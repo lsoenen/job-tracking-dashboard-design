@@ -1,18 +1,14 @@
 import {
   ArrowRight,
-  BriefcaseBusiness,
   CalendarDays,
   ChartNoAxesCombined,
   Clock3,
-  LayoutDashboard,
-  ListChecks,
-  Target,
 } from "lucide-react"
 
 import { ApplicationActivityChart } from "@/components/application-activity-chart"
+import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { ActiveApplications } from "@/components/active-applications"
 import { ApplicationOutcomes } from "@/components/application-outcomes"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -23,36 +19,6 @@ import {
 } from "@/components/ui/card"
 
 const responseRate = 39.6
-const pursuitLogoSource =
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
-
-function PursuitLogo() {
-  return (
-    <span aria-hidden="true" className="flex shrink-0 items-center gap-2">
-      <span className="relative size-8 shrink-0 overflow-hidden rounded-sm bg-sidebar">
-        <img
-          src={pursuitLogoSource}
-          alt=""
-          className="absolute left-[-12px] top-[-4px] size-[56px] max-w-none mix-blend-multiply"
-        />
-      </span>
-      <span className="relative hidden h-6 w-[78px] shrink-0 overflow-hidden md:block">
-        <img
-          src={pursuitLogoSource}
-          alt=""
-          className="absolute left-[-25px] top-[-85px] size-[128px] max-w-none mix-blend-multiply"
-        />
-      </span>
-    </span>
-  )
-}
-
-const navigation = [
-  { label: "Overview", href: "#top", icon: LayoutDashboard, count: undefined },
-  { label: "Applications", href: "#applications", icon: BriefcaseBusiness, count: "48" },
-  { label: "Next steps", href: "#next-steps", icon: ListChecks, count: "3" },
-]
-
 const metrics = [
   {
     label: "Total applications",
@@ -100,54 +66,6 @@ const nextSteps = [
     initials: "F",
   },
 ]
-
-function Sidebar() {
-  return (
-    <aside className="sticky top-0 flex h-screen w-[68px] shrink-0 flex-col border-r border-border bg-sidebar md:w-[224px]">
-      <a href="#top" className="flex items-center justify-center px-2 py-5 md:justify-start md:px-6 md:py-6" aria-label="Pursuit home">
-        <PursuitLogo />
-      </a>
-
-      <div className="px-2 pt-4 md:px-4">
-        <p className="hidden px-3 pb-2 text-[11px] font-medium text-muted-foreground md:block">WORKSPACE</p>
-        <nav aria-label="Main navigation" className="flex flex-col gap-1">
-          {navigation.map((item, index) => {
-            const Icon = item.icon
-            const active = index === 0
-
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                aria-label={item.count ? `${item.label}, ${item.count}` : item.label}
-                aria-current={active ? "page" : undefined}
-                className={`flex items-center justify-center gap-3 rounded-md px-2 py-2.5 text-sm transition-colors md:justify-start md:px-3 ${active ? "font-semibold text-primary" : "text-foreground hover:bg-muted/70"}`}
-              >
-                <Icon aria-hidden="true" className={`size-[17px] shrink-0 ${active ? "fill-primary text-primary" : ""}`} />
-                <span className="hidden md:inline">{item.label}</span>
-                {item.count && <span className="ml-auto hidden text-xs text-muted-foreground md:inline">{item.count}</span>}
-              </a>
-            )
-          })}
-        </nav>
-      </div>
-
-      <div className="mt-auto px-2 pb-5 pt-8 md:px-6">
-        <div className="flex items-center justify-center gap-3 border-t border-border pt-4 md:justify-start">
-          <Avatar className="size-8 shrink-0 border border-border">
-            <AvatarImage src="/profile-avatar.png" alt="Alex Taylor" />
-            <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">AT</AvatarFallback>
-          </Avatar>
-          <div className="hidden min-w-0 md:block">
-            <p className="truncate text-xs font-medium">Alex Taylor</p>
-            <p className="truncate text-[11px] text-muted-foreground">Product designer</p>
-          </div>
-        </div>
-        <p className="mt-5 hidden text-[11px] text-muted-foreground md:block">Your search, on your terms.</p>
-      </div>
-    </aside>
-  )
-}
 
 function WeeklyFocusWidget() {
   return (
@@ -256,7 +174,7 @@ function NextSteps() {
 export function JobSearchDashboard() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <Sidebar />
+      <DashboardSidebar activePage="overview" />
       <div className="flex min-w-0 flex-1 flex-col">
         <main id="top" className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
           <section aria-labelledby="page-title" className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">

@@ -1,50 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Link from "next/link"
 import { ArrowRight, Search } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { applications } from "@/lib/applications"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
-
-const applications = [
-  {
-    company: "Vercel",
-    role: "Senior Product Designer",
-    initials: "V",
-    logo: "https://thesvg.org/icons/vercel/default.svg",
-    status: "Interviewing",
-    nextStep: "Hiring manager interview",
-    due: "Tomorrow",
-  },
-  {
-    company: "Figma",
-    role: "Product Designer, Growth",
-    initials: "F",
-    logo: "https://thesvg.org/icons/figma/default.svg",
-    status: "Take-home",
-    nextStep: "Submit design exercise",
-    due: "Nov 30",
-  },
-  {
-    company: "Linear",
-    role: "Product Designer",
-    initials: "L",
-    logo: "https://thesvg.org/icons/linear/default.svg",
-    status: "Applied",
-    nextStep: "Follow up with recruiter",
-    due: "Dec 2",
-  },
-  {
-    company: "Ramp",
-    role: "Staff Product Designer",
-    initials: "R",
-    logo: "https://thesvg.org/icons/ramp/default.svg",
-    status: "Recruiter screen",
-    nextStep: "Share availability",
-    due: "Nov 27",
-  },
-]
 
 function statusClassName(status: string) {
   if (status === "Offer") return "border-success/20 bg-success/5 text-success"
@@ -74,9 +37,9 @@ export function ActiveApplications() {
           <h2 id="applications-heading" className="text-base font-medium tracking-tight">Active applications</h2>
           <CardDescription className="mt-1">Your next moves, ordered by date.</CardDescription>
         </div>
-        <a href="#applications" className="hidden shrink-0 items-center gap-1 text-xs font-medium text-foreground hover:underline sm:inline-flex">
-          View all 4 <ArrowRight aria-hidden="true" className="size-3.5" />
-        </a>
+        <Link href="/applications" className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-foreground hover:underline">
+          View all {applications.length} <ArrowRight aria-hidden="true" className="size-3.5" />
+        </Link>
       </CardHeader>
       <CardContent>
         <label className="mb-3 flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
@@ -134,7 +97,7 @@ export function ActiveApplications() {
           </p>
         )}
         <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
-          Showing {filteredApplications.length} of 4 in-progress applications
+          Showing {filteredApplications.length} of {applications.length} in-progress applications
         </p>
       </CardContent>
     </Card>
