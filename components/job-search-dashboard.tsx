@@ -24,6 +24,29 @@ import {
 } from "@/components/ui/card"
 
 const responseRate = 39.6
+const pursuitLogoSource =
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
+
+function PursuitLogo() {
+  return (
+    <span aria-hidden="true" className="flex shrink-0 items-center gap-2">
+      <span className="relative size-8 shrink-0 overflow-hidden rounded-sm bg-sidebar">
+        <img
+          src={pursuitLogoSource}
+          alt=""
+          className="absolute left-[-12px] top-[-4px] size-[56px] max-w-none mix-blend-multiply"
+        />
+      </span>
+      <span className="relative h-6 w-[78px] shrink-0 overflow-hidden">
+        <img
+          src={pursuitLogoSource}
+          alt=""
+          className="absolute left-[-25px] top-[-85px] size-[128px] max-w-none mix-blend-multiply"
+        />
+      </span>
+    </span>
+  )
+}
 
 const navigation = [
   { label: "Overview", href: "#top", icon: LayoutDashboard, count: undefined },
@@ -82,12 +105,8 @@ const nextSteps = [
 function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-[224px] shrink-0 flex-col border-r border-border bg-sidebar md:flex">
-      <a href="#top" className="flex items-center gap-3 px-6 py-6" aria-label="Pursuit home">
-        <BriefcaseBusiness aria-hidden="true" className="size-7 stroke-[1.6] text-primary" />
-        <span className="flex flex-col">
-          <span className="text-sm font-medium tracking-tight">Pursuit</span>
-          <span className="mt-0.5 text-[11px] text-muted-foreground">Job search</span>
-        </span>
+      <a href="#top" className="flex items-center px-6 py-6" aria-label="Pursuit home">
+        <PursuitLogo />
       </a>
 
       <div className="px-4 pt-4">
@@ -232,9 +251,8 @@ export function JobSearchDashboard() {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6 lg:px-8">
-          <a href="#top" className="flex items-center gap-2.5 md:hidden" aria-label="Pursuit home">
-            <BriefcaseBusiness aria-hidden="true" className="size-6 stroke-[1.6] text-primary" />
-            <span className="text-sm font-medium tracking-tight">Pursuit</span>
+          <a href="#top" className="flex items-center md:hidden" aria-label="Pursuit home">
+            <PursuitLogo />
           </a>
           <div className="hidden text-sm text-muted-foreground md:block">
             Workspace <span className="px-1.5 text-border">/</span> <span className="text-foreground">Overview</span>
