@@ -1,3 +1,10 @@
+export type CanvasJobContact = {
+  category: string
+  title: string
+  outreachTip: string
+  linkedinSearchQuery: string
+}
+
 export type CanvasJob = {
   id: string
   company: string
@@ -6,6 +13,12 @@ export type CanvasJob = {
   source: string
   logo: string
   summary: string
+  description: {
+    overview: string
+    responsibilities: string[]
+    qualifications: string[]
+  }
+  contacts: CanvasJobContact[]
   matchTerms: string[]
   minimumExperienceYears: number
 }
@@ -19,6 +32,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "LinkedIn",
     logo: "https://thesvg.org/icons/airbnb/default.svg",
     summary: "Shape the end-to-end booking experience for guests around the world.",
+    description: {
+      overview: "Airbnb is looking for a Senior Product Designer to make it easier for guests to move from trip inspiration to a confident booking. You will work across discovery, listing evaluation, checkout, and post-booking support, shaping a connected experience used by travelers with different needs, budgets, and levels of familiarity with a destination.",
+      responsibilities: [
+        "Lead design from early opportunity framing through prototyping, launch, and iteration with product, engineering, research, content design, and data partners.",
+        "Use guest research and product signals to uncover friction in destination discovery, listing comparison, pricing transparency, and booking decisions.",
+        "Design clear, accessible flows for complex decisions while accounting for trust, localization, and a wide range of travel contexts.",
+        "Communicate design rationale, align stakeholders, and contribute reusable patterns across the guest experience.",
+      ],
+      qualifications: [
+        "At least five years designing and shipping consumer digital products, with a portfolio showing end-to-end ownership.",
+        "Strong interaction and systems thinking, including experience simplifying multi-step or high-consideration journeys.",
+        "Comfortable pairing qualitative research with behavioral data to make and explain product decisions.",
+        "Clear communicator who can collaborate across disciplines and move work forward amid ambiguity.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask who is coordinating hiring for the Guest Experience design team.", linkedinSearchQuery: "Airbnb product design recruiter talent partner" },
+      { category: "Hiring team", title: "Design Lead, Guest Experience", outreachTip: "Ask about the team’s current priorities and how this role partners with product and research.", linkedinSearchQuery: "Airbnb Guest Experience design lead" },
+      { category: "Team member", title: "Product Designer, Guest Experience", outreachTip: "Learn how designers work across discovery, booking, and post-booking support.", linkedinSearchQuery: "Airbnb product designer Guest Experience" },
+    ],
     matchTerms: ["user research", "service design", "mobile design", "prototyping", "product designer"],
     minimumExperienceYears: 5,
   },
@@ -30,6 +63,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Wellfound",
     logo: "https://thesvg.org/icons/figma/default.svg",
     summary: "Design approachable AI tools that help teams move from idea to interface.",
+    description: {
+      overview: "Figma is seeking a Product Designer to help teams use AI naturally within their creative workflow. You will shape experiences that help people explore ideas, make progress on real design work, and stay in control of the result. The role calls for thoughtful interaction design, rapid prototyping, and close partnership with teams building emerging product capabilities.",
+      responsibilities: [
+        "Translate customer needs and product strategy into clear AI-assisted workflows across ideation, editing, and collaboration.",
+        "Prototype a range of interaction models and use feedback to improve discoverability, usefulness, and user control.",
+        "Work closely with product managers, engineers, researchers, and content designers to deliver cohesive experiences.",
+        "Define patterns for communicating system status, uncertainty, and recovery when generated results need refinement.",
+      ],
+      qualifications: [
+        "Four or more years of product design experience and a portfolio that demonstrates shipped work and strong craft.",
+        "Experience designing complex tools, collaborative products, or workflows with multiple steps and user intents.",
+        "Ability to move between detailed interaction design and broad product framing.",
+        "Curiosity about AI capabilities and limitations, with a user-centered approach to trust and transparency.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask whether the team is hiring for this role and what the interview process emphasizes.", linkedinSearchQuery: "Figma product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, AI Experiences", outreachTip: "Ask how the design team is approaching user control and AI-assisted workflows.", linkedinSearchQuery: "Figma AI Experiences design lead" },
+      { category: "Team member", title: "Product Designer, AI", outreachTip: "Learn what prototyping and cross-functional work look like on the team.", linkedinSearchQuery: "Figma AI product designer" },
+    ],
     matchTerms: ["ai product design", "prototyping", "interaction design", "product strategy", "product designer"],
     minimumExperienceYears: 4,
   },
@@ -41,6 +94,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Indeed",
     logo: "https://thesvg.org/icons/stripe/default.svg",
     summary: "Make complex billing workflows clear for businesses of every size.",
+    description: {
+      overview: "Stripe is looking for a Product Designer to improve the tools businesses use to manage subscriptions, invoices, and recurring revenue. Billing workflows can be powerful but difficult to understand, especially as a company grows. You will help make setup and ongoing administration more predictable for users, while supporting the flexibility needed by businesses with different models.",
+      responsibilities: [
+        "Own design projects across billing setup, plan changes, invoices, and subscription management from discovery through launch.",
+        "Partner with product, engineering, research, and content design to turn complex billing rules into understandable workflows.",
+        "Use customer conversations, support themes, and product data to identify opportunities and evaluate design decisions.",
+        "Maintain quality across edge cases, permissions, responsive layouts, and the broader Stripe product ecosystem.",
+      ],
+      qualifications: [
+        "Five or more years of experience designing software products, ideally for business or financial workflows.",
+        "A portfolio demonstrating strong information architecture and the ability to simplify complex systems.",
+        "Experience collaborating closely with engineering and adapting designs to technical and operational constraints.",
+        "Strong written and verbal communication skills, with care for accessibility and interaction details.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about the hiring team and the scope of the Billing design opening.", linkedinSearchQuery: "Stripe product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Billing", outreachTip: "Ask which billing problems the team is prioritizing for businesses right now.", linkedinSearchQuery: "Stripe Billing design lead" },
+      { category: "Team member", title: "Product Designer, Billing", outreachTip: "Learn how designers balance flexible billing rules with a clear user experience.", linkedinSearchQuery: "Stripe product designer Billing" },
+    ],
     matchTerms: ["billing", "fintech", "information architecture", "product strategy", "product designer"],
     minimumExperienceYears: 5,
   },
@@ -52,6 +125,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Wellhub",
     logo: "https://thesvg.org/icons/notion/default.svg",
     summary: "Help people create, share, and discover useful work in Notion.",
+    description: {
+      overview: "Notion is looking for a Product Designer to make publishing work feel simple from the first draft through sharing and discovery. You will help people turn their knowledge into pages and sites that are useful to an audience, whether they are sharing with a small group or making something publicly available. The team values thoughtful defaults, flexible tools, and a coherent experience across the product.",
+      responsibilities: [
+        "Design publishing and sharing workflows, including the decisions people make around audience, access, and presentation.",
+        "Partner with product managers, engineers, researchers, and content designers to identify user needs and deliver improvements.",
+        "Explore concepts through sketches and prototypes, then refine them using customer feedback and product insights.",
+        "Work with adjacent teams to create consistent patterns across editing, collaboration, and public-facing pages.",
+      ],
+      qualifications: [
+        "Four or more years designing digital products, with examples of work from discovery through delivery.",
+        "Strong product judgment and ability to make complex functionality approachable without limiting flexibility.",
+        "Experience with collaboration, content creation, publishing, or information-rich products is valuable.",
+        "Comfortable sharing work early, incorporating feedback, and articulating tradeoffs to partners.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask who is leading recruiting for the Publishing product area.", linkedinSearchQuery: "Notion product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Publishing", outreachTip: "Ask how the team thinks about sharing, audience, and public pages.", linkedinSearchQuery: "Notion Publishing design lead" },
+      { category: "Team member", title: "Product Designer, Publishing", outreachTip: "Learn how the team balances flexible publishing tools with simple defaults.", linkedinSearchQuery: "Notion product designer publishing" },
+    ],
     matchTerms: ["content design", "collaboration", "information architecture", "design systems", "product designer"],
     minimumExperienceYears: 4,
   },
@@ -63,6 +156,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Built In",
     logo: "https://thesvg.org/icons/linear/default.svg",
     summary: "Evolve the systems and patterns behind a fast, focused product.",
+    description: {
+      overview: "Linear is seeking a Senior Product Designer to evolve the shared patterns that make its product feel clear and consistent. You will work across the design system and the product surfaces that depend on it, helping the team move quickly without sacrificing craft. This role combines hands-on interface design with the systems thinking needed to make patterns useful to designers and engineers alike.",
+      responsibilities: [
+        "Improve core component patterns, interaction behavior, and documentation in partnership with design and engineering.",
+        "Collaborate with product teams to identify where shared patterns help and where a specific workflow needs a considered exception.",
+        "Prototype and validate improvements to navigation, controls, accessibility, and responsive behavior.",
+        "Help establish a consistent quality bar through reviews, examples, and practical design-system guidance.",
+      ],
+      qualifications: [
+        "Six or more years in product design, including experience working with or contributing to a design system.",
+        "Excellent interaction and visual design craft, with a portfolio showing thoughtful product details.",
+        "Ability to work closely with engineers and reason about reusable components and implementation constraints.",
+        "A pragmatic approach to consistency, accessibility, and evolving established patterns.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about the role’s scope and how the team evaluates systems-design experience.", linkedinSearchQuery: "Linear product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Design Systems", outreachTip: "Ask how the design system partners with product teams and engineering.", linkedinSearchQuery: "Linear design systems design lead" },
+      { category: "Team member", title: "Product Designer, Design Systems", outreachTip: "Learn how shared patterns are maintained as the product evolves.", linkedinSearchQuery: "Linear product designer design systems" },
+    ],
     matchTerms: ["design systems", "prototyping", "interaction design", "product designer", "accessibility"],
     minimumExperienceYears: 6,
   },
@@ -74,6 +187,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Glassdoor",
     logo: "https://thesvg.org/icons/miro/default.svg",
     summary: "Create better ways for distributed teams to think and work together.",
+    description: {
+      overview: "Miro is looking for a Product Designer to help distributed teams collaborate effectively before, during, and after shared work sessions. You will explore how people contribute ideas, stay aligned, and turn a collaborative canvas into clear next steps. The work spans individual and team needs, with an emphasis on making complex group workflows feel welcoming and easy to follow.",
+      responsibilities: [
+        "Lead design for collaboration workflows, from understanding team needs to defining and shipping product improvements.",
+        "Facilitate discovery with customers and internal partners to understand how teams use collaborative tools in practice.",
+        "Create prototypes that test new interaction models for live and asynchronous collaboration.",
+        "Partner with engineering, research, and product to measure outcomes and iterate on launched work.",
+      ],
+      qualifications: [
+        "Four or more years of product design experience and a portfolio with shipped collaborative or productivity tools.",
+        "Strong facilitation and communication skills, including the ability to make group needs actionable.",
+        "Comfort working across discovery, interaction design, prototyping, and delivery.",
+        "Experience designing for distributed teams or complex multi-user workflows is a plus.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask which team owns hiring for collaboration experiences.", linkedinSearchQuery: "Miro product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Collaboration", outreachTip: "Ask about the team’s biggest collaboration challenges and design priorities.", linkedinSearchQuery: "Miro Collaboration design lead" },
+      { category: "Team member", title: "Product Designer, Collaboration", outreachTip: "Learn how designers validate workflows for distributed teams.", linkedinSearchQuery: "Miro product designer collaboration" },
+    ],
     matchTerms: ["collaboration", "remote", "workshop facilitation", "prototyping", "product designer"],
     minimumExperienceYears: 4,
   },
@@ -85,6 +218,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Dribbble",
     logo: "https://thesvg.org/icons/spotify/default.svg",
     summary: "Build tools that help artists connect with their listeners.",
+    description: {
+      overview: "Spotify is seeking a Product Designer to improve the tools creators use to understand and grow their audience. You will help artists make sense of performance insights, manage their presence, and take meaningful actions for their work. The role brings together data-heavy interfaces and creator-focused workflows, with a goal of making useful information feel clear and actionable.",
+      responsibilities: [
+        "Design and ship creator-facing features across analytics, content management, and audience engagement.",
+        "Work with creators and internal partners to understand different goals, levels of experience, and working contexts.",
+        "Turn complex data and platform capabilities into interfaces that support confident decisions.",
+        "Partner with product, engineering, research, and content design to iterate based on feedback and measurable outcomes.",
+      ],
+      qualifications: [
+        "Four or more years of product design experience, ideally with creator, media, or data-rich products.",
+        "Portfolio evidence of making complex information understandable and useful.",
+        "Strong interaction design and prototyping skills, with care for mobile and responsive experiences.",
+        "Ability to balance creator needs with platform requirements and cross-functional constraints.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about recruiting for Spotify’s creator-focused product teams.", linkedinSearchQuery: "Spotify product design recruiter creator tools" },
+      { category: "Hiring team", title: "Design Lead, Creator Tools", outreachTip: "Ask what creator needs are shaping the team’s current roadmap.", linkedinSearchQuery: "Spotify Creator Tools design lead" },
+      { category: "Team member", title: "Product Designer, Creator Tools", outreachTip: "Learn how designers make creator analytics more actionable.", linkedinSearchQuery: "Spotify product designer creator tools" },
+    ],
     matchTerms: ["creator tools", "mobile design", "user research", "content design", "product designer"],
     minimumExperienceYears: 4,
   },
@@ -96,6 +249,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Otta",
     logo: "https://thesvg.org/icons/webflow/default.svg",
     summary: "Improve the journey from a first project to a thriving website.",
+    description: {
+      overview: "Webflow is looking for a Product Designer to help more people reach value as they learn, build, and publish with the platform. You will focus on the journey from a first project toward a useful, successful website, identifying where people need clearer guidance or better tools. The role combines product craft with experimentation and close attention to both new and returning customers.",
+      responsibilities: [
+        "Map key onboarding and activation journeys and identify opportunities to reduce friction.",
+        "Design experiments and product improvements with product managers, engineering, research, analytics, and marketing partners.",
+        "Use customer research and funnel data to form hypotheses, assess results, and guide follow-up work.",
+        "Create clear, accessible experiences that help customers make progress without compromising the flexibility of the product.",
+      ],
+      qualifications: [
+        "Three or more years of product design experience with examples of work that improved a customer journey.",
+        "Comfort using qualitative and quantitative signals to inform design decisions.",
+        "Strong interaction design and prototyping skills, with an iterative approach to testing ideas.",
+        "Experience with growth, onboarding, experimentation, or website-building products is a plus.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask about the Growth team’s hiring priorities and interview loop.", linkedinSearchQuery: "Webflow product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Growth", outreachTip: "Ask how the team defines activation and evaluates product experiments.", linkedinSearchQuery: "Webflow Growth design lead" },
+      { category: "Team member", title: "Product Designer, Growth", outreachTip: "Learn how research and experimentation inform day-to-day design work.", linkedinSearchQuery: "Webflow product designer growth" },
+    ],
     matchTerms: ["growth", "experimentation", "web design", "product strategy", "product designer"],
     minimumExperienceYears: 3,
   },
@@ -107,6 +280,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "Indeed",
     logo: "https://thesvg.org/icons/asana/default.svg",
     summary: "Make everyday planning and cross-team workflows feel effortless.",
+    description: {
+      overview: "Asana is seeking a Product Designer to make it easier for teams to coordinate work across projects, tools, and roles. You will help people understand what needs attention, define repeatable processes, and keep work moving without adding unnecessary overhead. The role requires careful systems thinking and the ability to make flexible workflow capabilities approachable for a broad range of teams.",
+      responsibilities: [
+        "Design end-to-end workflow experiences, from early customer problems through detailed interaction design and launch.",
+        "Partner with product, engineering, research, and data teams to prioritize opportunities and deliver cohesive solutions.",
+        "Explore how teams create, automate, and monitor work while accounting for different permissions and levels of complexity.",
+        "Evaluate shipped experiences using customer feedback and product signals, then identify practical improvements.",
+      ],
+      qualifications: [
+        "Four or more years designing software products, with a portfolio that shows clear problem solving and execution.",
+        "Strong information architecture and systems thinking for multi-step or cross-team experiences.",
+        "Experience collaborating with technical partners to deliver robust workflows and edge cases.",
+        "A thoughtful approach to accessibility, product consistency, and communicating design tradeoffs.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about the team and the experience Asana is looking for in this role.", linkedinSearchQuery: "Asana product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Workflows", outreachTip: "Ask how the team is approaching workflow flexibility and team coordination.", linkedinSearchQuery: "Asana Workflows design lead" },
+      { category: "Team member", title: "Product Designer, Workflows", outreachTip: "Learn how designers handle complex processes and permissions.", linkedinSearchQuery: "Asana product designer workflows" },
+    ],
     matchTerms: ["workflow", "information architecture", "product strategy", "prototyping", "product designer"],
     minimumExperienceYears: 4,
   },
@@ -118,6 +311,26 @@ export const canvasJobs: CanvasJob[] = [
     source: "LinkedIn",
     logo: "https://thesvg.org/icons/adobe/default.svg",
     summary: "Bring thoughtful product experiences to creative tools used worldwide.",
+    description: {
+      overview: "Adobe is looking for a Product Designer to help improve creative workflows across Creative Cloud. You will work on experiences that support people as they move between inspiration, creation, and sharing, considering a broad range of skill levels and devices. The team is looking for someone who can bring strong craft to detailed interactions while keeping the needs of creative professionals and everyday makers in view.",
+      responsibilities: [
+        "Define and deliver product experiences in partnership with product management, engineering, research, and content design.",
+        "Explore creative workflows through customer conversations, competitive research, and collaborative prototyping.",
+        "Design clear, accessible interactions that work across connected tools and fit within established product patterns.",
+        "Present work, incorporate feedback, and contribute to a high bar for quality from concept through implementation.",
+      ],
+      qualifications: [
+        "Five or more years of product design experience with a portfolio demonstrating shipped, polished work.",
+        "Strong visual and interaction design skills, including the ability to work within and improve shared systems.",
+        "Experience designing creative, productivity, or other tools with meaningful workflow complexity.",
+        "Comfort partnering with engineers to refine designs and resolve implementation details.",
+      ],
+    },
+    contacts: [
+      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask which Creative Cloud group is hiring and how the role is scoped.", linkedinSearchQuery: "Adobe Creative Cloud product design recruiter" },
+      { category: "Hiring team", title: "Design Lead, Creative Cloud", outreachTip: "Ask about the product area’s current creative workflow challenges.", linkedinSearchQuery: "Adobe Creative Cloud design lead" },
+      { category: "Team member", title: "Product Designer, Creative Cloud", outreachTip: "Learn how the team supports different creative skill levels and workflows.", linkedinSearchQuery: "Adobe Creative Cloud product designer" },
+    ],
     matchTerms: ["creative tools", "design systems", "interaction design", "accessibility", "product designer"],
     minimumExperienceYears: 5,
   },

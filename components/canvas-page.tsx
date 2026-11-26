@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CalendarDays, Check, Plus } from "lucide-react"
+import { ArrowUpRight, CalendarDays, Check, Plus } from "lucide-react"
 
 import { useApplications } from "@/components/applications-provider"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
@@ -44,6 +44,10 @@ function isJobAdded(job: CanvasJob, applications: { company: string; role: strin
       application.company.toLowerCase() === job.company.toLowerCase() &&
       application.role.toLowerCase() === job.title.toLowerCase(),
   )
+}
+
+function getLinkedInPeopleSearchUrl(query: string) {
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`
 }
 
 export function CanvasPage() {
@@ -190,7 +194,7 @@ export function CanvasPage() {
             <DialogDescription className="leading-relaxed">{selectedJob.summary}</DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 overflow-y-auto p-6">
+          <div className="grid min-h-0 flex-1 gap-6 overflow-y-auto p-6">
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-border bg-muted/20 p-3">
                 <dt className="text-xs text-muted-foreground">Minimum experience</dt>
@@ -206,12 +210,52 @@ export function CanvasPage() {
               </div>
             </dl>
 
-            <section aria-labelledby="role-match-terms-title" className="flex flex-col gap-3">
-              <h3 id="role-match-terms-title" className="text-sm font-medium">Role match terms</h3>
-              <ul className="flex list-none flex-wrap gap-2 p-0">
-                {selectedJob.matchTerms.map((term) => (
-                  <li key={term}>
-                    <Badge variant="outline" className="font-normal">{term}</Badge>
+            <section aria-labelledby="role-description-title" className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <h3 id="role-description-title" className="text-sm font-medium">About the role</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{selectedJob.description.overview}</p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <h4 className="text-sm font-medium">What you&apos;ll do</h4>
+                <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+                  {selectedJob.description.responsibilities.map((responsibility) => (
+                    <li key={responsibility}>{responsibility}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex flex-col gap-2">
+                <h4 className="text-sm font-medium">What you&apos;ll bring</h4>
+                <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+                  {selectedJob.description.qualifications.map((qualification) => (
+                    <li key={qualification}>{qualification}</li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+
+            <section aria-labelledby="high-leverage-contacts-title" className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <h3 id="high-leverage-contacts-title" className="text-sm font-medium">High-leverage contacts</h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">Role-based LinkedIn searches to find the current recruiter and people on this team.</p>
+              </div>
+              <ul className="flex list-none flex-col gap-2 p-0">
+                {selectedJob.contacts.map((contact) => (
+                  <li key={contact.category} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <p className="text-xs font-medium text-muted-foreground">{contact.category}</p>
+                      <h4 className="text-sm font-medium">{contact.title}</h4>
+                      <p className="text-xs leading-relaxed text-muted-foreground">{contact.outreachTip}</p>
+                    </div>
+                    <a
+                      href={getLinkedInPeopleSearchUrl(contact.linkedinSearchQuery)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Find ${contact.title} at ${selectedJob.company} on LinkedIn`}
+                      className="inline-flex w-fit shrink-0 items-center gap-1.5 text-xs font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      Find on LinkedIn
+                      <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                    </a>
                   </li>
                 ))}
               </ul>
