@@ -2,6 +2,7 @@
 
 import { useRef, useState, type CSSProperties, type DragEvent, type KeyboardEvent } from "react"
 import Link from "next/link"
+import { toast } from "sonner"
 import {
   ArrowRight,
   BriefcaseBusiness,
@@ -73,12 +74,15 @@ export function InterviewsPage() {
 
     const currentStageIndex = interviewStages.findIndex((stage) => stage.id === getInterviewStage(application))
     const destinationStageIndex = interviewStages.findIndex((stage) => stage.id === stageId)
+    const stageTitle = interviewStages.find((stage) => stage.id === stageId)?.title ?? stageId
     if (destinationStageIndex > currentStageIndex) {
       setCelebration({ applicationId, stage: stageId, token: ++celebrationToken.current })
+      toast.success("You’re moving forward!", {
+        description: `${application.role} at ${application.company} advanced to ${stageTitle}. Keep up the great momentum.`,
+      })
     }
 
     updateInterviewStage(applicationId, stageId)
-    const stageTitle = interviewStages.find((stage) => stage.id === stageId)?.title ?? stageId
     setAnnouncement(`${application.company} moved to ${stageTitle}.`)
   }
 

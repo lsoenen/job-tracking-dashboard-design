@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { ApplicationsProvider } from '@/components/applications-provider'
 import { JobProfileProvider } from '@/components/job-profile-provider'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -43,6 +44,7 @@ export default function RootLayout({
         <ApplicationsProvider>
           <JobProfileProvider>{children}</JobProfileProvider>
         </ApplicationsProvider>
+        <Toaster position="bottom-right" richColors />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
