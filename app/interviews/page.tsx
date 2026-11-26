@@ -4,7 +4,7 @@ import { InterviewsPage } from "@/components/interviews-page"
 
 export const metadata: Metadata = {
   title: "Interview Prep | Pursuit",
-  description: "Prepare for active job interviews with company-specific progress and focused interviewer practice.",
+  description: "Organize active job interviews by stage and prepare for upcoming conversations.",
 }
 
 export default function InterviewsRoute() {

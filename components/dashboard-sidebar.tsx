@@ -6,6 +6,7 @@ import { BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, 
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { useApplications } from "@/components/applications-provider"
 import { useJobProfile } from "@/components/job-profile-provider"
 
 const pursuitLogoSource =
@@ -63,6 +64,10 @@ function profileInitials(name: string) {
 export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) {
   const [collapsed, setCollapsed] = useState(false)
   const { profile } = useJobProfile()
+  const { applications } = useApplications()
+  const interviewCount = applications.filter(
+    (application) => application.status === "Recruiter screen" || application.status === "Interviewing",
+  ).length.toString()
 
   return (
     <aside
@@ -97,6 +102,7 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
           {navigation.map((item) => {
             const Icon = item.icon
             const active = item.id === activePage
+            const count = item.id === "interview" ? interviewCount : item.count
             const itemLabelClassName = collapsed
               ? "hidden"
               : "hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap transition-[max-width,opacity] duration-200 md:inline-block md:max-w-[9rem] md:opacity-100"
@@ -105,15 +111,17 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
               <Link
                 key={item.id}
                 href={item.href}
-                aria-label={item.count ? `${item.label}, ${item.count}` : item.label}
-                title={collapsed ? (item.count ? `${item.label}, ${item.count}` : item.label) : undefined}
+                aria-label={count ? `${item.label}, ${count}` : item.label}
+                title={collapsed ? (count ? `${item.label}, ${count}` : item.label) : undefined}
                 aria-current={active ? "page" : undefined}
-                className={`group relative flex items-center rounded-md px-2 py-2.5 text-sm transition-all duration-200 ${collapsed ? "justify-center md:gap-0 md:px-0" : "justify-center gap-3 md:justify-start md:px-3"} ${active ? "font-semibold text-primary" : "text-foreground hover:bg-muted/70"}`}
+                className={`group relative flex items-center rounded-md px-2 py-2.5 text-sm transition-all duration-200 ${collapsed ? "justify-center gap-1 md:px-0" : "justify-center gap-3 md:justify-start md:px-3"} ${active ? "font-semibold text-primary" : "text-foreground hover:bg-muted/70"}`}
               >
                 <Icon aria-hidden="true" className={`size-[17px] shrink-0 ${active ? "fill-primary text-primary" : ""}`} />
                 <span className={itemLabelClassName}>{item.label}</span>
-                {item.count && !collapsed && (
-                  <span className="ml-auto hidden text-xs text-muted-foreground md:inline">{item.count}</span>
+                {count && (
+                  <span className={`text-[10px] text-muted-foreground md:text-xs ${collapsed ? "" : "ml-auto"}`}>
+                    {count}
+                  </span>
                 )}
               </Link>
             )
