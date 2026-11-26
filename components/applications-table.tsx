@@ -1,49 +1,21 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { CalendarDays, ExternalLink, Search } from "lucide-react"
+import { CalendarDays, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
+import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
+import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { applications } from "@/lib/applications"
-import type { Application, ApplicationStatus, NewApplication } from "@/lib/applications"
-
-function statusClassName(status: ApplicationStatus) {
-  if (status === "Recruiter screen") return "border-info/20 bg-info/5 text-info"
-  if (status === "Interviewing") return "border-primary/20 bg-primary/5 text-primary"
-  if (status === "Take-home") return "border-warning/20 bg-warning/5 text-warning"
-  if (status === "Offer") return "border-success/20 bg-success/5 text-success"
-  if (status === "Not moving forward") return "border-destructive/20 bg-destructive/5 text-destructive"
-  return "border-border bg-muted text-muted-foreground"
-}
-
-function companyInitials(company: string) {
-  return company
-    .trim()
-    .split(/[\s-]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase()
-}
-
-function safeExternalUrl(value?: string) {
-  if (!value) return undefined
-
-  try {
-    const url = new URL(value)
-    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : undefined
-  } catch {
-    return undefined
-  }
-}
+import { applicationStatusClassName } from "@/lib/application-helpers"
 
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
-  const [applicationRows, setApplicationRows] = useState(applications)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const { applications: applicationRows, addApplication } = useApplications()
+  const selectedApplication = applicationRows.find((application) => application.id === selectedId)
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -64,15 +36,6 @@ export function ApplicationsTable() {
         .includes(normalizedQuery),
     )
   }, [applicationRows, query])
-
-  function addApplication(application: NewApplication) {
-    const newApplication: Application = {
-      ...application,
-      id: crypto.randomUUID(),
-      initials: companyInitials(application.company),
-    }
-    setApplicationRows((current) => [newApplication, ...current])
-  }
 
   return (
     <Card className="border-border shadow-none">
@@ -102,90 +65,98 @@ export function ApplicationsTable() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <p className="border-b border-border px-4 py-2 text-xs text-muted-foreground sm:hidden">
-          Scroll horizontally to see all columns.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <caption className="sr-only">Active job applications with their stage, next step, and due date.</caption>
-            <thead className="bg-muted/50 text-xs text-muted-foreground">
-              <tr className="border-b border-border">
-                <th scope="col" className="w-[32%] px-5 py-3 font-medium">Company and role</th>
-                <th scope="col" className="w-[18%] px-5 py-3 font-medium">Stage</th>
-                <th scope="col" className="w-[34%] px-5 py-3 font-medium">Next step</th>
-                <th scope="col" className="w-[16%] px-5 py-3 font-medium">Due</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredApplications.length > 0 ? (
-                filteredApplications.map((application) => (
-                  <tr key={application.id} className="transition-colors hover:bg-muted/30">
-                    <td className="px-5 py-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <Avatar className="size-9 rounded-full border-0 bg-transparent after:hidden">
-                          {application.logo && (
-                            <AvatarImage
-                              src={application.logo}
-                              alt={`${application.company} logo`}
-                              className="rounded-full object-contain"
-                            />
-                          )}
-                          <AvatarFallback className="rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                            {application.initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="truncate font-medium text-foreground">{application.company}</p>
-                          <p className="mt-0.5 truncate text-xs text-muted-foreground">{application.role}</p>
-                          {application.description && (
-                            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{application.description}</p>
-                          )}
-                          {safeExternalUrl(application.sourceUrl) && (
-                            <a
-                              href={safeExternalUrl(application.sourceUrl)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`View ${application.company} job posting`}
-                              className="mt-1 inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
-                            >
-                              Job posting
-                              <ExternalLink aria-hidden="true" className="size-3" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge variant="outline" className={`rounded-full px-2.5 py-1 text-xs font-normal ${statusClassName(application.status)}`}>
-                        {application.status}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-foreground">{application.nextStep}</p>
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      <span className="flex items-center gap-2 whitespace-nowrap">
-                        <CalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
-                        {application.due}
-                      </span>
-                    </td>
+        <div className={selectedApplication ? "grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" : ""}>
+          <div className="min-w-0">
+            <p className="border-b border-border px-4 py-2 text-xs text-muted-foreground sm:hidden">
+              Scroll horizontally to see all columns.
+            </p>
+            <div className="overflow-x-auto">
+              <table className={`w-full text-left text-sm ${selectedApplication ? "min-w-[360px]" : "min-w-[720px]"}`}>
+                <caption className="sr-only">Active job applications with their stage, next step, and due date.</caption>
+                <thead className="bg-muted/50 text-xs text-muted-foreground">
+                  <tr className="border-b border-border">
+                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "w-[68%]" : "w-[32%]"}`}>Company and role</th>
+                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "w-[32%]" : "w-[18%]"}`}>Stage</th>
+                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "hidden" : "w-[34%]"}`}>Next step</th>
+                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "hidden" : "w-[16%]"}`}>Due</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-sm text-muted-foreground">
-                    <p role="status">
-                      {query ? `No applications match “${query}”.` : "No applications yet. Add one to get started."}
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredApplications.length > 0 ? (
+                    filteredApplications.map((application) => {
+                      const isSelected = application.id === selectedApplication?.id
+
+                      return (
+                        <tr
+                          key={application.id}
+                          onClick={() => setSelectedId(application.id)}
+                          className={`cursor-pointer transition-colors ${isSelected ? "bg-primary/[0.06] hover:bg-primary/[0.09]" : "hover:bg-muted/30"}`}
+                        >
+                          <td className="px-5 py-4">
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                setSelectedId(application.id)
+                              }}
+                              aria-label={`Preview ${application.role} at ${application.company}`}
+                              className="flex w-full min-w-0 items-center gap-3 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                              <Avatar className={`size-9 shrink-0 rounded-full border-0 after:hidden ${application.company === "Vercel" ? "bg-black" : "bg-transparent"}`}>
+                                {application.logo && (
+                                  <AvatarImage
+                                    src={application.logo}
+                                    alt={`${application.company} logo`}
+                                    className="rounded-full object-contain"
+                                  />
+                                )}
+                                <AvatarFallback className="rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                                  {application.initials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-medium text-foreground">{application.company}</span>
+                                <span className="mt-0.5 block truncate text-xs text-muted-foreground">{application.role}</span>
+                              </span>
+                            </button>
+                          </td>
+                          <td className="px-5 py-4">
+                            <Badge variant="outline" className={`rounded-full px-2.5 py-1 text-xs font-normal ${applicationStatusClassName(application.status)}`}>
+                              {application.status}
+                            </Badge>
+                          </td>
+                          <td className={selectedApplication ? "hidden" : "px-5 py-4"}>
+                            <p className="font-medium text-foreground">{application.nextStep}</p>
+                          </td>
+                          <td className={selectedApplication ? "hidden" : "px-5 py-4 text-muted-foreground"}>
+                            <span className="flex items-center gap-2 whitespace-nowrap">
+                              <CalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
+                              {application.due}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                        <p role="status">
+                          {query ? `No applications match “${query}”.` : "No applications yet. Add one to get started."}
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
+              Showing {filteredApplications.length} of {applicationRows.length} applications
+            </p>
+          </div>
+          {selectedApplication && (
+            <ApplicationPreviewPanel application={selectedApplication} onClose={() => setSelectedId(null)} />
+          )}
         </div>
-        <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
-          Showing {filteredApplications.length} of {applicationRows.length} applications
-        </p>
       </CardContent>
     </Card>
   )
