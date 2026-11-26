@@ -13,7 +13,7 @@ import {
 import { ApplicationActivityChart } from "@/components/application-activity-chart"
 import { ActiveApplications } from "@/components/active-applications"
 import { ApplicationOutcomes } from "@/components/application-outcomes"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
@@ -137,6 +137,7 @@ function Sidebar() {
       <div className="mt-auto px-6 pb-5 pt-8">
         <div className="flex items-center gap-3 border-t border-border pt-4">
           <Avatar className="size-8 border border-border">
+            <AvatarImage src="/profile-avatar.png" alt="Alex Taylor" />
             <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">AT</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
