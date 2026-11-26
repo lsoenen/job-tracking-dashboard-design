@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type DragEvent, type KeyboardEvent } from "react"
+import { useRef, useState, type CSSProperties, type DragEvent, type KeyboardEvent } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -27,6 +27,18 @@ import {
 } from "@/components/ui/empty"
 
 type InterviewStage = (typeof interviewStatuses)[number]
+type InterviewCelebration = { applicationId: string; status: InterviewStage; token: number }
+
+const confettiPieces = [
+  { x: -42, y: -26, color: "bg-primary", shape: "h-2 w-1 rounded-sm" },
+  { x: -28, y: 30, color: "bg-chart-4", shape: "size-1.5 rounded-full" },
+  { x: 36, y: -34, color: "bg-accent-foreground/60", shape: "h-2 w-1 rounded-sm" },
+  { x: 42, y: 17, color: "bg-primary/70", shape: "size-1.5 rounded-full" },
+  { x: -8, y: -43, color: "bg-chart-5", shape: "h-2 w-1 rounded-sm" },
+  { x: -5, y: 42, color: "bg-chart-4", shape: "size-1.5 rounded-full" },
+  { x: 22, y: -18, color: "bg-primary", shape: "h-2 w-1 rounded-sm" },
+  { x: -38, y: -3, color: "bg-chart-5", shape: "size-1.5 rounded-full" },
+] as const
 
 const interviewStages: {
   id: string
@@ -49,11 +61,19 @@ export function InterviewsPage() {
   const { applications, updateApplicationStatus } = useApplications()
   const [dragOverStage, setDragOverStage] = useState<InterviewStage | null>(null)
   const [announcement, setAnnouncement] = useState("")
+  const [celebration, setCelebration] = useState<InterviewCelebration | null>(null)
+  const celebrationToken = useRef(0)
   const interviewApplications = applications.filter(isActiveInterview)
 
   function moveApplication(applicationId: string, status: InterviewStage) {
     const application = interviewApplications.find((item) => item.id === applicationId)
     if (!application || application.status === status) return
+
+    const currentStageIndex = interviewStages.findIndex((stage) => stage.status === application.status)
+    const destinationStageIndex = interviewStages.findIndex((stage) => stage.status === status)
+    if (destinationStageIndex > currentStageIndex) {
+      setCelebration({ applicationId, status, token: ++celebrationToken.current })
+    }
 
     updateApplicationStatus(applicationId, status)
     const stageTitle = interviewStages.find((stage) => stage.status === status)?.title ?? status
@@ -156,8 +176,26 @@ export function InterviewsPage() {
                               }}
                               onDragEnd={() => setDragOverStage(null)}
                               onKeyDown={(event) => handleCardKeyDown(application, event)}
-                              className="group rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                              className="group relative rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                             >
+                              {celebration?.applicationId === application.id && celebration.status === stage.status && (
+                                <span
+                                  key={celebration.token}
+                                  aria-hidden="true"
+                                  className="pointer-events-none absolute inset-0"
+                                  onAnimationEnd={() => {
+                                    setCelebration((current) => current?.token === celebration.token ? null : current)
+                                  }}
+                                >
+                                  {confettiPieces.map((piece, index) => (
+                                    <span
+                                      key={`${celebration.token}-${index}`}
+                                      className={`interview-confetti-piece absolute left-1/2 top-1/2 ${piece.color} ${piece.shape}`}
+                                      style={{ "--confetti-x": `${piece.x}px`, "--confetti-y": `${piece.y}px` } as CSSProperties}
+                                    />
+                                  ))}
+                                </span>
+                              )}
                               <Card className="border-border shadow-none transition-colors group-hover:border-muted-foreground/40 group-focus-visible:border-ring">
                                 <CardContent className="flex flex-col gap-3 p-3">
                                   <div className="flex min-w-0 items-center gap-2.5">
