@@ -6,11 +6,12 @@ import { BriefcaseBusiness, LayoutDashboard, LayoutGrid, ListChecks, PanelLeftCl
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { useJobProfile } from "@/components/job-profile-provider"
 
 const pursuitLogoSource =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
 
-type DashboardPage = "overview" | "canvas" | "applications" | "next-steps"
+type DashboardPage = "overview" | "canvas" | "applications" | "next-steps" | "account"
 
 const navigation: {
   id: DashboardPage
@@ -48,8 +49,20 @@ function PursuitLogo({ collapsed }: { collapsed: boolean }) {
   )
 }
 
+function profileInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+}
+
 export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) {
   const [collapsed, setCollapsed] = useState(false)
+  const { profile } = useJobProfile()
 
   return (
     <aside
@@ -109,18 +122,26 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
       </div>
 
       <div className={`mt-auto pb-5 pt-8 transition-all duration-300 ${collapsed ? "px-2 md:px-2" : "px-2 md:px-6"}`}>
-        <div className={`flex items-center gap-3 border-t border-border pt-4 ${collapsed ? "justify-center" : "justify-center md:justify-start"}`}>
+        <Link
+          href="/account"
+          aria-label={`Account: ${profile.fullName}`}
+          aria-current={activePage === "account" ? "page" : undefined}
+          title={collapsed ? `Account: ${profile.fullName}` : undefined}
+          className={`flex items-center gap-3 rounded-md border-t border-border pt-4 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring ${collapsed ? "justify-center" : "justify-center md:justify-start"}`}
+        >
           <Avatar className="size-8 shrink-0 border border-border">
-            <AvatarImage src="/profile-avatar.png" alt="Alex Taylor" />
-            <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">AT</AvatarFallback>
+            <AvatarImage src="/profile-avatar.png" alt="" />
+            <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">
+              {profileInitials(profile.fullName)}
+            </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="hidden min-w-0 md:block">
-              <p className="truncate text-xs font-medium">Alex Taylor</p>
-              <p className="truncate text-[11px] text-muted-foreground">Product designer</p>
+              <p className="truncate text-xs font-medium">{profile.fullName}</p>
+              <p className="truncate text-[11px] text-muted-foreground">{profile.headline}</p>
             </div>
           )}
-        </div>
+        </Link>
         {!collapsed && <p className="mt-5 hidden text-[11px] text-muted-foreground md:block">Your search, on your terms.</p>}
       </div>
     </aside>

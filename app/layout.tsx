@@ -1,11 +1,12 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { ApplicationsProvider } from '@/components/applications-provider'
+import { JobProfileProvider } from '@/components/job-profile-provider'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Pursuit — Job Search Dashboard',
-  description: 'Track job applications, understand your progress, and stay on top of your next steps.',
+  description: 'Track applications, manage your job profile, and explore roles matched to your background.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -39,7 +40,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className="antialiased">
-        <ApplicationsProvider>{children}</ApplicationsProvider>
+        <ApplicationsProvider>
+          <JobProfileProvider>{children}</JobProfileProvider>
+        </ApplicationsProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
