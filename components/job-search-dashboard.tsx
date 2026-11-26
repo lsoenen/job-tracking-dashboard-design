@@ -257,7 +257,7 @@ export function JobSearchDashboard() {
                 A clear view of what&apos;s moving, what&apos;s waiting, and what&apos;s next.
               </p>
             </div>
-            <Button variant="outline" size="sm" render={<a href="#next-steps" />} className="w-fit bg-card">
+            <Button nativeButton={false} variant="outline" size="sm" render={<a href="#next-steps" />} className="w-fit bg-card">
               Review next steps
               <ArrowRight data-icon="inline-end" />
             </Button>
