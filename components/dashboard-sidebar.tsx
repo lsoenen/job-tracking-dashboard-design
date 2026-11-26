@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { BriefcaseBusiness, LayoutDashboard, ListChecks, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { BriefcaseBusiness, LayoutDashboard, LayoutGrid, ListChecks, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 const pursuitLogoSource =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
 
-type DashboardPage = "overview" | "applications" | "next-steps"
+type DashboardPage = "overview" | "canvas" | "applications" | "next-steps"
 
 const navigation: {
   id: DashboardPage
@@ -20,6 +20,7 @@ const navigation: {
   count?: string
 }[] = [
   { id: "overview", label: "Overview", href: "/", icon: LayoutDashboard },
+  { id: "canvas", label: "Canvas", href: "/canvas", icon: LayoutGrid },
   { id: "applications", label: "Applications", href: "/applications", icon: BriefcaseBusiness, count: "48" },
   { id: "next-steps", label: "Next steps", href: "/#next-steps", icon: ListChecks, count: "3" },
 ]

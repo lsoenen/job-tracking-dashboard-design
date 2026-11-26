@@ -23,7 +23,7 @@ export type Application = {
   due: string
 }
 
-export type NewApplication = Omit<Application, "id" | "initials" | "logo">
+export type NewApplication = Omit<Application, "id" | "initials">
 
 export const applications: Application[] = [
   {
