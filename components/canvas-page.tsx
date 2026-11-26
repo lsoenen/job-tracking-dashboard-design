@@ -236,24 +236,37 @@ export function CanvasPage() {
             <section aria-labelledby="high-leverage-contacts-title" className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
                 <h3 id="high-leverage-contacts-title" className="text-sm font-medium">High-leverage contacts</h3>
-                <p className="text-xs leading-relaxed text-muted-foreground">Role-based LinkedIn searches to find the current recruiter and people on this team.</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">Illustrative sample profiles with generated portraits. LinkedIn links search for current people in these roles.</p>
               </div>
               <ul className="flex list-none flex-col gap-2 p-0">
                 {selectedJob.contacts.map((contact) => (
-                  <li key={contact.category} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <p className="text-xs font-medium text-muted-foreground">{contact.category}</p>
-                      <h4 className="text-sm font-medium">{contact.title}</h4>
-                      <p className="text-xs leading-relaxed text-muted-foreground">{contact.outreachTip}</p>
+                  <li key={contact.name} className="flex min-w-0 items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+                    <Avatar className="size-10 shrink-0 overflow-hidden border border-border bg-muted">
+                      <AvatarImage
+                        src={contact.avatar}
+                        alt={`Illustrative portrait of ${contact.name}`}
+                        className="absolute z-0 max-w-none rounded-none object-fill"
+                        style={{
+                          width: "300%",
+                          height: "300%",
+                          left: `-${contact.avatarIndex * 100}%`,
+                          top: `-${contact.avatarCropTop * 3}%`,
+                        }}
+                      />
+                      <AvatarFallback>{contact.name.split(/\s+/).map((part) => part[0]).join("")}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium leading-tight">{contact.name}</p>
+                      <p className="mt-1 text-xs leading-snug text-muted-foreground">{contact.title}</p>
                     </div>
                     <a
                       href={getLinkedInPeopleSearchUrl(contact.linkedinSearchQuery)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={`Find ${contact.title} at ${selectedJob.company} on LinkedIn`}
-                      className="inline-flex w-fit shrink-0 items-center gap-1.5 text-xs font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      aria-label={`Search LinkedIn for ${contact.title} at ${selectedJob.company}`}
+                      className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
-                      Find on LinkedIn
+                      LinkedIn
                       <ArrowUpRight aria-hidden="true" className="size-3.5" />
                     </a>
                   </li>

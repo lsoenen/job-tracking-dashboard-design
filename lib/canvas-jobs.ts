@@ -1,7 +1,9 @@
 export type CanvasJobContact = {
-  category: string
+  name: string
   title: string
-  outreachTip: string
+  avatar: string
+  avatarIndex: number
+  avatarCropTop: number
   linkedinSearchQuery: string
 }
 
@@ -48,9 +50,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask who is coordinating hiring for the Guest Experience design team.", linkedinSearchQuery: "Airbnb product design recruiter talent partner" },
-      { category: "Hiring team", title: "Design Lead, Guest Experience", outreachTip: "Ask about the team’s current priorities and how this role partners with product and research.", linkedinSearchQuery: "Airbnb Guest Experience design lead" },
-      { category: "Team member", title: "Product Designer, Guest Experience", outreachTip: "Learn how designers work across discovery, booking, and post-booking support.", linkedinSearchQuery: "Airbnb product designer Guest Experience" },
+      { name: "Aditi Mehta", title: "Product Design Talent Partner", avatar: "/contact-portraits/airbnb.png", avatarIndex: 0, avatarCropTop: 25, linkedinSearchQuery: "Airbnb product design recruiter talent partner" },
+      { name: "Marcus Reed", title: "Design Lead, Guest Experience", avatar: "/contact-portraits/airbnb.png", avatarIndex: 1, avatarCropTop: 25, linkedinSearchQuery: "Airbnb Guest Experience design lead" },
+      { name: "Hana Ito", title: "Product Designer, Guest Experience", avatar: "/contact-portraits/airbnb.png", avatarIndex: 2, avatarCropTop: 25, linkedinSearchQuery: "Airbnb product designer Guest Experience" },
     ],
     matchTerms: ["user research", "service design", "mobile design", "prototyping", "product designer"],
     minimumExperienceYears: 5,
@@ -79,9 +81,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask whether the team is hiring for this role and what the interview process emphasizes.", linkedinSearchQuery: "Figma product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, AI Experiences", outreachTip: "Ask how the design team is approaching user control and AI-assisted workflows.", linkedinSearchQuery: "Figma AI Experiences design lead" },
-      { category: "Team member", title: "Product Designer, AI", outreachTip: "Learn what prototyping and cross-functional work look like on the team.", linkedinSearchQuery: "Figma AI product designer" },
+      { name: "Maya Brooks", title: "Product Design Recruiter", avatar: "/contact-portraits/figma.png", avatarIndex: 0, avatarCropTop: 10, linkedinSearchQuery: "Figma product design recruiter" },
+      { name: "Gabriel Santos", title: "Design Lead, AI Experiences", avatar: "/contact-portraits/figma.png", avatarIndex: 1, avatarCropTop: 10, linkedinSearchQuery: "Figma AI Experiences design lead" },
+      { name: "Claire Ellis", title: "Product Designer, AI", avatar: "/contact-portraits/figma.png", avatarIndex: 2, avatarCropTop: 10, linkedinSearchQuery: "Figma AI product designer" },
     ],
     matchTerms: ["ai product design", "prototyping", "interaction design", "product strategy", "product designer"],
     minimumExperienceYears: 4,
@@ -110,9 +112,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about the hiring team and the scope of the Billing design opening.", linkedinSearchQuery: "Stripe product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Billing", outreachTip: "Ask which billing problems the team is prioritizing for businesses right now.", linkedinSearchQuery: "Stripe Billing design lead" },
-      { category: "Team member", title: "Product Designer, Billing", outreachTip: "Learn how designers balance flexible billing rules with a clear user experience.", linkedinSearchQuery: "Stripe product designer Billing" },
+      { name: "Kenji Sato", title: "Product Design Talent Partner", avatar: "/contact-portraits/stripe.png", avatarIndex: 0, avatarCropTop: 25, linkedinSearchQuery: "Stripe product design recruiter" },
+      { name: "Imani Clarke", title: "Design Lead, Billing", avatar: "/contact-portraits/stripe.png", avatarIndex: 1, avatarCropTop: 25, linkedinSearchQuery: "Stripe Billing design lead" },
+      { name: "Arjun Patel", title: "Product Designer, Billing", avatar: "/contact-portraits/stripe.png", avatarIndex: 2, avatarCropTop: 25, linkedinSearchQuery: "Stripe product designer Billing" },
     ],
     matchTerms: ["billing", "fintech", "information architecture", "product strategy", "product designer"],
     minimumExperienceYears: 5,
@@ -141,9 +143,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask who is leading recruiting for the Publishing product area.", linkedinSearchQuery: "Notion product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Publishing", outreachTip: "Ask how the team thinks about sharing, audience, and public pages.", linkedinSearchQuery: "Notion Publishing design lead" },
-      { category: "Team member", title: "Product Designer, Publishing", outreachTip: "Learn how the team balances flexible publishing tools with simple defaults.", linkedinSearchQuery: "Notion product designer publishing" },
+      { name: "Lucia Reyes", title: "Product Design Recruiter", avatar: "/contact-portraits/notion.png", avatarIndex: 0, avatarCropTop: 10, linkedinSearchQuery: "Notion product design recruiter" },
+      { name: "Min Park", title: "Design Lead, Publishing", avatar: "/contact-portraits/notion.png", avatarIndex: 1, avatarCropTop: 10, linkedinSearchQuery: "Notion Publishing design lead" },
+      { name: "Asha Bennett", title: "Product Designer, Publishing", avatar: "/contact-portraits/notion.png", avatarIndex: 2, avatarCropTop: 10, linkedinSearchQuery: "Notion product designer publishing" },
     ],
     matchTerms: ["content design", "collaboration", "information architecture", "design systems", "product designer"],
     minimumExperienceYears: 4,
@@ -172,9 +174,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about the role’s scope and how the team evaluates systems-design experience.", linkedinSearchQuery: "Linear product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Design Systems", outreachTip: "Ask how the design system partners with product teams and engineering.", linkedinSearchQuery: "Linear design systems design lead" },
-      { category: "Team member", title: "Product Designer, Design Systems", outreachTip: "Learn how shared patterns are maintained as the product evolves.", linkedinSearchQuery: "Linear product designer design systems" },
+      { name: "Emma Foster", title: "Product Design Talent Partner", avatar: "/contact-portraits/linear.png", avatarIndex: 0, avatarCropTop: 10, linkedinSearchQuery: "Linear product design recruiter" },
+      { name: "Andre Lewis", title: "Design Lead, Design Systems", avatar: "/contact-portraits/linear.png", avatarIndex: 1, avatarCropTop: 10, linkedinSearchQuery: "Linear design systems design lead" },
+      { name: "Rina Shah", title: "Product Designer, Design Systems", avatar: "/contact-portraits/linear.png", avatarIndex: 2, avatarCropTop: 10, linkedinSearchQuery: "Linear product designer design systems" },
     ],
     matchTerms: ["design systems", "prototyping", "interaction design", "product designer", "accessibility"],
     minimumExperienceYears: 6,
@@ -203,9 +205,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask which team owns hiring for collaboration experiences.", linkedinSearchQuery: "Miro product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Collaboration", outreachTip: "Ask about the team’s biggest collaboration challenges and design priorities.", linkedinSearchQuery: "Miro Collaboration design lead" },
-      { category: "Team member", title: "Product Designer, Collaboration", outreachTip: "Learn how designers validate workflows for distributed teams.", linkedinSearchQuery: "Miro product designer collaboration" },
+      { name: "Yuna Mori", title: "Product Design Recruiter", avatar: "/contact-portraits/miro.png", avatarIndex: 0, avatarCropTop: 25, linkedinSearchQuery: "Miro product design recruiter" },
+      { name: "Rafael Cruz", title: "Design Lead, Collaboration", avatar: "/contact-portraits/miro.png", avatarIndex: 1, avatarCropTop: 25, linkedinSearchQuery: "Miro Collaboration design lead" },
+      { name: "Talia Brooks", title: "Product Designer, Collaboration", avatar: "/contact-portraits/miro.png", avatarIndex: 2, avatarCropTop: 25, linkedinSearchQuery: "Miro product designer collaboration" },
     ],
     matchTerms: ["collaboration", "remote", "workshop facilitation", "prototyping", "product designer"],
     minimumExperienceYears: 4,
@@ -234,9 +236,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about recruiting for Spotify’s creator-focused product teams.", linkedinSearchQuery: "Spotify product design recruiter creator tools" },
-      { category: "Hiring team", title: "Design Lead, Creator Tools", outreachTip: "Ask what creator needs are shaping the team’s current roadmap.", linkedinSearchQuery: "Spotify Creator Tools design lead" },
-      { category: "Team member", title: "Product Designer, Creator Tools", outreachTip: "Learn how designers make creator analytics more actionable.", linkedinSearchQuery: "Spotify product designer creator tools" },
+      { name: "Darius Cole", title: "Product Design Talent Partner", avatar: "/contact-portraits/spotify.png", avatarIndex: 0, avatarCropTop: 25, linkedinSearchQuery: "Spotify product design recruiter creator tools" },
+      { name: "Sana Iyer", title: "Design Lead, Creator Tools", avatar: "/contact-portraits/spotify.png", avatarIndex: 1, avatarCropTop: 25, linkedinSearchQuery: "Spotify Creator Tools design lead" },
+      { name: "Elliot Morgan", title: "Product Designer, Creator Tools", avatar: "/contact-portraits/spotify.png", avatarIndex: 2, avatarCropTop: 25, linkedinSearchQuery: "Spotify product designer creator tools" },
     ],
     matchTerms: ["creator tools", "mobile design", "user research", "content design", "product designer"],
     minimumExperienceYears: 4,
@@ -265,9 +267,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask about the Growth team’s hiring priorities and interview loop.", linkedinSearchQuery: "Webflow product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Growth", outreachTip: "Ask how the team defines activation and evaluates product experiments.", linkedinSearchQuery: "Webflow Growth design lead" },
-      { category: "Team member", title: "Product Designer, Growth", outreachTip: "Learn how research and experimentation inform day-to-day design work.", linkedinSearchQuery: "Webflow product designer growth" },
+      { name: "Grace Miller", title: "Product Design Recruiter", avatar: "/contact-portraits/webflow.png", avatarIndex: 0, avatarCropTop: 20, linkedinSearchQuery: "Webflow product design recruiter" },
+      { name: "Nikhil Rao", title: "Design Lead, Growth", avatar: "/contact-portraits/webflow.png", avatarIndex: 1, avatarCropTop: 20, linkedinSearchQuery: "Webflow Growth design lead" },
+      { name: "Evan Lin", title: "Product Designer, Growth", avatar: "/contact-portraits/webflow.png", avatarIndex: 2, avatarCropTop: 20, linkedinSearchQuery: "Webflow product designer growth" },
     ],
     matchTerms: ["growth", "experimentation", "web design", "product strategy", "product designer"],
     minimumExperienceYears: 3,
@@ -296,9 +298,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Talent Partner", outreachTip: "Ask about the team and the experience Asana is looking for in this role.", linkedinSearchQuery: "Asana product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Workflows", outreachTip: "Ask how the team is approaching workflow flexibility and team coordination.", linkedinSearchQuery: "Asana Workflows design lead" },
-      { category: "Team member", title: "Product Designer, Workflows", outreachTip: "Learn how designers handle complex processes and permissions.", linkedinSearchQuery: "Asana product designer workflows" },
+      { name: "Layla Haddad", title: "Product Design Talent Partner", avatar: "/contact-portraits/asana.png", avatarIndex: 0, avatarCropTop: 10, linkedinSearchQuery: "Asana product design recruiter" },
+      { name: "Malik Turner", title: "Design Lead, Workflows", avatar: "/contact-portraits/asana.png", avatarIndex: 1, avatarCropTop: 10, linkedinSearchQuery: "Asana Workflows design lead" },
+      { name: "Mei Zhou", title: "Product Designer, Workflows", avatar: "/contact-portraits/asana.png", avatarIndex: 2, avatarCropTop: 10, linkedinSearchQuery: "Asana product designer workflows" },
     ],
     matchTerms: ["workflow", "information architecture", "product strategy", "prototyping", "product designer"],
     minimumExperienceYears: 4,
@@ -327,9 +329,9 @@ export const canvasJobs: CanvasJob[] = [
       ],
     },
     contacts: [
-      { category: "Recruiter", title: "Product Design Recruiter", outreachTip: "Ask which Creative Cloud group is hiring and how the role is scoped.", linkedinSearchQuery: "Adobe Creative Cloud product design recruiter" },
-      { category: "Hiring team", title: "Design Lead, Creative Cloud", outreachTip: "Ask about the product area’s current creative workflow challenges.", linkedinSearchQuery: "Adobe Creative Cloud design lead" },
-      { category: "Team member", title: "Product Designer, Creative Cloud", outreachTip: "Learn how the team supports different creative skill levels and workflows.", linkedinSearchQuery: "Adobe Creative Cloud product designer" },
+      { name: "Rhea Das", title: "Product Design Recruiter", avatar: "/contact-portraits/adobe.png", avatarIndex: 0, avatarCropTop: 10, linkedinSearchQuery: "Adobe Creative Cloud product design recruiter" },
+      { name: "Javier Torres", title: "Design Lead, Creative Cloud", avatar: "/contact-portraits/adobe.png", avatarIndex: 1, avatarCropTop: 10, linkedinSearchQuery: "Adobe Creative Cloud design lead" },
+      { name: "Imani Reed", title: "Product Designer, Creative Cloud", avatar: "/contact-portraits/adobe.png", avatarIndex: 2, avatarCropTop: 10, linkedinSearchQuery: "Adobe Creative Cloud product designer" },
     ],
     matchTerms: ["creative tools", "design systems", "interaction design", "accessibility", "product designer"],
     minimumExperienceYears: 5,
