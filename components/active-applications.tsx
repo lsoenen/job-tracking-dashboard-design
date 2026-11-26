@@ -10,9 +10,12 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 
 function statusClassName(status: string) {
+  if (status === "Recruiter screen") return "border-info/20 bg-info/5 text-info"
+  if (status === "Interviewing") return "border-primary/20 bg-primary/5 text-primary"
+  if (status === "Take-home") return "border-warning/20 bg-warning/5 text-warning"
   if (status === "Offer") return "border-success/20 bg-success/5 text-success"
   if (status === "Not moving forward") return "border-destructive/20 bg-destructive/5 text-destructive"
-  return "border-border bg-muted text-foreground"
+  return "border-border bg-muted text-muted-foreground"
 }
 
 export function ActiveApplications() {
