@@ -83,7 +83,7 @@ function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-[224px] shrink-0 flex-col border-r border-border bg-sidebar md:flex">
       <a href="#top" className="flex items-center gap-3 px-6 py-6" aria-label="Pursuit home">
-        <BriefcaseBusiness aria-hidden="true" className="size-7 stroke-[1.6]" />
+        <BriefcaseBusiness aria-hidden="true" className="size-7 stroke-[1.6] text-primary" />
         <span className="flex flex-col">
           <span className="text-sm font-medium tracking-tight">Pursuit</span>
           <span className="mt-0.5 text-[11px] text-muted-foreground">Job search</span>
@@ -104,7 +104,7 @@ function Sidebar() {
                 aria-current={active ? "page" : undefined}
                 className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${active ? "bg-accent font-medium text-foreground" : "text-foreground hover:bg-accent"}`}
               >
-                <Icon aria-hidden="true" className="size-[17px]" />
+                <Icon aria-hidden="true" className={`size-[17px] ${active ? "text-primary" : ""}`} />
                 {item.label}
                 {item.count && <span className="ml-auto text-xs text-muted-foreground">{item.count}</span>}
               </a>
@@ -113,7 +113,7 @@ function Sidebar() {
         </nav>
       </div>
 
-      <Card className="mx-4 mt-6 border-success/15 bg-success/[0.04] shadow-none">
+      <Card className="mx-4 mt-6 border-primary/15 bg-primary/[0.04] shadow-none">
         <CardContent className="p-3">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium">A little closer, every day.</p>
@@ -126,11 +126,11 @@ function Sidebar() {
             aria-valuemin={0}
             aria-valuemax={5}
             aria-valuenow={3}
-            className="mt-3 h-1.5 overflow-hidden rounded-full bg-success/15"
+            className="mt-3 h-1.5 overflow-hidden rounded-full bg-primary/15"
           >
-            <div className="h-full w-3/5 rounded-full bg-success" />
+            <div className="h-full w-3/5 rounded-full bg-primary" />
           </div>
-          <p className="mt-2 text-xs text-success">2 more to reach your goal</p>
+          <p className="mt-2 text-xs text-primary">2 more to reach your goal</p>
         </CardContent>
       </Card>
 
@@ -201,7 +201,7 @@ function NextSteps() {
       <CardContent>
         <ol aria-label="Upcoming job-search tasks" className="flex flex-col divide-y divide-border">
           {nextSteps.map((step, index) => (
-            <li key={step.company} className={`flex gap-3 py-4 first:pt-0 last:pb-0 ${index === 0 ? "-mx-2 rounded-md bg-success/[0.04] px-2" : ""}`}>
+            <li key={step.company} className={`flex gap-3 py-4 first:pt-0 last:pb-0 ${index === 0 ? "-mx-2 rounded-md bg-primary/[0.04] px-2" : ""}`}>
               <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border border-border bg-background text-[11px] font-medium text-muted-foreground">
                 {step.initials}
               </span>
@@ -233,7 +233,7 @@ export function JobSearchDashboard() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6 lg:px-8">
           <a href="#top" className="flex items-center gap-2.5 md:hidden" aria-label="Pursuit home">
-            <BriefcaseBusiness aria-hidden="true" className="size-6 stroke-[1.6]" />
+            <BriefcaseBusiness aria-hidden="true" className="size-6 stroke-[1.6] text-primary" />
             <span className="text-sm font-medium tracking-tight">Pursuit</span>
           </a>
           <div className="hidden text-sm text-muted-foreground md:block">
@@ -258,7 +258,7 @@ export function JobSearchDashboard() {
                 aria-current={index === 0 ? "page" : undefined}
                 className={`flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md px-2 py-2 text-xs ${index === 0 ? "bg-accent font-medium text-foreground" : "text-muted-foreground"}`}
               >
-                <Icon aria-hidden="true" className="size-4 shrink-0" />
+                <Icon aria-hidden="true" className={`size-4 shrink-0 ${index === 0 ? "text-primary" : ""}`} />
                 {item.label}
                 {item.count && <span className="text-[10px] text-muted-foreground">{item.count}</span>}
               </a>

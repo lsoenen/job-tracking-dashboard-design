@@ -17,7 +17,7 @@ const activity = [
 ]
 
 const chartConfig = {
-  applications: { label: "Applications sent", color: "var(--chart-5)" },
+  applications: { label: "Applications sent", color: "var(--chart-1)" },
   responses: { label: "Responses received", color: "var(--success)" },
 } satisfies ChartConfig
 
@@ -52,7 +52,7 @@ export function ApplicationActivityChart() {
           Applications sent
         </span>
         <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="size-2.5 rounded-sm bg-chart-2" />
+          <span aria-hidden="true" className="size-2.5 rounded-sm bg-success" />
           Responses received
         </span>
       </div>
