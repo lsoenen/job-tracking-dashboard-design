@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { ArrowRight, Search } from "lucide-react"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 
@@ -12,6 +12,7 @@ const applications = [
     company: "Vercel",
     role: "Senior Product Designer",
     initials: "V",
+    logo: "https://thesvg.org/icons/vercel/default.svg",
     status: "Interviewing",
     nextStep: "Hiring manager interview",
     due: "Tomorrow",
@@ -20,6 +21,7 @@ const applications = [
     company: "Figma",
     role: "Product Designer, Growth",
     initials: "F",
+    logo: "https://thesvg.org/icons/figma/default.svg",
     status: "Take-home",
     nextStep: "Submit design exercise",
     due: "Nov 30",
@@ -28,6 +30,7 @@ const applications = [
     company: "Linear",
     role: "Product Designer",
     initials: "L",
+    logo: "https://thesvg.org/icons/linear/default.svg",
     status: "Applied",
     nextStep: "Follow up with recruiter",
     due: "Dec 2",
@@ -36,6 +39,7 @@ const applications = [
     company: "Ramp",
     role: "Staff Product Designer",
     initials: "R",
+    logo: "https://thesvg.org/icons/ramp/default.svg",
     status: "Recruiter screen",
     nextStep: "Share availability",
     due: "Nov 27",
@@ -98,6 +102,11 @@ export function ActiveApplications() {
               <li key={application.company} className="grid gap-3 py-3 first:pt-3 sm:grid-cols-[minmax(130px,1fr)_minmax(100px,0.65fr)_minmax(150px,1.1fr)] sm:items-center sm:px-2">
                 <div className="flex min-w-0 items-center gap-3">
                   <Avatar className="size-8 rounded-md border border-border bg-background">
+                    <AvatarImage
+                      src={application.logo}
+                      alt={`${application.company} logo`}
+                      className="rounded-md object-contain p-1"
+                    />
                     <AvatarFallback className="rounded-md bg-muted text-xs font-medium text-muted-foreground">
                       {application.initials}
                     </AvatarFallback>
