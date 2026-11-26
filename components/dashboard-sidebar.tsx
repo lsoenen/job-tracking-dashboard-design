@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { BriefcaseBusiness, LayoutDashboard, LayoutGrid, ListChecks, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, ListChecks, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -17,10 +17,10 @@ const navigation: {
   id: DashboardPage
   label: string
   href: string
-  icon: typeof LayoutDashboard
+  icon: typeof ChartNoAxesCombined
   count?: string
 }[] = [
-  { id: "overview", label: "Overview", href: "/", icon: LayoutDashboard },
+  { id: "overview", label: "Overview", href: "/", icon: ChartNoAxesCombined },
   { id: "canvas", label: "Canvas", href: "/canvas", icon: LayoutGrid },
   { id: "applications", label: "Applications", href: "/applications", icon: BriefcaseBusiness, count: "48" },
   { id: "next-steps", label: "Next steps", href: "/#next-steps", icon: ListChecks, count: "3" },
