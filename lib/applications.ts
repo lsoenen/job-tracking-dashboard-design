@@ -3,12 +3,25 @@ export const applicationStatuses = [
   "Applied",
   "Recruiter screen",
   "Interviewing",
+  "Team, Technical, Case",
+  "Final or Executive Round",
   "Take-home",
   "Offer",
   "Not moving forward",
 ] as const
 
 export type ApplicationStatus = (typeof applicationStatuses)[number]
+
+export const interviewStatuses = [
+  "Recruiter screen",
+  "Interviewing",
+  "Team, Technical, Case",
+  "Final or Executive Round",
+] as const satisfies readonly ApplicationStatus[]
+
+export function isInterviewStatus(status: ApplicationStatus) {
+  return interviewStatuses.some((interviewStatus) => interviewStatus === status)
+}
 
 export type Application = {
   id: string

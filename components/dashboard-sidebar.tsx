@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useApplications } from "@/components/applications-provider"
 import { useJobProfile } from "@/components/job-profile-provider"
+import { isInterviewStatus } from "@/lib/applications"
 
 const pursuitLogoSource =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
@@ -65,9 +66,7 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
   const [collapsed, setCollapsed] = useState(false)
   const { profile } = useJobProfile()
   const { applications } = useApplications()
-  const interviewCount = applications.filter(
-    (application) => application.status === "Recruiter screen" || application.status === "Interviewing",
-  ).length.toString()
+  const interviewCount = applications.filter((application) => isInterviewStatus(application.status)).length.toString()
 
   return (
     <aside

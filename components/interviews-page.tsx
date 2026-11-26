@@ -7,8 +7,10 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   ChevronDown,
+  Code2,
   MessageSquareText,
   PenLine,
+  Trophy,
   UsersRound,
   UserRound,
 } from "lucide-react"
@@ -19,23 +21,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import type { Application, ApplicationStatus } from "@/lib/applications"
+import { isInterviewStatus, interviewStatuses, type Application } from "@/lib/applications"
 import { interviewPersonas } from "@/lib/interview-prep"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 const personaIcons = [MessageSquareText, BriefcaseBusiness, PenLine, UsersRound, UserRound]
-type InterviewStage = Extract<ApplicationStatus, "Recruiter screen" | "Interviewing">
+type InterviewStage = (typeof interviewStatuses)[number]
 
 const interviewStages: {
+  id: string
   status: InterviewStage
   title: string
   description: string
+  icon: typeof MessageSquareText
 }[] = [
-  { status: "Recruiter screen", title: "Recruiter", description: "Recruiter screen" },
-  { status: "Interviewing", title: "Hiring manager", description: "Hiring manager interview" },
+  { id: "recruiter", status: "Recruiter screen", title: "Recruiter", description: "Recruiter screen", icon: MessageSquareText },
+  { id: "hiring-manager", status: "Interviewing", title: "Hiring manager", description: "Hiring manager interview", icon: BriefcaseBusiness },
+  { id: "team-technical-case", status: "Team, Technical, Case", title: "Team, Technical, Case", description: "Team, technical, or case interview", icon: Code2 },
+  { id: "final-executive", status: "Final or Executive Round", title: "Final or Executive Round", description: "Final or executive round", icon: Trophy },
 ]
 
 function isActiveInterview(application: Application) {
-  return application.status === "Recruiter screen" || application.status === "Interviewing"
+  return isInterviewStatus(application.status)
 }
 
 export function InterviewsPage() {
@@ -65,8 +78,13 @@ export function InterviewsPage() {
     if (event.target instanceof HTMLElement && event.target.closest("button")) return
 
     event.preventDefault()
-    const status = event.key === "ArrowRight" ? "Interviewing" : "Recruiter screen"
-    moveApplication(application.id, status)
+    const currentIndex = interviewStages.findIndex((stage) => stage.status === application.status)
+    if (currentIndex < 0) return
+
+    const direction = event.key === "ArrowRight" ? 1 : -1
+    const destinationIndex = Math.min(Math.max(currentIndex + direction, 0), interviewStages.length - 1)
+    const destination = interviewStages[destinationIndex]
+    if (destination) moveApplication(application.id, destination.status)
   }
 
   return (
@@ -79,7 +97,7 @@ export function InterviewsPage() {
               <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Your preparation space</p>
               <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Interview prep</h1>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Keep active conversations moving from recruiter screen to hiring manager.
+                Keep active conversations moving from recruiter screen through the final round.
               </p>
             </div>
             <Link href="/applications" className={buttonVariants({ variant: "outline", size: "sm" })}>
@@ -100,14 +118,16 @@ export function InterviewsPage() {
 
             <p id="kanban-keyboard-help" className="sr-only">Use the left and right arrow keys to move this job between interview stages.</p>
             <p role="status" aria-live="polite" className="sr-only">{announcement}</p>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {interviewStages.map((stage) => {
-                const stageApplications = interviewApplications.filter((application) => application.status === stage.status)
+            <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+              <div className="grid min-w-[840px] grid-cols-4 gap-3">
+                {interviewStages.map((stage) => {
+                  const stageApplications = interviewApplications.filter((application) => application.status === stage.status)
+                  const StageIcon = stage.icon
 
-                return (
-                  <section
-                    key={stage.status}
-                    aria-labelledby={`stage-${stage.status}`}
+                  return (
+                    <section
+                      key={stage.status}
+                      aria-labelledby={`stage-${stage.id}`}
                     onDragOver={(event) => {
                       event.preventDefault()
                       event.dataTransfer.dropEffect = "move"
@@ -119,7 +139,7 @@ export function InterviewsPage() {
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div>
-                        <h3 id={`stage-${stage.status}`} className="text-sm font-semibold tracking-tight">{stage.title}</h3>
+                        <h3 id={`stage-${stage.id}`} className="text-sm font-semibold tracking-tight">{stage.title}</h3>
                         <p className="mt-0.5 text-xs text-muted-foreground">{stage.description}</p>
                       </div>
                       <Badge variant="secondary" className="min-w-7 justify-center rounded-full tabular-nums">
@@ -156,9 +176,9 @@ export function InterviewsPage() {
                                       <p className="mt-0.5 truncate text-xs text-muted-foreground">{application.company}</p>
                                     </div>
                                   </div>
-                                  <div className="flex min-w-0 items-center justify-between gap-2 border-t border-border pt-2.5">
+                                  <div className="flex min-w-0 flex-col gap-2 border-t border-border pt-2.5 xl:flex-row xl:items-center xl:justify-between">
                                     <p title={application.nextStep} className="min-w-0 truncate text-[11px] text-muted-foreground">{application.nextStep}</p>
-                                    <div className="flex shrink-0 items-center gap-2">
+                                    <div className="flex shrink-0 items-center justify-between gap-2 xl:justify-start">
                                       {application.due !== "—" && (
                                         <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                                           <CalendarDays aria-hidden="true" className="size-3" />
@@ -177,13 +197,22 @@ export function InterviewsPage() {
                         ))}
                       </ul>
                     ) : (
-                      <div className="flex min-h-28 items-center justify-center rounded-lg border border-dashed border-border px-4 text-center">
-                        <p className="text-xs text-muted-foreground">Drop an active interview here</p>
-                      </div>
+                      <Empty className="min-h-48 gap-3 rounded-lg border bg-background/60 px-4 py-6">
+                        <EmptyHeader className="gap-1.5">
+                          <EmptyMedia variant="icon" className="mb-1 size-11 rounded-full border border-border bg-muted/60 text-muted-foreground">
+                            <StageIcon aria-hidden="true" className="size-5" />
+                          </EmptyMedia>
+                          <EmptyTitle className="text-xs">Nothing here just yet</EmptyTitle>
+                          <EmptyDescription className="max-w-44 text-[11px] leading-relaxed">
+                            Drop an application here when it advances to {stage.description.toLowerCase()}.
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
                     )}
                   </section>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
           </section>
 
