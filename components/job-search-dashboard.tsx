@@ -121,9 +121,9 @@ function Sidebar() {
                 href={item.href}
                 aria-label={item.count ? `${item.label}, ${item.count}` : item.label}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center justify-center gap-3 rounded-md px-2 py-2.5 text-sm transition-colors md:justify-start md:px-3 ${active ? "bg-accent font-medium text-foreground" : "text-foreground hover:bg-accent"}`}
+                className={`flex items-center justify-center gap-3 rounded-md px-2 py-2.5 text-sm transition-colors md:justify-start md:px-3 ${active ? "font-semibold text-primary" : "text-foreground hover:bg-muted/70"}`}
               >
-                <Icon aria-hidden="true" className={`size-[17px] shrink-0 ${active ? "text-primary" : ""}`} />
+                <Icon aria-hidden="true" className={`size-[17px] shrink-0 ${active ? "fill-primary text-primary" : ""}`} />
                 <span className="hidden md:inline">{item.label}</span>
                 {item.count && <span className="ml-auto hidden text-xs text-muted-foreground md:inline">{item.count}</span>}
               </a>
@@ -131,27 +131,6 @@ function Sidebar() {
           })}
         </nav>
       </div>
-
-      <Card className="mx-4 mt-6 hidden border-primary/15 bg-primary/[0.04] shadow-none md:block">
-        <CardContent className="p-3">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-medium">A little closer, every day.</p>
-            <span className="text-xs tabular-nums text-muted-foreground">3/5</span>
-          </div>
-          <p className="mt-1.5 text-xs text-muted-foreground">Weekly focus actions</p>
-          <div
-            role="progressbar"
-            aria-label="Weekly focus progress"
-            aria-valuemin={0}
-            aria-valuemax={5}
-            aria-valuenow={3}
-            className="mt-3 h-1.5 overflow-hidden rounded-full bg-primary/15"
-          >
-            <div className="h-full w-3/5 rounded-full bg-primary" />
-          </div>
-          <p className="mt-2 text-xs text-primary">2 more to reach your goal</p>
-        </CardContent>
-      </Card>
 
       <div className="mt-auto px-2 pb-5 pt-8 md:px-6">
         <div className="flex items-center justify-center gap-3 border-t border-border pt-4 md:justify-start">
@@ -167,6 +146,35 @@ function Sidebar() {
         <p className="mt-5 hidden text-[11px] text-muted-foreground md:block">Your search, on your terms.</p>
       </div>
     </aside>
+  )
+}
+
+function WeeklyFocusWidget() {
+  return (
+    <Card className="mb-5 border-primary/15 bg-primary/[0.04] shadow-none">
+      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-6">
+        <div className="flex shrink-0 items-center justify-between gap-3 sm:min-w-56">
+          <div>
+            <p className="text-sm font-medium">A little closer, every day.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Weekly focus actions</p>
+          </div>
+          <span className="text-sm font-medium tabular-nums text-primary">3/5</span>
+        </div>
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div
+            role="progressbar"
+            aria-label="Weekly focus progress"
+            aria-valuemin={0}
+            aria-valuemax={5}
+            aria-valuenow={3}
+            className="h-1.5 min-w-12 flex-1 overflow-hidden rounded-full bg-primary/15"
+          >
+            <div className="h-full w-3/5 rounded-full bg-primary" />
+          </div>
+          <p className="shrink-0 text-xs text-muted-foreground"><span className="font-medium text-primary">2 more</span> to reach your goal</p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -267,6 +275,8 @@ export function JobSearchDashboard() {
               </a>
             </div>
           </section>
+
+          <WeeklyFocusWidget />
 
           <section aria-label="Job search key performance indicators" className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {metrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
