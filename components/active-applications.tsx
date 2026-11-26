@@ -101,13 +101,13 @@ export function ActiveApplications() {
             {filteredApplications.map((application) => (
               <li key={application.company} className="grid gap-3 py-3 first:pt-3 sm:grid-cols-[minmax(130px,1fr)_minmax(100px,0.65fr)_minmax(150px,1.1fr)] sm:items-center sm:px-2">
                 <div className="flex min-w-0 items-center gap-3">
-                  <Avatar className="size-8 rounded-md border border-border bg-background">
+                  <Avatar className="size-8 rounded-full border-0 bg-transparent after:hidden">
                     <AvatarImage
                       src={application.logo}
                       alt={`${application.company} logo`}
-                      className="rounded-md object-contain p-1"
+                      className="rounded-full object-contain"
                     />
-                    <AvatarFallback className="rounded-md bg-muted text-xs font-medium text-muted-foreground">
+                    <AvatarFallback className="rounded-full bg-muted text-xs font-medium text-muted-foreground">
                       {application.initials}
                     </AvatarFallback>
                   </Avatar>
