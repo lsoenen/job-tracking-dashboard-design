@@ -5,6 +5,8 @@ import Link from "next/link"
 import { ArrowLeft, ArrowRight, Check, Lightbulb, MessageSquareText } from "lucide-react"
 
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { useApplications } from "@/components/applications-provider"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useJobProfile } from "@/components/job-profile-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -13,14 +15,26 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Textarea } from "@/components/ui/textarea"
 import { getInterviewPersona, interviewPersonas } from "@/lib/interview-prep"
 
-export function InterviewPrepPage({ personaSlug }: { personaSlug: string }) {
+export function InterviewPrepPage({
+  personaSlug,
+  applicationId,
+}: {
+  personaSlug: string
+  applicationId?: string
+}) {
   const persona = getInterviewPersona(personaSlug)
   const { profile } = useJobProfile()
+  const { applications, interviewProgress, toggleInterviewQuestionPractice } = useApplications()
+  const application = applicationId ? applications.find((item) => item.id === applicationId) : undefined
   const firstQuestion = persona?.questions[0]
   const [selectedQuestionId, setSelectedQuestionId] = useState(firstQuestion?.id ?? "")
   const [showCues, setShowCues] = useState(false)
   const [practiceNotes, setPracticeNotes] = useState<Record<string, string>>({})
-  const [practicedQuestionIds, setPracticedQuestionIds] = useState<string[]>([])
+  const [localPracticedQuestionIds, setLocalPracticedQuestionIds] = useState<string[]>([])
+  const progressKey = applicationId ? `${applicationId}:${personaSlug}` : undefined
+  const practicedQuestionIds = progressKey
+    ? interviewProgress[progressKey] ?? []
+    : localPracticedQuestionIds
 
   if (!persona || !firstQuestion) return null
 
@@ -34,7 +48,12 @@ export function InterviewPrepPage({ personaSlug }: { personaSlug: string }) {
   }
 
   function togglePracticed() {
-    setPracticedQuestionIds((current) =>
+    if (applicationId) {
+      toggleInterviewQuestionPractice(applicationId, personaSlug, selectedQuestion.id)
+      return
+    }
+
+    setLocalPracticedQuestionIds((current) =>
       current.includes(selectedQuestion.id)
         ? current.filter((questionId) => questionId !== selectedQuestion.id)
         : [...current, selectedQuestion.id],
@@ -54,7 +73,7 @@ export function InterviewPrepPage({ personaSlug }: { personaSlug: string }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
           <Link href="/interviews" className={`${buttonVariants({ variant: "ghost", size: "sm" })} mb-5 -ml-2`}>
-            <ArrowLeft data-icon="inline-start" aria-hidden="true" />All interview stages
+            <ArrowLeft data-icon="inline-start" aria-hidden="true" />Back to interview prep
           </Link>
 
           <section aria-labelledby="page-title" className="mb-6">
@@ -72,13 +91,29 @@ export function InterviewPrepPage({ personaSlug }: { personaSlug: string }) {
             </div>
           </section>
 
+          {application && (
+            <Card className="mb-6 border-border shadow-none">
+              <CardContent className="flex flex-wrap items-center gap-3 p-4">
+                <Avatar className="size-9 shrink-0 border border-border bg-muted">
+                  {application.logo && <AvatarImage src={application.logo} alt={`${application.company} logo`} className="object-contain p-1" />}
+                  <AvatarFallback className="text-xs font-medium text-muted-foreground">{application.initials}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Preparing for</p>
+                  <p className="truncate text-sm font-medium">{application.company} <span className="font-normal text-muted-foreground">· {application.role}</span></p>
+                </div>
+                <Badge variant="outline" className="max-w-full truncate font-normal">{application.nextStep}</Badge>
+              </CardContent>
+            </Card>
+          )}
+
           <section aria-label="Choose an interviewer persona" className="mb-6">
             <p className="mb-2 text-xs font-medium text-muted-foreground">Practice with a different persona</p>
             <nav className="flex flex-wrap gap-2">
               {interviewPersonas.map((option) => (
                 <Link
                   key={option.slug}
-                  href={`/interviews/${option.slug}`}
+                  href={applicationId ? `/interviews/${option.slug}?applicationId=${encodeURIComponent(applicationId)}` : `/interviews/${option.slug}`}
                   aria-current={option.slug === persona.slug ? "page" : undefined}
                   className={buttonVariants({
                     size: "sm",
@@ -132,7 +167,7 @@ export function InterviewPrepPage({ personaSlug }: { personaSlug: string }) {
                   </div>
                   <div
                     role="progressbar"
-                    aria-label="Interview practice progress"
+                    aria-label={application ? `${application.company} interview preparation progress` : "Interview practice progress"}
                     aria-valuemin={0}
                     aria-valuemax={persona.questions.length}
                     aria-valuenow={practicedQuestionIds.length}

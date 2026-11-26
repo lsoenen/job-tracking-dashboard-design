@@ -10,11 +10,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { applicationStatusClassName } from "@/lib/application-helpers"
+import { applicationStatuses, type ApplicationStatus } from "@/lib/applications"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { applications: applicationRows, addApplication } = useApplications()
+  const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
   const selectedApplication = applicationRows.find((application) => application.id === selectedId)
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -89,8 +98,7 @@ export function ApplicationsTable() {
                       return (
                         <tr
                           key={application.id}
-                          onClick={() => setSelectedId(application.id)}
-                          className={`cursor-pointer transition-colors ${isSelected ? "bg-primary/[0.06] hover:bg-primary/[0.09]" : "hover:bg-muted/30"}`}
+                          className={`transition-colors ${isSelected ? "bg-primary/[0.06]" : "hover:bg-muted/30"}`}
                         >
                           <td className="px-5 py-4">
                             <button
@@ -121,9 +129,27 @@ export function ApplicationsTable() {
                             </button>
                           </td>
                           <td className="px-5 py-4">
-                            <Badge variant="outline" className={`rounded-full px-2.5 py-1 text-xs font-normal ${applicationStatusClassName(application.status)}`}>
-                              {application.status}
-                            </Badge>
+                            <Select
+                              value={application.status}
+                              onValueChange={(value) => {
+                                if (value) updateApplicationStatus(application.id, value as ApplicationStatus)
+                              }}
+                            >
+                              <SelectTrigger
+                                size="sm"
+                                aria-label={`Update ${application.company} application status`}
+                                className={`rounded-full border-transparent px-2.5 text-xs ${applicationStatusClassName(application.status)}`}
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent align="start">
+                                <SelectGroup>
+                                  {applicationStatuses.map((status) => (
+                                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
                           </td>
                           <td className={selectedApplication ? "hidden" : "px-5 py-4"}>
                             <p className="font-medium text-foreground">{application.nextStep}</p>

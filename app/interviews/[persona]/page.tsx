@@ -6,6 +6,7 @@ import { getInterviewPersona } from "@/lib/interview-prep"
 
 type InterviewPersonaRouteProps = {
   params: Promise<{ persona: string }>
+  searchParams: Promise<{ applicationId?: string }>
 }
 
 export async function generateMetadata({ params }: InterviewPersonaRouteProps): Promise<Metadata> {
@@ -22,11 +23,11 @@ export async function generateMetadata({ params }: InterviewPersonaRouteProps): 
   }
 }
 
-export default async function InterviewPersonaRoute({ params }: InterviewPersonaRouteProps) {
-  const { persona: personaSlug } = await params
+export default async function InterviewPersonaRoute({ params, searchParams }: InterviewPersonaRouteProps) {
+  const [{ persona: personaSlug }, { applicationId }] = await Promise.all([params, searchParams])
   const persona = getInterviewPersona(personaSlug)
 
   if (!persona) notFound()
 
-  return <InterviewPrepPage key={persona.slug} personaSlug={persona.slug} />
+  return <InterviewPrepPage key={`${persona.slug}-${applicationId ?? "general"}`} personaSlug={persona.slug} applicationId={applicationId} />
 }
