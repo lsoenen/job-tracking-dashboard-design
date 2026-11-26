@@ -37,9 +37,9 @@ export function CanvasPage() {
           <section aria-labelledby="page-title" className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Canvas</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Product design roles picked for your profile.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Sample product design roles across LinkedIn, Indeed, Wellfound, Wellhub, and more.</p>
             </div>
-            <p className="text-xs text-muted-foreground">Mock recommendations · Newest first</p>
+            <p className="text-xs text-muted-foreground">Mock data · Newest first</p>
           </section>
 
           <section aria-labelledby="recommended-roles-title">
@@ -75,10 +75,13 @@ export function CanvasPage() {
                         </div>
 
                         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <CalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
-                            Posted {postedDate}
-                          </p>
+                          <div className="flex flex-col gap-1.5">
+                            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <CalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
+                              Posted {postedDate}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Source: {job.source}</p>
+                          </div>
                           <Button
                             type="button"
                             size="sm"
@@ -90,7 +93,7 @@ export function CanvasPage() {
                                 company: job.company,
                                 role: job.title,
                                 logo: job.logo,
-                                description: `${job.summary} Posted ${postedDate}.`,
+                                description: `${job.summary} Posted ${postedDate}. Source: ${job.source}.`,
                                 status: "Interested",
                                 nextStep: "Review the job posting",
                                 due: "—",
