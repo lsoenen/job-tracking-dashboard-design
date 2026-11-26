@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  Bell,
   BriefcaseBusiness,
   CalendarDays,
   ChartNoAxesCombined,
@@ -15,7 +14,7 @@ import { ActiveApplications } from "@/components/active-applications"
 import { ApplicationOutcomes } from "@/components/application-outcomes"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -37,7 +36,7 @@ function PursuitLogo() {
           className="absolute left-[-12px] top-[-4px] size-[56px] max-w-none mix-blend-multiply"
         />
       </span>
-      <span className="relative h-6 w-[78px] shrink-0 overflow-hidden">
+      <span className="relative hidden h-6 w-[78px] shrink-0 overflow-hidden md:block">
         <img
           src={pursuitLogoSource}
           alt=""
@@ -104,13 +103,13 @@ const nextSteps = [
 
 function Sidebar() {
   return (
-    <aside className="sticky top-0 hidden h-screen w-[224px] shrink-0 flex-col border-r border-border bg-sidebar md:flex">
-      <a href="#top" className="flex items-center px-6 py-6" aria-label="Pursuit home">
+    <aside className="sticky top-0 flex h-screen w-[68px] shrink-0 flex-col border-r border-border bg-sidebar md:w-[224px]">
+      <a href="#top" className="flex items-center justify-center px-2 py-5 md:justify-start md:px-6 md:py-6" aria-label="Pursuit home">
         <PursuitLogo />
       </a>
 
-      <div className="px-4 pt-4">
-        <p className="px-3 pb-2 text-[11px] font-medium text-muted-foreground">WORKSPACE</p>
+      <div className="px-2 pt-4 md:px-4">
+        <p className="hidden px-3 pb-2 text-[11px] font-medium text-muted-foreground md:block">WORKSPACE</p>
         <nav aria-label="Main navigation" className="flex flex-col gap-1">
           {navigation.map((item, index) => {
             const Icon = item.icon
@@ -120,19 +119,20 @@ function Sidebar() {
               <a
                 key={item.label}
                 href={item.href}
+                aria-label={item.count ? `${item.label}, ${item.count}` : item.label}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${active ? "bg-accent font-medium text-foreground" : "text-foreground hover:bg-accent"}`}
+                className={`flex items-center justify-center gap-3 rounded-md px-2 py-2.5 text-sm transition-colors md:justify-start md:px-3 ${active ? "bg-accent font-medium text-foreground" : "text-foreground hover:bg-accent"}`}
               >
-                <Icon aria-hidden="true" className={`size-[17px] ${active ? "text-primary" : ""}`} />
-                {item.label}
-                {item.count && <span className="ml-auto text-xs text-muted-foreground">{item.count}</span>}
+                <Icon aria-hidden="true" className={`size-[17px] shrink-0 ${active ? "text-primary" : ""}`} />
+                <span className="hidden md:inline">{item.label}</span>
+                {item.count && <span className="ml-auto hidden text-xs text-muted-foreground md:inline">{item.count}</span>}
               </a>
             )
           })}
         </nav>
       </div>
 
-      <Card className="mx-4 mt-6 border-primary/15 bg-primary/[0.04] shadow-none">
+      <Card className="mx-4 mt-6 hidden border-primary/15 bg-primary/[0.04] shadow-none md:block">
         <CardContent className="p-3">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium">A little closer, every day.</p>
@@ -153,18 +153,18 @@ function Sidebar() {
         </CardContent>
       </Card>
 
-      <div className="mt-auto px-6 pb-5 pt-8">
-        <div className="flex items-center gap-3 border-t border-border pt-4">
-          <Avatar className="size-8 border border-border">
+      <div className="mt-auto px-2 pb-5 pt-8 md:px-6">
+        <div className="flex items-center justify-center gap-3 border-t border-border pt-4 md:justify-start">
+          <Avatar className="size-8 shrink-0 border border-border">
             <AvatarImage src="/profile-avatar.png" alt="Alex Taylor" />
             <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">AT</AvatarFallback>
           </Avatar>
-          <div className="min-w-0">
+          <div className="hidden min-w-0 md:block">
             <p className="truncate text-xs font-medium">Alex Taylor</p>
             <p className="truncate text-[11px] text-muted-foreground">Product designer</p>
           </div>
         </div>
-        <p className="mt-5 text-[11px] text-muted-foreground">Your search, on your terms.</p>
+        <p className="mt-5 hidden text-[11px] text-muted-foreground md:block">Your search, on your terms.</p>
       </div>
     </aside>
   )
@@ -250,40 +250,6 @@ export function JobSearchDashboard() {
     <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6 lg:px-8">
-          <a href="#top" className="flex items-center md:hidden" aria-label="Pursuit home">
-            <PursuitLogo />
-          </a>
-          <div className="hidden text-sm text-muted-foreground md:block">
-            Workspace <span className="px-1.5 text-border">/</span> <span className="text-foreground">Overview</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <p className="hidden text-xs text-muted-foreground sm:block">Thursday, November 26</p>
-            <span aria-hidden="true" className="hidden h-5 w-px bg-border sm:block" />
-            <Button variant="ghost" size="icon" aria-label="Notifications">
-              <Bell aria-hidden="true" data-icon="inline-start" />
-            </Button>
-          </div>
-        </header>
-
-        <nav aria-label="Mobile navigation" className="flex items-center gap-1 overflow-x-auto border-b border-border px-3 py-2 md:hidden">
-          {navigation.map((item, index) => {
-            const Icon = item.icon
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                aria-current={index === 0 ? "page" : undefined}
-                className={`flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md px-2 py-2 text-xs ${index === 0 ? "bg-accent font-medium text-foreground" : "text-muted-foreground"}`}
-              >
-                <Icon aria-hidden="true" className={`size-4 shrink-0 ${index === 0 ? "text-primary" : ""}`} />
-                {item.label}
-                {item.count && <span className="text-[10px] text-muted-foreground">{item.count}</span>}
-              </a>
-            )
-          })}
-        </nav>
-
         <main id="top" className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
           <section aria-labelledby="page-title" className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
