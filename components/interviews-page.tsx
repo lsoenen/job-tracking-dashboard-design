@@ -108,7 +108,6 @@ export function InterviewsPage() {
         <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
           <section aria-labelledby="page-title" className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Your preparation space</p>
               <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Interview prep</h1>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
                 Keep active conversations moving from recruiter screen through the final round.
