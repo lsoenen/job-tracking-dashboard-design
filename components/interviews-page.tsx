@@ -6,13 +6,9 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   CalendarDays,
-  ChevronDown,
   Code2,
   MessageSquareText,
-  PenLine,
   Trophy,
-  UsersRound,
-  UserRound,
 } from "lucide-react"
 
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
@@ -22,7 +18,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { isInterviewStatus, interviewStatuses, type Application } from "@/lib/applications"
-import { interviewPersonas } from "@/lib/interview-prep"
 import {
   Empty,
   EmptyDescription,
@@ -31,7 +26,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 
-const personaIcons = [MessageSquareText, BriefcaseBusiness, PenLine, UsersRound, UserRound]
 type InterviewStage = (typeof interviewStatuses)[number]
 
 const interviewStages: {
@@ -135,7 +129,7 @@ export function InterviewsPage() {
                     }}
                     onDragLeave={() => setDragOverStage(null)}
                     onDrop={(event) => handleDrop(stage.status, event)}
-                    className={`min-w-0 rounded-xl border p-3 transition-colors sm:p-4 ${dragOverStage === stage.status ? "border-primary/50 bg-primary/[0.04]" : "border-border bg-muted/20"}`}
+                    className={`min-w-0 rounded-xl border p-3 transition-colors sm:p-4 ${dragOverStage === stage.status ? "border-primary/50 bg-primary/[0.04]" : "border-border/80 bg-muted/60"}`}
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div>
@@ -216,48 +210,6 @@ export function InterviewsPage() {
             </div>
           </section>
 
-          <details className="group mt-8 rounded-xl border border-border bg-card">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-5">
-              <span>
-                <span className="block text-sm font-medium">Practice by interviewer</span>
-                <span className="mt-1 block text-xs text-muted-foreground">Browse question sets outside an active interview.</span>
-              </span>
-              <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
-            </summary>
-            <div className="border-t border-border p-4 sm:p-5">
-              <ul className="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3">
-                {interviewPersonas.map((persona, index) => {
-                  const Icon = personaIcons[index]
-                  if (!Icon) return null
-
-                  return (
-                    <li key={persona.slug} className="min-w-0">
-                      <Link
-                        href={`/interviews/${persona.slug}`}
-                        aria-label={`Practice with a ${persona.label.toLowerCase()}: ${persona.title}`}
-                        className="group/persona block h-full rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                      >
-                        <Card className="h-full border-border shadow-none transition-colors group-hover/persona:border-muted-foreground/40">
-                          <CardContent className="flex h-full items-start gap-3 p-4">
-                            <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
-                              <Icon className="size-4" />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="flex items-center justify-between gap-2">
-                                <span className="text-sm font-medium">{persona.label}</span>
-                                <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-hover/persona:translate-x-0.5" />
-                              </span>
-                              <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{persona.focus}</span>
-                            </span>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          </details>
         </main>
       </div>
     </div>
