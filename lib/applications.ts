@@ -1,15 +1,33 @@
+export const applicationStatuses = [
+  "Interested",
+  "Applied",
+  "Recruiter screen",
+  "Interviewing",
+  "Take-home",
+  "Offer",
+  "Not moving forward",
+] as const
+
+export type ApplicationStatus = (typeof applicationStatuses)[number]
+
 export type Application = {
+  id: string
   company: string
   role: string
   initials: string
-  logo: string
-  status: string
+  logo?: string
+  description?: string
+  sourceUrl?: string
+  status: ApplicationStatus
   nextStep: string
   due: string
 }
 
+export type NewApplication = Omit<Application, "id" | "initials" | "logo">
+
 export const applications: Application[] = [
   {
+    id: "seed-vercel",
     company: "Vercel",
     role: "Senior Product Designer",
     initials: "V",
@@ -19,6 +37,7 @@ export const applications: Application[] = [
     due: "Tomorrow",
   },
   {
+    id: "seed-figma",
     company: "Figma",
     role: "Product Designer, Growth",
     initials: "F",
@@ -28,6 +47,7 @@ export const applications: Application[] = [
     due: "Nov 30",
   },
   {
+    id: "seed-linear",
     company: "Linear",
     role: "Product Designer",
     initials: "L",
@@ -37,6 +57,7 @@ export const applications: Application[] = [
     due: "Dec 2",
   },
   {
+    id: "seed-ramp",
     company: "Ramp",
     role: "Staff Product Designer",
     initials: "R",

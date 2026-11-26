@@ -3,8 +3,6 @@ import Link from "next/link"
 
 import { ApplicationsTable } from "@/components/applications-table"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Badge } from "@/components/ui/badge"
-import { applications } from "@/lib/applications"
 
 export function ApplicationsPage() {
   return (
@@ -18,11 +16,8 @@ export function ApplicationsPage() {
         <section aria-labelledby="page-title" className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Applications</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Your active applications, organized in one place.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Your active applications, organized in one place. New entries are session-only for this proof of concept.</p>
           </div>
-          <Badge variant="outline" className="h-9 w-fit gap-2 rounded-md px-3 text-sm font-normal text-foreground">
-            {applications.length} active
-          </Badge>
         </section>
         <ApplicationsTable />
       </main>
