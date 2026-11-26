@@ -17,8 +17,8 @@ const activity = [
 ]
 
 const chartConfig = {
-  applications: { label: "Applications sent", color: "var(--chart-1)" },
-  responses: { label: "Responses received", color: "var(--chart-2)" },
+  applications: { label: "Applications sent", color: "var(--chart-5)" },
+  responses: { label: "Responses received", color: "var(--success)" },
 } satisfies ChartConfig
 
 export function ApplicationActivityChart() {
@@ -26,7 +26,7 @@ export function ApplicationActivityChart() {
     <div>
       <ChartContainer config={chartConfig} className="h-[230px] w-full aspect-auto">
         <BarChart accessibilityLayer data={activity} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} stroke="var(--border)" />
           <XAxis
             dataKey="week"
             axisLine={false}
@@ -42,8 +42,8 @@ export function ApplicationActivityChart() {
             allowDecimals={false}
           />
           <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-          <Bar dataKey="applications" fill="var(--color-applications)" radius={[4, 4, 0, 0]} maxBarSize={25} />
-          <Bar dataKey="responses" fill="var(--color-responses)" radius={[4, 4, 0, 0]} maxBarSize={25} />
+          <Bar dataKey="applications" fill="var(--color-applications)" radius={[2, 2, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="responses" fill="var(--color-responses)" radius={[2, 2, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ChartContainer>
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground" aria-label="Chart legend">

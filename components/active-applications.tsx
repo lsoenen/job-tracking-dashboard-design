@@ -1,15 +1,11 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Search } from "lucide-react"
+import { ArrowRight, Search } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 
 const applications = [
   {
@@ -19,7 +15,6 @@ const applications = [
     status: "Interviewing",
     nextStep: "Hiring manager interview",
     due: "Tomorrow",
-    tone: "bg-primary/10 text-primary",
   },
   {
     company: "Figma",
@@ -28,7 +23,6 @@ const applications = [
     status: "Take-home",
     nextStep: "Submit design exercise",
     due: "Nov 30",
-    tone: "bg-warning/10 text-warning",
   },
   {
     company: "Linear",
@@ -37,7 +31,6 @@ const applications = [
     status: "Applied",
     nextStep: "Follow up with recruiter",
     due: "Dec 2",
-    tone: "bg-muted text-muted-foreground",
   },
   {
     company: "Ramp",
@@ -46,9 +39,14 @@ const applications = [
     status: "Recruiter screen",
     nextStep: "Share availability",
     due: "Nov 27",
-    tone: "bg-info/10 text-info",
   },
 ]
+
+function statusClassName(status: string) {
+  if (status === "Offer") return "border-success/20 bg-success/5 text-success"
+  if (status === "Not moving forward") return "border-destructive/20 bg-destructive/5 text-destructive"
+  return "border-border bg-muted text-foreground"
+}
 
 export function ActiveApplications() {
   const [query, setQuery] = useState("")
@@ -66,13 +64,15 @@ export function ActiveApplications() {
   }, [query])
 
   return (
-    <Card className="h-full border-border/70 shadow-sm shadow-foreground/[0.02]">
+    <Card className="h-full border-border shadow-none">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 id="applications-heading" className="text-base font-semibold tracking-tight">In motion</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Your active applications and what to do next.</p>
+          <h2 id="applications-heading" className="text-base font-medium tracking-tight">Active applications</h2>
+          <CardDescription className="mt-1">Your next moves, ordered by date.</CardDescription>
         </div>
-        <Badge variant="secondary" className="shrink-0 rounded-full px-2.5 py-1 text-xs">4 active</Badge>
+        <a href="#applications" className="hidden shrink-0 items-center gap-1 text-xs font-medium text-foreground hover:underline sm:inline-flex">
+          View all 4 <ArrowRight aria-hidden="true" className="size-3.5" />
+        </a>
       </CardHeader>
       <CardContent>
         <label className="mb-3 flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
@@ -87,30 +87,35 @@ export function ActiveApplications() {
           />
         </label>
 
+        <div className="hidden grid-cols-[minmax(130px,1fr)_minmax(100px,0.65fr)_minmax(150px,1.1fr)] gap-3 bg-muted px-2 py-3 text-xs font-medium text-foreground sm:grid">
+          <span>Company &amp; role</span>
+          <span>Stage</span>
+          <span>Next step</span>
+        </div>
         {filteredApplications.length > 0 ? (
-          <ul aria-labelledby="applications-heading" className="divide-y divide-border/70">
+          <ul aria-labelledby="applications-heading" className="divide-y divide-border">
             {filteredApplications.map((application) => (
-              <li key={application.company} className="grid gap-3 py-4 first:pt-3 last:pb-1 md:grid-cols-[minmax(145px,1fr)_minmax(145px,1.1fr)_auto] md:items-center">
+              <li key={application.company} className="grid gap-3 py-3 first:pt-3 sm:grid-cols-[minmax(130px,1fr)_minmax(100px,0.65fr)_minmax(150px,1.1fr)] sm:items-center sm:px-2">
                 <div className="flex min-w-0 items-center gap-3">
-                  <Avatar className="size-10 rounded-xl border border-border/70 bg-background">
-                    <AvatarFallback className={`rounded-xl text-sm font-semibold ${application.tone}`}>
+                  <Avatar className="size-8 rounded-md border border-border bg-background">
+                    <AvatarFallback className="rounded-md bg-muted text-xs font-medium text-muted-foreground">
                       {application.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{application.company}</p>
+                    <p className="truncate text-sm font-medium">{application.company}</p>
                     <p className="truncate text-xs text-muted-foreground">{application.role}</p>
                   </div>
                 </div>
 
-                <div className="min-w-0 md:pl-2">
-                  <p className="truncate text-sm">{application.nextStep}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Next step · {application.due}</p>
-                </div>
-
-                <Badge variant="outline" className="w-fit rounded-full border-border px-2.5 py-1 text-xs font-medium">
+                <Badge variant="outline" className={`w-fit rounded-full px-2.5 py-1 text-xs font-normal ${statusClassName(application.status)}`}>
                   {application.status}
                 </Badge>
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{application.nextStep}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{application.due}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -119,6 +124,9 @@ export function ActiveApplications() {
             No active applications match “{query}”.
           </p>
         )}
+        <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
+          Showing {filteredApplications.length} of 4 in-progress applications
+        </p>
       </CardContent>
     </Card>
   )
