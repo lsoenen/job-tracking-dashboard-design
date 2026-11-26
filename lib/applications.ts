@@ -1,10 +1,7 @@
 export const applicationStatuses = [
   "Interested",
   "Applied",
-  "Recruiter screen",
   "Interviewing",
-  "Team, Technical, Case",
-  "Final or Executive Round",
   "Take-home",
   "Offer",
   "Not moving forward",
@@ -12,15 +9,17 @@ export const applicationStatuses = [
 
 export type ApplicationStatus = (typeof applicationStatuses)[number]
 
-export const interviewStatuses = [
-  "Recruiter screen",
-  "Interviewing",
-  "Team, Technical, Case",
-  "Final or Executive Round",
-] as const satisfies readonly ApplicationStatus[]
+export const interviewStages = [
+  "recruiter",
+  "hiring-manager",
+  "team-technical-case",
+  "final-executive",
+] as const
+
+export type InterviewStage = (typeof interviewStages)[number]
 
 export function isInterviewStatus(status: ApplicationStatus) {
-  return interviewStatuses.some((interviewStatus) => interviewStatus === status)
+  return status === "Interviewing"
 }
 
 export type Application = {
@@ -32,6 +31,7 @@ export type Application = {
   description?: string
   sourceUrl?: string
   status: ApplicationStatus
+  interviewStage?: InterviewStage
   nextStep: string
   due: string
 }
@@ -46,6 +46,7 @@ export const applications: Application[] = [
     initials: "V",
     logo: "https://thesvg.org/icons/vercel/default.svg",
     status: "Interviewing",
+    interviewStage: "hiring-manager",
     nextStep: "Hiring manager interview",
     due: "Tomorrow",
   },
@@ -75,7 +76,8 @@ export const applications: Application[] = [
     role: "Staff Product Designer",
     initials: "R",
     logo: "https://thesvg.org/icons/ramp/default.svg",
-    status: "Recruiter screen",
+    status: "Interviewing",
+    interviewStage: "recruiter",
     nextStep: "Share availability",
     due: "Nov 27",
   },

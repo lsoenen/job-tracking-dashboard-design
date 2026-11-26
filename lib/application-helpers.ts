@@ -1,7 +1,6 @@
 import type { ApplicationStatus } from "@/lib/applications"
 
 export function applicationStatusClassName(status: ApplicationStatus) {
-  if (status === "Recruiter screen") return "border-info/20 bg-info/5 text-info"
   if (status === "Interviewing") return "border-primary/20 bg-primary/5 text-primary"
   if (status === "Take-home") return "border-warning/20 bg-warning/5 text-warning"
   if (status === "Offer") return "border-success/20 bg-success/5 text-success"

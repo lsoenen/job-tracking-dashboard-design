@@ -2,13 +2,14 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react"
 
-import { applications as initialApplications, type Application, type ApplicationStatus, type NewApplication } from "@/lib/applications"
+import { applications as initialApplications, type Application, type ApplicationStatus, type InterviewStage, type NewApplication } from "@/lib/applications"
 
 type ApplicationsContextValue = {
   applications: Application[]
   interviewProgress: Record<string, string[]>
   addApplication: (application: NewApplication) => void
   updateApplicationStatus: (applicationId: string, status: ApplicationStatus) => void
+  updateInterviewStage: (applicationId: string, stage: InterviewStage) => void
   toggleInterviewQuestionPractice: (applicationId: string, personaSlug: string, questionId: string) => void
 }
 
@@ -35,6 +36,7 @@ export function ApplicationsProvider({ children }: { children: ReactNode }) {
         ...application,
         id: crypto.randomUUID(),
         initials: companyInitials(application.company),
+        interviewStage: application.interviewStage ?? (application.status === "Interviewing" ? "recruiter" : undefined),
       },
       ...current,
     ])
@@ -42,8 +44,26 @@ export function ApplicationsProvider({ children }: { children: ReactNode }) {
 
   function updateApplicationStatus(applicationId: string, status: ApplicationStatus) {
     setApplications((current) =>
+      current.map((application) => {
+        if (application.id !== applicationId) return application
+
+        return {
+          ...application,
+          status,
+          ...(status === "Interviewing" && application.status !== "Interviewing"
+            ? { interviewStage: "recruiter" as const }
+            : {}),
+        }
+      }),
+    )
+  }
+
+  function updateInterviewStage(applicationId: string, stage: InterviewStage) {
+    setApplications((current) =>
       current.map((application) =>
-        application.id === applicationId ? { ...application, status } : application,
+        application.id === applicationId && application.status === "Interviewing"
+          ? { ...application, interviewStage: stage }
+          : application,
       ),
     )
   }
@@ -68,6 +88,7 @@ export function ApplicationsProvider({ children }: { children: ReactNode }) {
         interviewProgress,
         addApplication,
         updateApplicationStatus,
+        updateInterviewStage,
         toggleInterviewQuestionPractice,
       }}
     >

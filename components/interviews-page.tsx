@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { isInterviewStatus, interviewStatuses, type Application } from "@/lib/applications"
+import { interviewStages as interviewStageIds, isInterviewStatus, type Application, type InterviewStage } from "@/lib/applications"
 import {
   Empty,
   EmptyDescription,
@@ -26,8 +26,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 
-type InterviewStage = (typeof interviewStatuses)[number]
-type InterviewCelebration = { applicationId: string; status: InterviewStage; token: number }
+type InterviewCelebration = { applicationId: string; stage: InterviewStage; token: number }
 
 const confettiPieces = [
   { x: -42, y: -26, color: "bg-primary", shape: "h-2 w-1 rounded-sm" },
@@ -41,42 +40,45 @@ const confettiPieces = [
 ] as const
 
 const interviewStages: {
-  id: string
-  status: InterviewStage
+  id: InterviewStage
   title: string
   description: string
   icon: typeof MessageSquareText
 }[] = [
-  { id: "recruiter", status: "Recruiter screen", title: "Recruiter", description: "Recruiter screen", icon: MessageSquareText },
-  { id: "hiring-manager", status: "Interviewing", title: "Hiring manager", description: "Hiring manager interview", icon: BriefcaseBusiness },
-  { id: "team-technical-case", status: "Team, Technical, Case", title: "Team, Technical, Case", description: "Team, technical, or case interview", icon: Code2 },
-  { id: "final-executive", status: "Final or Executive Round", title: "Final or Executive Round", description: "Final or executive round", icon: Trophy },
+  { id: "recruiter", title: "Recruiter", description: "Recruiter screen", icon: MessageSquareText },
+  { id: "hiring-manager", title: "Hiring manager", description: "Hiring manager interview", icon: BriefcaseBusiness },
+  { id: "team-technical-case", title: "Team, Technical, Case", description: "Team, technical, or case interview", icon: Code2 },
+  { id: "final-executive", title: "Final or Executive Round", description: "Final or executive round", icon: Trophy },
 ]
 
 function isActiveInterview(application: Application) {
   return isInterviewStatus(application.status)
 }
 
+function getInterviewStage(application: Application): InterviewStage {
+  return application.interviewStage ?? interviewStageIds[0]
+}
+
 export function InterviewsPage() {
-  const { applications, updateApplicationStatus } = useApplications()
+  const { applications, updateInterviewStage } = useApplications()
   const [dragOverStage, setDragOverStage] = useState<InterviewStage | null>(null)
   const [announcement, setAnnouncement] = useState("")
   const [celebration, setCelebration] = useState<InterviewCelebration | null>(null)
   const celebrationToken = useRef(0)
   const interviewApplications = applications.filter(isActiveInterview)
 
-  function moveApplication(applicationId: string, status: InterviewStage) {
+  function moveApplication(applicationId: string, stageId: InterviewStage) {
     const application = interviewApplications.find((item) => item.id === applicationId)
-    if (!application || application.status === status) return
+    if (!application || getInterviewStage(application) === stageId) return
 
-    const currentStageIndex = interviewStages.findIndex((stage) => stage.status === application.status)
-    const destinationStageIndex = interviewStages.findIndex((stage) => stage.status === status)
+    const currentStageIndex = interviewStages.findIndex((stage) => stage.id === getInterviewStage(application))
+    const destinationStageIndex = interviewStages.findIndex((stage) => stage.id === stageId)
     if (destinationStageIndex > currentStageIndex) {
-      setCelebration({ applicationId, status, token: ++celebrationToken.current })
+      setCelebration({ applicationId, stage: stageId, token: ++celebrationToken.current })
     }
 
-    updateApplicationStatus(applicationId, status)
-    const stageTitle = interviewStages.find((stage) => stage.status === status)?.title ?? status
+    updateInterviewStage(applicationId, stageId)
+    const stageTitle = interviewStages.find((stage) => stage.id === stageId)?.title ?? stageId
     setAnnouncement(`${application.company} moved to ${stageTitle}.`)
   }
 
@@ -92,13 +94,13 @@ export function InterviewsPage() {
     if (event.target instanceof HTMLElement && event.target.closest("button")) return
 
     event.preventDefault()
-    const currentIndex = interviewStages.findIndex((stage) => stage.status === application.status)
+    const currentIndex = interviewStages.findIndex((stage) => stage.id === getInterviewStage(application))
     if (currentIndex < 0) return
 
     const direction = event.key === "ArrowRight" ? 1 : -1
     const destinationIndex = Math.min(Math.max(currentIndex + direction, 0), interviewStages.length - 1)
     const destination = interviewStages[destinationIndex]
-    if (destination) moveApplication(application.id, destination.status)
+    if (destination) moveApplication(application.id, destination.id)
   }
 
   return (
@@ -134,21 +136,21 @@ export function InterviewsPage() {
             <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
               <div className="grid min-w-[840px] grid-cols-4 gap-3">
                 {interviewStages.map((stage) => {
-                  const stageApplications = interviewApplications.filter((application) => application.status === stage.status)
+                  const stageApplications = interviewApplications.filter((application) => getInterviewStage(application) === stage.id)
                   const StageIcon = stage.icon
 
                   return (
                     <section
-                      key={stage.status}
+                      key={stage.id}
                       aria-labelledby={`stage-${stage.id}`}
                     onDragOver={(event) => {
                       event.preventDefault()
                       event.dataTransfer.dropEffect = "move"
-                      setDragOverStage(stage.status)
+                      setDragOverStage(stage.id)
                     }}
                     onDragLeave={() => setDragOverStage(null)}
-                    onDrop={(event) => handleDrop(stage.status, event)}
-                    className={`min-w-0 rounded-xl border p-3 transition-colors sm:p-4 ${dragOverStage === stage.status ? "border-primary/50 bg-primary/[0.04]" : "border-border/80 bg-muted/60"}`}
+                    onDrop={(event) => handleDrop(stage.id, event)}
+                    className={`min-w-0 rounded-xl border p-3 transition-colors sm:p-4 ${dragOverStage === stage.id ? "border-primary/50 bg-primary/[0.04]" : "border-border/80 bg-muted/60"}`}
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div>
@@ -177,7 +179,7 @@ export function InterviewsPage() {
                               onKeyDown={(event) => handleCardKeyDown(application, event)}
                               className="group relative rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                             >
-                              {celebration?.applicationId === application.id && celebration.status === stage.status && (
+                              {celebration?.applicationId === application.id && celebration.stage === stage.id && (
                                 <span
                                   key={celebration.token}
                                   aria-hidden="true"
