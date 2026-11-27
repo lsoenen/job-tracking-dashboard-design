@@ -27,7 +27,7 @@ const copy = {
 } as const
 
 /** A stack of pages with a sparkle, drawn in the theme's primary color */
-function DraftIllustration({ kind }: { kind: MaterialKind }) {
+export function DraftIllustration({ kind }: { kind: MaterialKind }) {
   return (
     <svg viewBox="0 0 120 96" aria-hidden="true" className="h-20 w-auto text-primary">
       <rect x="30" y="14" width="52" height="68" rx="6" className="fill-primary/5 stroke-primary/20" strokeWidth="1.5" transform="rotate(-8 56 48)" />

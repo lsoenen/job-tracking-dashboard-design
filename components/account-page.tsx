@@ -29,16 +29,23 @@ export function AccountPage() {
   }
 
   function handleResumeSelect(file: File) {
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+    // Word only: tailoring edits the document itself, which isn't possible with PDFs
+    const isWord =
+      file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      file.name.toLowerCase().endsWith(".docx")
 
-    if (!isPdf) {
-      setResumeError("Choose a PDF file to use as your resume.")
+    if (!isWord) {
+      setResumeError(
+        file.name.toLowerCase().endsWith(".doc")
+          ? "Older .doc files aren't supported. In Word, use File → Save As → Word Document (.docx)."
+          : "Choose a Word file (.docx). From Google Docs: File → Download → Microsoft Word.",
+      )
       setSaveMessage("")
       return
     }
 
     if (file.size > maximumResumeSize) {
-      setResumeError("Choose a PDF smaller than 10 MB.")
+      setResumeError("Choose a Word file smaller than 10 MB.")
       setSaveMessage("")
       return
     }

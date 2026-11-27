@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
   // Row-level security makes sure this is the user's own application
   const { data: application, error } = await supabase
     .from("applications")
-    .select("id, company, role, description, canvas_job_id")
+    .select("id, company, role, description, canvas_job_id, details")
     .eq("id", applicationId)
     .maybeSingle()
   if (error || !application) return NextResponse.json({ error: "Application not found." }, { status: 404 })
@@ -136,6 +136,9 @@ export async function POST(request: NextRequest) {
 
   // Prefer the full posting from Canvas over the short saved summary
   let description = (application.description as string | null) ?? ""
+  // A posting imported on the Overview tab is the most complete source
+  const postingText = (application.details as { postingText?: string } | null)?.postingText
+  if (postingText && postingText.length > description.length) description = postingText
   if (application.canvas_job_id) {
     const { data: job } = await supabase.from("jobs").select("description").eq("id", application.canvas_job_id).maybeSingle()
     if (job?.description && job.description.length > description.length) description = job.description as string

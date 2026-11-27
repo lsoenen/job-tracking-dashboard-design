@@ -21,6 +21,8 @@ type JobRow = {
 export function useApplicationDetails(application: Application) {
   const [details, setDetails] = useState<JobDetails>({})
   const [suggested, setSuggested] = useState<JobDetails>({})
+  /** The best description we have when no posting text was imported: Canvas posting or saved notes */
+  const [fallbackDescription, setFallbackDescription] = useState<{ text: string; source: "canvas" | "notes" } | null>(null)
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
 
   useEffect(() => {
@@ -36,7 +38,8 @@ export function useApplicationDetails(application: Application) {
         setStatus("error")
         return
       }
-      setDetails(((data?.details as JobDetails | null) ?? {}) as JobDetails)
+      const loaded = ((data?.details as JobDetails | null) ?? {}) as JobDetails
+      setDetails(loaded)
       setStatus("ready")
 
       // What the posting can fill in: the full Canvas posting when we have it, otherwise the saved notes
@@ -44,7 +47,8 @@ export function useApplicationDetails(application: Application) {
       const facts: PostingFacts = {
         company: application.company,
         title: application.role,
-        description: application.description,
+        // An imported posting beats the short saved notes
+        description: loaded.postingText ?? application.description,
         industry: known?.industry,
         companyDomain: known?.domain,
       }
@@ -59,7 +63,7 @@ export function useApplicationDetails(application: Application) {
         if (row) {
           const board = jobBoards.find((item) => item.board === row.board)
           Object.assign(facts, {
-            description: row.description ?? facts.description,
+            description: loaded.postingText ?? row.description ?? facts.description,
             location: row.location ?? undefined,
             isRemote: row.is_remote,
             department: row.department ?? undefined,
@@ -70,7 +74,13 @@ export function useApplicationDetails(application: Application) {
         facts.fromCanvas = true
       }
 
-      if (!cancelled) setSuggested(detailsFromPosting(facts))
+      if (!cancelled) {
+        setSuggested(detailsFromPosting(facts))
+        const canvasText = application.canvasJobId && facts.description !== application.description ? facts.description : undefined
+        if (canvasText && !loaded.postingText) setFallbackDescription({ text: canvasText, source: "canvas" })
+        else if (application.description?.trim()) setFallbackDescription({ text: application.description, source: "notes" })
+        else setFallbackDescription(null)
+      }
     }
 
     void load()
@@ -98,5 +108,5 @@ export function useApplicationDetails(application: Application) {
     [application.id, details],
   )
 
-  return { details, suggested, status, saveDetails }
+  return { details, suggested, status, saveDetails, fallbackDescription }
 }

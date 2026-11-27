@@ -12,7 +12,7 @@ type JobProfileContextValue = {
   email: string
   /** Temporary link to the profile photo, or null when there isn't one */
   avatarUrl: string | null
-  /** Saves profile fields and, if given, uploads a new resume PDF. Returns an error message or null. */
+  /** Saves profile fields and, if given, uploads a new resume (.docx). Returns an error message or null. */
   saveProfile: (profile: JobProfile, resumeFile?: File | null) => Promise<string | null>
   getResumeUrl: () => Promise<string | null>
   /** Crops, shrinks and saves a new profile photo right away. Returns an error message or null. */
@@ -87,10 +87,13 @@ export function JobProfileProvider({
     const update: Record<string, unknown> = profileToRow(nextProfile)
 
     if (resumeFile) {
-      const path = `${userId}/resume.pdf`
+      const path = `${userId}/resume.docx`
       const { error: uploadError } = await supabase.storage
         .from("resumes")
-        .upload(path, resumeFile, { upsert: true, contentType: "application/pdf" })
+        .upload(path, resumeFile, {
+          upsert: true,
+          contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
 
       if (uploadError) {
         console.error("Resume upload failed:", uploadError.message)
@@ -113,6 +116,11 @@ export function JobProfileProvider({
     if (error) {
       console.error("Profile save failed:", error.message)
       return "Your profile couldn't be saved. Please try again."
+    }
+
+    // Replacing an older PDF upload: remove the old file
+    if (resumeFile && profile.resume?.path && profile.resume.path !== update.resume_path) {
+      await supabase.storage.from("resumes").remove([profile.resume.path])
     }
 
     setProfile(profileFromRow(data as ProfileRow))

@@ -2,10 +2,13 @@
 
 import { useMemo, useState, type ReactNode } from "react"
 import { format, parseISO } from "date-fns"
-import { Building2, CircleDollarSign, ExternalLink, FileSearch, MapPin, Pencil, Sparkles, X } from "lucide-react"
+import { Building2, CircleDollarSign, Download, ExternalLink, FileSearch, MapPin, Pencil, Sparkles, X } from "lucide-react"
 import { toast } from "sonner"
 
+import { useApplications } from "@/components/applications-provider"
 import { EditJobDetailsSheet, ExcitementPicker } from "@/components/edit-job-details-sheet"
+import { ImportPostingDialog } from "@/components/import-posting-dialog"
+import { JobDescriptionCard } from "@/components/job-description-card"
 import { StatusLabel } from "@/components/status-label"
 import { useApplicationDetails } from "@/components/use-application-details"
 import { Badge } from "@/components/ui/badge"
@@ -80,8 +83,12 @@ function Glance({ icon, label, children }: { icon: ReactNode; label: string; chi
 }
 
 export function ApplicationOverview({ application }: { application: Application }) {
-  const { details, suggested, status, saveDetails } = useApplicationDetails(application)
+  const { details, suggested, status, saveDetails, fallbackDescription } = useApplicationDetails(application)
+  const descriptionText = details.postingText ?? fallbackDescription?.text
+  const descriptionSource = details.postingText ? ("imported" as const) : fallbackDescription?.source
   const [editing, setEditing] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const { updateApplication } = useApplications()
   const [dismissedFill, setDismissedFill] = useState(false)
   const fill = useMemo(() => missingFromPosting(details, suggested), [details, suggested])
   const fillNames = [...new Set(Object.keys(fill).map((key) => fieldNames[key as keyof JobDetails]).filter(Boolean))] as string[]
@@ -159,10 +166,16 @@ export function ApplicationOverview({ application }: { application: Application 
 
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-medium tracking-tight">Job details</h2>
-        <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
-          <Pencil data-icon="inline-start" aria-hidden="true" />
-          Edit details
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={() => setImporting(true)}>
+            <Download data-icon="inline-start" aria-hidden="true" />
+            Import posting
+          </Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
+            <Pencil data-icon="inline-start" aria-hidden="true" />
+            Edit details
+          </Button>
+        </div>
       </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
@@ -215,6 +228,31 @@ export function ApplicationOverview({ application }: { application: Application 
           )}
         </Section>
       </div>
+
+      <JobDescriptionCard
+        text={descriptionText}
+        source={descriptionSource}
+        onImport={() => setImporting(true)}
+        onSave={async (text) => {
+          const saved = await saveDetails({ ...details, postingText: text || undefined })
+          if (saved) toast.success(text ? "Description saved" : "Description removed")
+          return saved
+        }}
+      />
+
+      <ImportPostingDialog
+        open={importing}
+        application={application}
+        details={details}
+        onOpenChange={setImporting}
+        onApply={async (next, postingUrl) => {
+          const saved = await saveDetails(next)
+          if (!saved) return false
+          if (postingUrl) await updateApplication(application.id, { sourceUrl: postingUrl })
+          toast.success("Posting details imported")
+          return true
+        }}
+      />
 
       <EditJobDetailsSheet
         open={editing}

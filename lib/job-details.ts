@@ -40,6 +40,8 @@ export type JobDetails = {
   deadline?: string
   // Anything else
   custom?: CustomField[]
+  /** The full posting text, saved by "Import posting" (used for networking suggestions and fill-ins) */
+  postingText?: string
 }
 
 export const excitementLabels = ["", "Not really", "Lukewarm", "Interested", "Excited", "Dream job"] as const

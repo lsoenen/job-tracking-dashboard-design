@@ -7,6 +7,7 @@ import { ApplicationInterviewPrep } from "@/components/application-interview-pre
 import { ApplicationNetworking } from "@/components/application-networking"
 import { ApplicationOverview } from "@/components/application-overview"
 import { ApplicationMaterialCard } from "@/components/application-material-card"
+import { TailoredResumeCard } from "@/components/tailored-resume-card"
 import { ApplicationMaterialsDialog, type ApplicationMaterialMode } from "@/components/application-materials-dialog"
 import { useApplicationMaterials } from "@/components/use-application-materials"
 import { Badge } from "@/components/ui/badge"
@@ -70,16 +71,18 @@ export function ApplicationWorkspaceTabs({
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
             <div className="flex min-w-0 flex-col gap-5">
               <div className="grid items-start gap-4 md:grid-cols-2">
-                {(["cover-letter", "resume"] as const).map((kind) => (
-                  <ApplicationMaterialCard
-                    key={kind}
-                    kind={kind}
-                    saved={materials[kind]}
-                    isLoading={materialsStatus === "loading"}
-                    onOpen={() => openMaterial(kind, false)}
-                    onGenerate={() => openMaterial(kind, true)}
-                  />
-                ))}
+                <ApplicationMaterialCard
+                  kind="cover-letter"
+                  saved={materials["cover-letter"]}
+                  isLoading={materialsStatus === "loading"}
+                  onOpen={() => openMaterial("cover-letter", false)}
+                  onGenerate={() => openMaterial("cover-letter", true)}
+                />
+                <TailoredResumeCard
+                  application={application}
+                  saved={materials.resume?.content}
+                  isLoading={materialsStatus === "loading"}
+                />
               </div>
 
               <Card className="border-border shadow-none">

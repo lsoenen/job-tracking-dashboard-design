@@ -37,7 +37,7 @@ export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelecte
         <CardTitle role="heading" aria-level={2}>
           Resume
         </CardTitle>
-        <CardDescription>Upload your resume as a PDF. Only you can see it.</CardDescription>
+        <CardDescription>Upload your resume as a Word file (.docx). Only you can see it.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {resume ? (
@@ -48,8 +48,11 @@ export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelecte
           <div className="min-w-0 flex-1">
             <p className="break-all text-sm font-medium">{resume.name}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              PDF · {formatFileSize(resume.sizeBytes)} · Updated {resume.lastUpdated}
+              {/\.pdf$/i.test(resume.name) ? "PDF" : "Word"} · {formatFileSize(resume.sizeBytes)} · Updated {resume.lastUpdated}
             </p>
+            {/\.pdf$/i.test(resume.name) && (
+              <p className="mt-2 text-xs text-warning">Upload the Word (.docx) version to tailor it for each role.</p>
+            )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge variant="outline">{isPendingUpload ? "Uploads when you save" : "Saved"}</Badge>
               {onOpen && (
@@ -70,7 +73,7 @@ export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelecte
           <Input
             id="resume-upload"
             type="file"
-            accept="application/pdf,.pdf"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             aria-describedby="resume-upload-help"
             aria-invalid={Boolean(error)}
             onChange={(event) => {
@@ -79,7 +82,7 @@ export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelecte
             }}
           />
           <FieldDescription id="resume-upload-help">
-            PDF only, up to 10 MB.
+            Word (.docx) only, up to 10 MB. Google Docs: File → Download → Microsoft Word. Tailoring keeps your exact design.
           </FieldDescription>
           {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
         </Field>
