@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { format, parseISO } from "date-fns"
-import { CalendarDays, ChevronDown, Search } from "lucide-react"
+import { ArrowDown, ArrowDownUp, ArrowUp, CalendarDays, ChevronDown, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { AppliedDatePicker } from "@/components/applied-date-picker"
@@ -75,6 +75,7 @@ export function ApplicationsTable() {
     due: "",
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [appliedDateSort, setAppliedDateSort] = useState<"asc" | "desc" | null>(null)
   const {
     applications: applicationRows,
     addApplication,
@@ -87,7 +88,7 @@ export function ApplicationsTable() {
     const matchesFilter = (value: string, filter: string) =>
       value.toLowerCase().includes(filter.trim().toLowerCase())
 
-    return applicationRows.filter((application) => {
+    const filteredRows = applicationRows.filter((application) => {
       const matchesQuery =
         !normalizedQuery ||
         [
@@ -117,7 +118,20 @@ export function ApplicationsTable() {
         matchesFilter(application.due, filters.due)
       )
     })
-  }, [applicationRows, query, filters])
+
+    if (!appliedDateSort) return filteredRows
+
+    return [...filteredRows].sort((left, right) => {
+      const leftDate = left.appliedDate ?? ""
+      const rightDate = right.appliedDate ?? ""
+
+      if (!leftDate) return rightDate ? 1 : 0
+      if (!rightDate) return -1
+
+      const dateOrder = leftDate.localeCompare(rightDate)
+      return appliedDateSort === "asc" ? dateOrder : -dateOrder
+    })
+  }, [applicationRows, query, filters, appliedDateSort])
   const hasActiveFilters = Boolean(
     query.trim() ||
     filters.stage.length > 0 ||
@@ -165,7 +179,27 @@ export function ApplicationsTable() {
                   <tr className="border-b border-border">
                     <th scope="col" className="w-[15%] px-3 py-2 font-medium">Company</th>
                     <th scope="col" className="w-[19%] px-3 py-2 font-medium">Role</th>
-                    <th scope="col" className="w-[14%] px-3 py-2 font-medium">Applied date</th>
+                    <th
+                      scope="col"
+                      aria-sort={appliedDateSort === "desc" ? "descending" : appliedDateSort === "asc" ? "ascending" : "none"}
+                      className="w-[14%] px-3 py-2 font-medium"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setAppliedDateSort((current) => current === "desc" ? "asc" : "desc")}
+                        aria-label={`Sort by applied date, ${appliedDateSort === "desc" ? "oldest first" : "newest first"}`}
+                        className="flex items-center gap-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        Applied date
+                        {appliedDateSort === "desc" ? (
+                          <ArrowDown aria-hidden="true" className="size-3" />
+                        ) : appliedDateSort === "asc" ? (
+                          <ArrowUp aria-hidden="true" className="size-3" />
+                        ) : (
+                          <ArrowDownUp aria-hidden="true" className="size-3" />
+                        )}
+                      </button>
+                    </th>
                     <th scope="col" className="w-[15%] px-3 py-2 font-medium">Stage</th>
                     <th scope="col" className="w-[23%] px-3 py-2 font-medium">Next step</th>
                     <th scope="col" className="w-[14%] px-3 py-2 font-medium">Due</th>
