@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { format, parseISO } from "date-fns"
@@ -24,6 +24,8 @@ import { applicationStatusClassName } from "@/lib/application-helpers"
 import { applicationStatuses, statusLabel, type Application, type ApplicationStatus } from "@/lib/applications"
 import { StatusLabel } from "@/components/status-label"
 
+const trackerViewKey = "applications-tracker-view"
+
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
   const [filters, setFilters] = useState({
@@ -37,6 +39,42 @@ export function ApplicationsTable() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [appliedDateSort, setAppliedDateSort] = useState<"asc" | "desc" | null>(null)
+  const [viewRestored, setViewRestored] = useState(false)
+
+  // Remember search, filters and sort on this device
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(trackerViewKey) ?? "null")
+      if (saved && typeof saved === "object") {
+        const text = (value: unknown) => (typeof value === "string" ? value : "")
+        if (typeof saved.query === "string") setQuery(saved.query)
+        if (saved.filters && typeof saved.filters === "object") {
+          setFilters({
+            company: text(saved.filters.company),
+            role: text(saved.filters.role),
+            appliedDate: text(saved.filters.appliedDate),
+            stage: Array.isArray(saved.filters.stage)
+              ? saved.filters.stage.filter((stage: unknown) =>
+                  (applicationStatuses as readonly unknown[]).includes(stage),
+                )
+              : [],
+          })
+        }
+        if (saved.appliedDateSort === "asc" || saved.appliedDateSort === "desc") {
+          setAppliedDateSort(saved.appliedDateSort)
+        }
+      }
+    } catch {}
+    setViewRestored(true)
+  }, [])
+
+  useEffect(() => {
+    if (!viewRestored) return
+    try {
+      window.localStorage.setItem(trackerViewKey, JSON.stringify({ query, filters, appliedDateSort }))
+    } catch {}
+  }, [viewRestored, query, filters, appliedDateSort])
+
   const {
     applications: applicationRows,
     addApplication,
@@ -388,7 +426,7 @@ export function ApplicationsTable() {
                     <tr>
                       <td colSpan={5} className="px-3 py-10 text-center text-xs text-muted-foreground">
                         <p role="status">
-                          {hasActiveFilters ? "No applications match these filters." : "No roles in your tracker yet. Mark one as interested on Canvas or add an application to get started."}
+                          {hasActiveFilters ? "No applications match these filters." : "No roles in your tracker yet. Add an application to get started."}
                         </p>
                       </td>
                     </tr>

@@ -1,44 +1,31 @@
 import type { Metadata } from "next"
 
-import { CanvasPage } from "@/components/canvas-page"
-import { familiesForHeadline, roleFamilies } from "@/lib/jobs/roles"
-import { canvasJobColumns, canvasJobFromRow, type CanvasJobRow } from "@/lib/jobs/types"
+import { CanvasComingSoon } from "@/components/canvas-coming-soon"
 import { createClient } from "@/lib/supabase/server"
+import { CanvasBoard } from "./canvas-board"
+
+// Canvas is paused while we gather interest. Set to true to bring the full job board back.
+const canvasLaunched = false
 
 export const metadata: Metadata = {
   title: "Canvas | Pursuit",
-  description: "Open roles from company job boards, ranked by how well they fit your profile.",
+  description: canvasLaunched
+    ? "Open roles from company job boards, ranked by how well they fit your profile."
+    : "Canvas is coming soon. Leave your email to hear when it's ready or help shape it.",
 }
 
 export default async function CanvasRoute() {
+  if (canvasLaunched) return <CanvasBoard />
+
+  // Show the person's earlier sign-up, if they've already left one
   const supabase = await createClient()
-  const { data: claims } = await supabase.auth.getClaims()
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("headline")
-    .eq("id", claims?.claims?.sub ?? "")
+  const { data, error } = await supabase
+    .from("feature_interest")
+    .select("email, note")
+    .eq("feature", "canvas")
     .maybeSingle()
 
-  const headline = (profile?.headline as string | undefined) ?? ""
-  const matchedFamilies = familiesForHeadline(headline)
-  // Nothing matches yet (e.g. empty headline): show every family we support
-  const families = matchedFamilies.length > 0 ? matchedFamilies : roleFamilies
+  if (error) console.error("Failed to load Canvas interest:", error.message)
 
-  const { data, error } = await supabase
-    .from("jobs")
-    .select(canvasJobColumns)
-    .in("role_family", families.map((family) => family.id))
-    .order("posted_at", { ascending: false, nullsFirst: false })
-    .limit(600)
-
-  if (error) console.error("Failed to load Canvas jobs:", error.message)
-
-  return (
-    <CanvasPage
-      jobs={((data ?? []) as CanvasJobRow[]).map(canvasJobFromRow)}
-      familyLabels={families.map((family) => family.label)}
-      headlineMatched={matchedFamilies.length > 0}
-      loadFailed={Boolean(error)}
-    />
-  )
+  return <CanvasComingSoon existing={data ? { email: data.email as string, note: data.note as string } : null} />
 }

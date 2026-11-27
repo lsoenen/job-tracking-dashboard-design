@@ -18,11 +18,12 @@ const navigation: {
   href: string
   icon: typeof ChartNoAxesCombined
   count?: string
+  comingSoon?: boolean
 }[] = [
   { id: "overview", label: "Overview", href: "/", icon: ChartNoAxesCombined },
-  { id: "canvas", label: "Canvas", href: "/canvas", icon: LayoutGrid },
   { id: "applications", label: "Applications", href: "/applications", icon: BriefcaseBusiness },
   { id: "interview", label: "Interview", href: "/interviews", icon: MessageSquareText },
+  { id: "canvas", label: "Canvas", href: "/canvas", icon: LayoutGrid, comingSoon: true },
 ]
 
 function PursuitLogo({ collapsed }: { collapsed: boolean }) {
@@ -99,18 +100,28 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
             const itemLabelClassName = collapsed
               ? "hidden"
               : "hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap transition-[max-width,opacity] duration-200 md:inline-block md:max-w-[9rem] md:opacity-100"
+            const accessibleLabel = item.comingSoon
+              ? `${item.label}, coming soon`
+              : count
+                ? `${item.label}, ${count}`
+                : item.label
 
             return (
               <Link
                 key={item.id}
                 href={item.href}
-                aria-label={count ? `${item.label}, ${count}` : item.label}
-                title={collapsed ? (count ? `${item.label}, ${count}` : item.label) : undefined}
+                aria-label={accessibleLabel}
+                title={collapsed ? accessibleLabel : undefined}
                 aria-current={active ? "page" : undefined}
-                className={`group relative flex items-center rounded-md px-2 py-2.5 text-sm transition-all duration-200 ${collapsed ? "justify-center gap-1 md:px-0" : "justify-center gap-3 md:justify-start md:px-3"} ${active ? "font-semibold text-primary" : "text-foreground hover:bg-muted/70"}`}
+                className={`group relative flex items-center rounded-md px-2 py-2.5 text-sm transition-all duration-200 ${collapsed ? "justify-center gap-1 md:px-0" : "justify-center gap-3 md:justify-start md:px-3"} ${active ? "font-semibold text-primary" : item.comingSoon ? "text-muted-foreground hover:bg-muted/70" : "text-foreground hover:bg-muted/70"}`}
               >
                 <Icon aria-hidden="true" className={`size-[17px] shrink-0 ${active ? "fill-primary text-primary" : ""}`} />
                 <span className={itemLabelClassName}>{item.label}</span>
+                {item.comingSoon && !collapsed && (
+                  <span className="ml-auto hidden rounded-full border border-border px-1.5 py-px text-[10px] font-medium text-muted-foreground md:inline">
+                    Soon
+                  </span>
+                )}
                 {count && (
                   <span className={`text-[10px] text-muted-foreground md:text-xs ${collapsed ? "" : "ml-auto"}`}>
                     {count}
