@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Bookmark, Check, ExternalLink, FileText, PenLine } from "lucide-react"
+import { Bookmark, Check, ExternalLink, FileText, PenLine, UsersRound } from "lucide-react"
 
+import { ApplicationContactsDialog } from "@/components/application-contacts-dialog"
 import { ApplicationMaterialsDialog, type ApplicationMaterialMode } from "@/components/application-materials-dialog"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,6 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useApplications } from "@/components/applications-provider"
+import { canvasJobs } from "@/lib/canvas-jobs"
 import { safeExternalUrl } from "@/lib/application-helpers"
 import type { Application, ApplicationStatus } from "@/lib/applications"
 import { cn } from "@/lib/utils"
@@ -40,9 +42,11 @@ type ApplicationReadinessChecklistProps = {
   completedTaskIds: string[]
   onTaskChange: (taskId: string, isComplete: boolean) => void
   onPrepare: (mode: ApplicationMaterialMode) => void
+  hasContacts: boolean
+  onContacts: () => void
 }
 
-function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskChange, onPrepare }: ApplicationReadinessChecklistProps) {
+function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskChange, onPrepare, hasContacts, onContacts }: ApplicationReadinessChecklistProps) {
   const completedCount = readinessTasks.filter((task) => completedTaskIds.includes(task.id)).length
   const progressPercent = Math.round((completedCount / readinessTasks.length) * 100)
   const isReady = completedCount === readinessTasks.length
@@ -106,6 +110,20 @@ function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskCh
               >
                 {task.label}
               </label>
+              {task.id === "contact-hiring-manager" && hasContacts && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 shrink-0 px-2"
+                  aria-haspopup="dialog"
+                  aria-label={`Open high-leverage contacts for ${applicationLabel}`}
+                  onClick={onContacts}
+                >
+                  <UsersRound aria-hidden="true" data-icon="inline-start" />
+                  Contacts
+                </Button>
+              )}
               {task.mode && (
                 <Button
                   type="button"
@@ -136,12 +154,14 @@ type WishlistCardProps = {
   application: Application
   completedTaskIds: string[]
   onPrepare: (application: Application, mode: ApplicationMaterialMode) => void
+  onContacts: (application: Application) => void
   onReadinessTaskChange: (applicationId: string, taskId: string, isComplete: boolean) => void
   onStatusChange: (applicationId: string, status: ApplicationStatus) => void
 }
 
-function WishlistCard({ application, completedTaskIds, onPrepare, onReadinessTaskChange, onStatusChange }: WishlistCardProps) {
+function WishlistCard({ application, completedTaskIds, onPrepare, onContacts, onReadinessTaskChange, onStatusChange }: WishlistCardProps) {
   const companyUrl = safeExternalUrl(application.companyUrl)
+  const hasContacts = canvasJobs.some((job) => job.id === application.canvasJobId)
 
   return (
     <Card className="flex h-full flex-col border-border shadow-none">
@@ -182,6 +202,8 @@ function WishlistCard({ application, completedTaskIds, onPrepare, onReadinessTas
           completedTaskIds={completedTaskIds}
           onTaskChange={(taskId, isComplete) => onReadinessTaskChange(application.id, taskId, isComplete)}
           onPrepare={(mode) => onPrepare(application, mode)}
+          hasContacts={hasContacts}
+          onContacts={() => onContacts(application)}
         />
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-4">
           <span className="text-xs font-medium text-muted-foreground">Status</span>
@@ -220,6 +242,7 @@ type MaterialRequest = {
 export function WishlistPage() {
   const { applications, readinessProgress, setReadinessTaskCompletion, updateApplicationStatus } = useApplications()
   const [materialRequest, setMaterialRequest] = useState<MaterialRequest>(null)
+  const [contactsRequest, setContactsRequest] = useState<Application | null>(null)
   const interestedApplications = useMemo(
     () => applications.filter((application) => application.status === "Interested"),
     [applications],
@@ -228,6 +251,14 @@ export function WishlistPage() {
   function openMaterial(application: Application, mode: ApplicationMaterialMode) {
     setMaterialRequest({ application, mode })
   }
+
+  function openContacts(application: Application) {
+    setContactsRequest(application)
+  }
+
+  const contactsJob = contactsRequest
+    ? canvasJobs.find((job) => job.id === contactsRequest.canvasJobId)
+    : undefined
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -255,6 +286,7 @@ export function WishlistPage() {
                 application={application}
                 completedTaskIds={readinessProgress[application.id] ?? []}
                 onPrepare={openMaterial}
+                onContacts={openContacts}
                 onReadinessTaskChange={setReadinessTaskCompletion}
                 onStatusChange={updateApplicationStatus}
               />
@@ -279,6 +311,15 @@ export function WishlistPage() {
           </Card>
         )}
       </main>
+      {contactsRequest && contactsJob && (
+        <ApplicationContactsDialog
+          application={contactsRequest}
+          contacts={contactsJob.contacts}
+          onOpenChange={(open) => {
+            if (!open) setContactsRequest(null)
+          }}
+        />
+      )}
       {materialRequest && (
         <ApplicationMaterialsDialog
           key={`${materialRequest.application.id}:${materialRequest.mode}`}

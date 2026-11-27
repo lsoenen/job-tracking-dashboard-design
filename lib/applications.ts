@@ -31,6 +31,7 @@ export type Application = {
   description?: string
   sourceUrl?: string
   companyUrl?: string
+  canvasJobId?: string
   status: ApplicationStatus
   interviewStage?: InterviewStage
   nextStep: string
