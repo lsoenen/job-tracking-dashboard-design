@@ -87,6 +87,7 @@ export const applications: Application[] = [
     company: "Manifest OS",
     role: "Product Designer",
     initials: "MO",
+    logo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/manifest-eEQNeSv2A0cKR9U2lIQ8ULCvjZOmWJ.jpeg",
     companyUrl: "https://www.linkedin.com/company/manifest-o-s/posts/?feedView=all",
     status: "Interested",
     nextStep: "Review company",
