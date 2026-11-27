@@ -82,7 +82,7 @@ export function CanvasPage() {
           <section aria-labelledby="page-title" className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Canvas</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Sample product design roles across LinkedIn, Indeed, Wellfound, Wellhub, and more.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Explore product design roles from LinkedIn, Indeed, Wellfound, Wellhub, and more. Save promising roles to your Wishlist while you prepare.</p>
               <p className="mt-1 text-xs text-muted-foreground">Fit estimates use your profile skills and background; the sample resume is not parsed.</p>
             </div>
             <p className="text-xs text-muted-foreground">Mock data · Newest first</p>
@@ -150,7 +150,7 @@ export function CanvasPage() {
                               size="sm"
                               variant={isAdded ? "secondary" : "outline"}
                               disabled={isAdded}
-                              aria-label={`${isAdded ? "Added" : "Add to list"}: ${job.title} at ${job.company}`}
+                              aria-label={`${isAdded ? "Already tracked" : "Add to Wishlist"}: ${job.title} at ${job.company}`}
                               onClick={() => addJobToList(job)}
                             >
                               {isAdded ? (
@@ -158,7 +158,7 @@ export function CanvasPage() {
                               ) : (
                                 <Plus data-icon="inline-start" aria-hidden="true" />
                               )}
-                              {isAdded ? "Added" : "Add to list"}
+                              {isAdded ? "Already tracked" : "Add to Wishlist"}
                             </Button>
                           </div>
                         </div>
@@ -283,7 +283,7 @@ export function CanvasPage() {
               ) : (
                 <Plus data-icon="inline-start" aria-hidden="true" />
               )}
-              {selectedJobIsAdded ? "Added" : "Add to list"}
+              {selectedJobIsAdded ? "Already tracked" : "Add to Wishlist"}
             </Button>
           </DialogFooter>
         </DialogContent>

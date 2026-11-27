@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { Bookmark, BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { isInterviewStatus } from "@/lib/applications"
 const pursuitLogoSource =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
 
-type DashboardPage = "overview" | "canvas" | "applications" | "interview" | "account"
+type DashboardPage = "overview" | "canvas" | "wishlist" | "applications" | "interview" | "account"
 
 const navigation: {
   id: DashboardPage
@@ -24,7 +24,8 @@ const navigation: {
 }[] = [
   { id: "overview", label: "Overview", href: "/", icon: ChartNoAxesCombined },
   { id: "canvas", label: "Canvas", href: "/canvas", icon: LayoutGrid },
-  { id: "applications", label: "Applications", href: "/applications", icon: BriefcaseBusiness, count: "48" },
+  { id: "wishlist", label: "Wishlist", href: "/wishlist", icon: Bookmark },
+  { id: "applications", label: "Applications", href: "/applications", icon: BriefcaseBusiness },
   { id: "interview", label: "Interview", href: "/interviews", icon: MessageSquareText },
 ]
 

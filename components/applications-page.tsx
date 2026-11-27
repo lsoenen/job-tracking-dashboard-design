@@ -10,7 +10,7 @@ export function ApplicationsPage() {
           <section aria-labelledby="page-title" className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Applications</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Update a stage here to surface interviews in your prep space. Status changes and new entries are session-only in this prototype.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Track roles you’ve applied to and their next steps. Interested roles stay in your Wishlist until you mark them Applied. Changes are session-only in this prototype.</p>
             </div>
           </section>
           <ApplicationsTable />

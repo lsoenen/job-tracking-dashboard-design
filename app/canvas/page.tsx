@@ -4,7 +4,7 @@ import { CanvasPage } from "@/components/canvas-page"
 
 export const metadata: Metadata = {
   title: "Canvas | Pursuit",
-  description: "Explore mock product design roles from multiple job boards, see where each was posted, and add opportunities to your application list.",
+  description: "Explore product design roles, save interesting opportunities to your Wishlist, and prepare application materials.",
 }
 
 export default function CanvasRoute() {
