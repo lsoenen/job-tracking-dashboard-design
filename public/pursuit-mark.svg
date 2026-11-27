@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="265 160 504 504">
+  <defs>
+    <linearGradient id="purpleLightGrad" x1="327" y1="163" x2="695" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7B4CE8" />
+      <stop offset="60%" stop-color="#6F42E5" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <linearGradient id="purpleDarkBowl" x1="560" y1="210" x2="540" y2="513" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4C2299" />
+      <stop offset="45%" stop-color="#35146E" />
+      <stop offset="100%" stop-color="#260C52" />
+    </linearGradient>
+    <linearGradient id="arrowLightGrad" x1="326" y1="660" x2="580" y2="279" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7E52EB" />
+      <stop offset="100%" stop-color="#6C3CE0" />
+    </linearGradient>
+    <linearGradient id="arrowDarkGrad" x1="326" y1="660" x2="580" y2="310" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#24094E" />
+      <stop offset="100%" stop-color="#2E0E63" />
+    </linearGradient>
+  </defs>
+  <g id="pursuit-icon">
+    <path d="M 327 168 L 516 168 L 574 176 L 538 192 L 695 163 L 666 346 L 688 282 C 708 355, 692 440, 636 482 C 598 510, 550 513, 498 513 L 435 513 L 502 446 L 522 446 C 586 446, 623 402, 623 341 C 623 306, 611 278, 593 260 C 575 242, 549 236, 514 236 L 404 236 L 404 363 L 327 440 Z" fill="url(#purpleLightGrad)" />
+    <path d="M 695 163 L 666 346 L 688 282 C 708 355, 692 440, 636 482 C 598 510, 550 513, 498 513 L 435 513 L 502 446 L 522 446 C 586 446, 623 402, 623 341 C 623 306, 611 278, 593 260 Z" fill="url(#purpleDarkBowl)" />
+    <path d="M 326 660 L 326 481 L 491 316 L 458 283 L 580 279 L 372 487 L 326 660 Z" fill="url(#arrowLightGrad)" />
+    <path d="M 326 660 L 372 487 L 580 279 L 580 398 L 546 364 L 404 506 L 404 582 L 326 660 Z" fill="url(#arrowDarkGrad)" />
+  </g>
+</svg>

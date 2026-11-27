@@ -1,6 +1,10 @@
 "use client"
 
+import { useMemo } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+
+import { useApplications } from "@/components/applications-provider"
+import { getWeeklyActivity } from "@/lib/dashboard-metrics"
 
 import {
   ChartContainer,
@@ -9,19 +13,16 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 
-const activity = [
-  { week: "Nov 1", applications: 9, responses: 3 },
-  { week: "Nov 8", applications: 11, responses: 4 },
-  { week: "Nov 15", applications: 13, responses: 5 },
-  { week: "Nov 22", applications: 15, responses: 7 },
-]
-
 const chartConfig = {
   applications: { label: "Applications sent", color: "var(--chart-5)" },
   responses: { label: "Responses received", color: "var(--chart-1)" },
 } satisfies ChartConfig
 
 export function ApplicationActivityChart() {
+  const { applications, statusEvents } = useApplications()
+  const activity = useMemo(() => getWeeklyActivity(applications, statusEvents), [applications, statusEvents])
+  const isEmpty = activity.every((week) => week.applications === 0 && week.responses === 0)
+
   return (
     <div>
       <ChartContainer config={chartConfig} className="h-[230px] w-full aspect-auto">
@@ -46,6 +47,11 @@ export function ApplicationActivityChart() {
           <Bar dataKey="responses" fill="var(--color-responses)" radius={[2, 2, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ChartContainer>
+      {isEmpty && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Nothing here yet. Set an applied date on an application and it will show up in the chart.
+        </p>
+      )}
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground" aria-label="Chart legend">
         <span className="flex items-center gap-2">
           <span aria-hidden="true" className="size-2.5 rounded-sm bg-chart-5" />

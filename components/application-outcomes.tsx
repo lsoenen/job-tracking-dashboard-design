@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/chart"
 
 const chartConfig = {
-  applications: { label: "Applications", color: "var(--chart-5)" },
+  applications: { label: "Awaiting response", color: "var(--warning)" },
   interviewing: { label: "Interviewing", color: "var(--chart-1)" },
-  takeHome: { label: "Take-home", color: "var(--warning)" },
+  takeHome: { label: "Take-home", color: "var(--info)" },
   offer: { label: "Offer received", color: "var(--success)" },
 } satisfies ChartConfig
 
@@ -22,7 +22,7 @@ export function ApplicationOutcomes() {
   const { applications } = useApplications()
   const statusCounts = getApplicationStatusCounts(applications)
   const outcomes = [
-    { key: "applications", label: "Applications", value: statusCounts.Applied },
+    { key: "applications", label: "Awaiting response", value: statusCounts.Applied },
     { key: "interviewing", label: "Interviewing", value: statusCounts.Interviewing },
     { key: "takeHome", label: "Take-home", value: statusCounts["Take-home"] },
     { key: "offer", label: "Offer received", value: statusCounts.Offer },

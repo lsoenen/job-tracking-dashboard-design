@@ -31,7 +31,7 @@ export function AppliedDatePicker({ value, company, role, onChange }: AppliedDat
             aria-label={formattedDate
               ? `Change applied date for ${role} at ${company}, currently ${formattedDate}`
               : `Set applied date for ${role} at ${company}`}
-            className="h-7 w-full justify-start gap-1.5 px-1.5 text-xs font-normal"
+            className="h-7 w-full min-w-0 shrink justify-start gap-1.5 overflow-hidden px-1.5 text-xs font-normal"
           />
         }
       >

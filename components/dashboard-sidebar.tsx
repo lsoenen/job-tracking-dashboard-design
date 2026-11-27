@@ -4,14 +4,11 @@ import { useState } from "react"
 import Link from "next/link"
 import { BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useApplications } from "@/components/applications-provider"
 import { useJobProfile } from "@/components/job-profile-provider"
 import { isInterviewStatus } from "@/lib/applications"
-
-const pursuitLogoSource =
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
 
 type DashboardPage = "overview" | "canvas" | "applications" | "interview" | "account"
 
@@ -31,21 +28,11 @@ const navigation: {
 function PursuitLogo({ collapsed }: { collapsed: boolean }) {
   return (
     <span aria-hidden="true" className="flex shrink-0 items-center gap-2">
-      <span className="relative size-8 shrink-0 overflow-hidden rounded-sm bg-sidebar">
-        <img
-          src={pursuitLogoSource}
-          alt=""
-          className="absolute left-[-12px] top-[-4px] size-[56px] max-w-none mix-blend-multiply"
-        />
-      </span>
+      <img src="/pursuit-mark.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
       <span
         className={`relative hidden h-6 shrink-0 overflow-hidden transition-[width,opacity] duration-300 md:block ${collapsed ? "w-0 opacity-0" : "w-[78px] opacity-100"}`}
       >
-        <img
-          src={pursuitLogoSource}
-          alt=""
-          className="absolute left-[-25px] top-[-85px] size-[128px] max-w-none mix-blend-multiply"
-        />
+        <img src="/pursuit-wordmark.svg" alt="" width={76} height={24} className="h-6 w-[76px] max-w-none" />
       </span>
     </span>
   )
@@ -64,8 +51,9 @@ function profileInitials(name: string) {
 
 export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) {
   const [collapsed, setCollapsed] = useState(false)
-  const { profile } = useJobProfile()
+  const { profile, email } = useJobProfile()
   const { applications } = useApplications()
+  const displayName = profile.fullName.trim() || email
   const interviewCount = applications.filter((application) => isInterviewStatus(application.status)).length.toString()
   const applicationCount = applications.length.toString()
 
@@ -137,21 +125,20 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
       <div className={`mt-auto pb-5 pt-8 transition-all duration-300 ${collapsed ? "px-2 md:px-2" : "px-2 md:px-6"}`}>
         <Link
           href="/account"
-          aria-label={`Account: ${profile.fullName}`}
+          aria-label={`Account: ${displayName}`}
           aria-current={activePage === "account" ? "page" : undefined}
-          title={collapsed ? `Account: ${profile.fullName}` : undefined}
+          title={collapsed ? `Account: ${displayName}` : undefined}
           className={`flex items-center gap-3 rounded-md border-t border-border pt-4 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring ${collapsed ? "justify-center" : "justify-center md:justify-start"}`}
         >
           <Avatar className="size-8 shrink-0 border border-border">
-            <AvatarImage src="/profile-avatar.png" alt="" />
             <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">
-              {profileInitials(profile.fullName)}
+              {profileInitials(displayName) || "?"}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="hidden min-w-0 md:block">
-              <p className="truncate text-xs font-medium">{profile.fullName}</p>
-              <p className="truncate text-[11px] text-muted-foreground">{profile.headline}</p>
+              <p className="truncate text-xs font-medium">{displayName}</p>
+              <p className="truncate text-[11px] text-muted-foreground">{profile.headline || "Add your profile"}</p>
             </div>
           )}
         </Link>

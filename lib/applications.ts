@@ -9,6 +9,23 @@ export const applicationStatuses = [
 
 export type ApplicationStatus = (typeof applicationStatuses)[number]
 
+/**
+ * What each status is called on screen. "Applied" is still the stored value
+ * (so existing data and spreadsheet imports keep working), shown as "Awaiting response".
+ */
+export const applicationStatusLabels: Record<ApplicationStatus, string> = {
+  Interested: "Interested",
+  Applied: "Awaiting response",
+  Interviewing: "Interviewing",
+  "Take-home": "Take-home",
+  Offer: "Offer",
+  "Not moving forward": "Not moving forward",
+}
+
+export function statusLabel(status: ApplicationStatus) {
+  return applicationStatusLabels[status] ?? status
+}
+
 export const interviewStages = [
   "recruiter",
   "hiring-manager",
@@ -17,6 +34,15 @@ export const interviewStages = [
 ] as const
 
 export type InterviewStage = (typeof interviewStages)[number]
+
+/** Options for "How far did it get?" on a rejected application */
+export const furthestStageLabels: Record<InterviewStage | "none", string> = {
+  none: "Before an interview",
+  recruiter: "Recruiter screen",
+  "hiring-manager": "Hiring manager",
+  "team-technical-case": "Team, technical, case, or take-home",
+  "final-executive": "Final or executive round",
+}
 
 export function isInterviewStatus(status: ApplicationStatus) {
   return status === "Interviewing"
@@ -28,6 +54,8 @@ export type Application = {
   role: string
   initials: string
   logo?: string
+  /** True until the app has tried to find this company's logo */
+  logoPending?: boolean
   description?: string
   sourceUrl?: string
   companyUrl?: string
@@ -36,63 +64,17 @@ export type Application = {
   appliedDate?: string
   interviewStage?: InterviewStage
   nextStep: string
+  /** ISO date (yyyy-MM-dd) the next step is due */
+  dueDate?: string
+  /** Display label derived from dueDate, e.g. "Nov 30" or "—" */
   due: string
 }
 
-export type NewApplication = Omit<Application, "id" | "initials">
+export type NewApplication = Omit<Application, "id" | "initials" | "due" | "logoPending">
 
-export const applications: Application[] = [
-  {
-    id: "seed-vercel",
-    company: "Vercel",
-    role: "Senior Product Designer",
-    initials: "V",
-    logo: "https://thesvg.org/icons/vercel/default.svg",
-    status: "Interviewing",
-    interviewStage: "hiring-manager",
-    nextStep: "Hiring manager interview",
-    due: "Tomorrow",
-  },
-  {
-    id: "seed-figma",
-    company: "Figma",
-    role: "Product Designer, Growth",
-    initials: "F",
-    logo: "https://thesvg.org/icons/figma/default.svg",
-    status: "Take-home",
-    nextStep: "Submit design exercise",
-    due: "Nov 30",
-  },
-  {
-    id: "seed-linear",
-    company: "Linear",
-    role: "Product Designer",
-    initials: "L",
-    logo: "https://thesvg.org/icons/linear/default.svg",
-    status: "Applied",
-    nextStep: "Follow up with recruiter",
-    due: "Dec 2",
-  },
-  {
-    id: "seed-ramp",
-    company: "Ramp",
-    role: "Staff Product Designer",
-    initials: "R",
-    logo: "https://thesvg.org/icons/ramp/default.svg",
-    status: "Interviewing",
-    interviewStage: "recruiter",
-    nextStep: "Share availability",
-    due: "Nov 27",
-  },
-  {
-    id: "seed-manifest-os",
-    company: "Manifest OS",
-    role: "Product Designer",
-    initials: "MO",
-    logo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/manifest-eEQNeSv2A0cKR9U2lIQ8ULCvjZOmWJ.jpeg",
-    companyUrl: "https://www.linkedin.com/company/manifest-o-s/posts/?feedView=all",
-    status: "Interested",
-    nextStep: "—",
-    due: "—",
-  },
-]
+export type StatusEvent = {
+  applicationId: string
+  fromStatus: ApplicationStatus | null
+  toStatus: ApplicationStatus
+  changedAt: string
+}

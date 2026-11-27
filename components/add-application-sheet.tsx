@@ -25,7 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
-import { applicationStatuses, type ApplicationStatus, type NewApplication } from "@/lib/applications"
+import { applicationStatuses, statusLabel, type ApplicationStatus, type NewApplication } from "@/lib/applications"
 
 type ApplicationDraft = {
   company: string
@@ -34,6 +34,7 @@ type ApplicationDraft = {
   sourceUrl: string
   status: ApplicationStatus
   nextStep: string
+  appliedDate: string
   followUpDate: string
 }
 
@@ -45,6 +46,11 @@ type ParsedJobPosting = {
   error?: string
 }
 
+function todayIsoDate() {
+  const now = new Date()
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+}
+
 const emptyDraft: ApplicationDraft = {
   company: "",
   role: "",
@@ -52,19 +58,14 @@ const emptyDraft: ApplicationDraft = {
   sourceUrl: "",
   status: "Applied",
   nextStep: "",
+  appliedDate: "",
   followUpDate: "",
 }
 
-function formatDueDate(value: string) {
-  if (!value) return "—"
-
-  const date = new Date(`${value}T12:00:00`)
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date)
-}
-
-export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplication) => void }) {
+export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplication) => Promise<unknown> }) {
   const [open, setOpen] = useState(false)
-  const [draft, setDraft] = useState<ApplicationDraft>(emptyDraft)
+  const [draft, setDraft] = useState<ApplicationDraft>(() => ({ ...emptyDraft, appliedDate: todayIsoDate() }))
+  const [isSaving, setIsSaving] = useState(false)
   const [isFilling, setIsFilling] = useState(false)
   const [smartFillError, setSmartFillError] = useState<string | null>(null)
   const [smartFillMessage, setSmartFillMessage] = useState<string | null>(null)
@@ -113,7 +114,7 @@ export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplica
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError(null)
 
@@ -138,16 +139,24 @@ export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplica
       }
     }
 
-    onAdd({
+    setIsSaving(true)
+    const created = await onAdd({
       company,
       role,
       description: draft.description.trim(),
       sourceUrl: sourceUrl || undefined,
       status: draft.status,
-      nextStep: draft.nextStep.trim() || "No next step set",
-      due: formatDueDate(draft.followUpDate),
+      appliedDate: draft.status === "Interested" ? undefined : draft.appliedDate || undefined,
+      nextStep: draft.nextStep.trim(),
+      dueDate: draft.followUpDate || undefined,
     })
-    setDraft(emptyDraft)
+    setIsSaving(false)
+    if (!created) {
+      setFormError("This application couldn't be saved. Please try again.")
+      return
+    }
+
+    setDraft({ ...emptyDraft, appliedDate: todayIsoDate() })
     setSmartFillError(null)
     setSmartFillMessage(null)
     setOpen(false)
@@ -260,12 +269,12 @@ export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplica
                   onValueChange={(value) => value && updateDraft("status", value as ApplicationStatus)}
                 >
                   <SelectTrigger id="application-status" className="w-full">
-                    <SelectValue placeholder="Choose a stage" />
+                    <SelectValue placeholder="Choose a stage">{(value: ApplicationStatus) => statusLabel(value)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       {applicationStatuses.map((status) => (
-                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                        <SelectItem key={status} value={status}>{statusLabel(status)}</SelectItem>
                       ))}
                     </SelectGroup>
                   </SelectContent>
@@ -283,6 +292,19 @@ export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplica
                 />
               </Field>
 
+              {draft.status !== "Interested" && (
+                <Field>
+                  <FieldLabel htmlFor="application-applied-date">Applied date</FieldLabel>
+                  <Input
+                    id="application-applied-date"
+                    type="date"
+                    value={draft.appliedDate}
+                    max={todayIsoDate()}
+                    onChange={(event) => updateDraft("appliedDate", event.target.value)}
+                  />
+                </Field>
+              )}
+
               <Field>
                 <FieldLabel htmlFor="application-follow-up">Follow-up date</FieldLabel>
                 <Input
@@ -299,7 +321,10 @@ export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplica
 
           <SheetFooter>
             <SheetClose render={<Button type="button" variant="outline" />}>Cancel</SheetClose>
-            <Button type="submit">Save application</Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving && <LoaderCircle data-icon="inline-start" aria-hidden="true" className="animate-spin" />}
+              Save application
+            </Button>
           </SheetFooter>
         </form>
       </SheetContent>

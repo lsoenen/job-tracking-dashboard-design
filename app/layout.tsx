@@ -1,7 +1,5 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { ApplicationsProvider } from '@/components/applications-provider'
-import { JobProfileProvider } from '@/components/job-profile-provider'
 import { Toaster } from 'sonner'
 import './globals.css'
 
@@ -41,9 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className="antialiased">
-        <ApplicationsProvider>
-          <JobProfileProvider>{children}</JobProfileProvider>
-        </ApplicationsProvider>
+        {children}
         <Toaster position="bottom-right" richColors />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

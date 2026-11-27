@@ -1,16 +1,20 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
-import { ArrowUpRight, BriefcaseBusiness, CalendarDays, FileText, MessageSquareText, Sparkles, WandSparkles } from "lucide-react"
+import { ArrowUpRight, BriefcaseBusiness, CalendarDays, FileText, MessageSquareText, Sparkles, SquareChartGantt, Users } from "lucide-react"
 
 import { ApplicationInterviewPrep } from "@/components/application-interview-prep"
+import { ApplicationNetworking } from "@/components/application-networking"
+import { ApplicationOverview } from "@/components/application-overview"
+import { ApplicationMaterialCard } from "@/components/application-material-card"
 import { ApplicationMaterialsDialog, type ApplicationMaterialMode } from "@/components/application-materials-dialog"
+import { useApplicationMaterials } from "@/components/use-application-materials"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { safeExternalUrl } from "@/lib/application-helpers"
+import { applicationStatusClassName, safeExternalUrl } from "@/lib/application-helpers"
 import type { Application } from "@/lib/applications"
+import { StatusLabel } from "@/components/status-label"
 
 export function ApplicationWorkspaceTabs({
   application,
@@ -20,19 +24,34 @@ export function ApplicationWorkspaceTabs({
   header: ReactNode
 }) {
   const [materialMode, setMaterialMode] = useState<ApplicationMaterialMode | null>(null)
+  const [generateOnOpen, setGenerateOnOpen] = useState(false)
+  const { materials, status: materialsStatus, saveMaterial } = useApplicationMaterials(application.id)
+
+  function openMaterial(mode: ApplicationMaterialMode, generate: boolean) {
+    setGenerateOnOpen(generate)
+    setMaterialMode(mode)
+  }
   const jobPostingUrl = safeExternalUrl(application.sourceUrl)
 
   return (
     <>
-      <Tabs defaultValue="resources" className="flex flex-col gap-5">
-        <div className="w-full bg-card">
+      <Tabs defaultValue="overview" className="flex flex-col gap-5">
+        <div className="w-full">
           <div className="mx-auto w-full max-w-[1480px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8 lg:pt-9">
             <div className="mx-auto max-w-[1180px]">
               {header}
-              <TabsList variant="line" className="w-full justify-start gap-2 border-b border-border p-0">
+              <TabsList variant="line" className="h-auto w-full justify-start gap-2 p-0 group-data-horizontal/tabs:h-auto">
+                <TabsTrigger value="overview" className="h-11 flex-none gap-2 rounded-none px-3">
+                  <SquareChartGantt aria-hidden="true" />
+                  Overview
+                </TabsTrigger>
                 <TabsTrigger value="resources" className="h-11 flex-none gap-2 rounded-none px-3">
                   <FileText aria-hidden="true" />
                   Resources
+                </TabsTrigger>
+                <TabsTrigger value="networking" className="h-11 flex-none gap-2 rounded-none px-3">
+                  <Users aria-hidden="true" />
+                  Networking
                 </TabsTrigger>
                 <TabsTrigger value="interview" className="h-11 flex-none gap-2 rounded-none px-3">
                   <MessageSquareText aria-hidden="true" />
@@ -44,64 +63,23 @@ export function ApplicationWorkspaceTabs({
         </div>
 
         <div className="w-full px-4 sm:px-6 lg:px-8">
+          <TabsContent value="overview" className="mx-auto w-full max-w-[1180px]">
+            <ApplicationOverview application={application} />
+          </TabsContent>
           <TabsContent value="resources" className="mx-auto flex w-full max-w-[1180px] flex-col gap-5">
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
             <div className="flex min-w-0 flex-col gap-5">
-              <div>
-                <h2 className="mt-1 text-xl font-semibold tracking-tight">Put your best work forward</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                  Build a focused first draft for {application.role}. Your profile and the role notes help keep every suggestion relevant to you.
-                </p>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card className="border-border shadow-none">
-                  <CardHeader className="gap-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <WandSparkles className="size-[18px]" />
-                      </span>
-                      <Badge variant="outline" className="gap-1.5 font-normal"><Sparkles aria-hidden="true" className="size-3" />AI-assisted</Badge>
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">Cover letter</CardTitle>
-                      <CardDescription className="mt-1.5 leading-relaxed">A personal, role-specific letter grounded in your background and the company&apos;s opportunity.</CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 text-xs leading-relaxed text-muted-foreground">
-                    Review the draft, edit it in your own voice, then copy it into your application.
-                  </CardContent>
-                  <CardFooter>
-                    <Button type="button" variant="outline" className="w-full" onClick={() => setMaterialMode("cover-letter")}>
-                      <WandSparkles aria-hidden="true" data-icon="inline-start" />
-                      Generate cover letter
-                    </Button>
-                  </CardFooter>
-                </Card>
-
-                <Card className="border-border shadow-none">
-                  <CardHeader className="gap-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-                        <FileText className="size-[18px]" />
-                      </span>
-                      <Badge variant="outline" className="gap-1.5 font-normal"><Sparkles aria-hidden="true" className="size-3" />AI-assisted</Badge>
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">Tailor your resume</CardTitle>
-                      <CardDescription className="mt-1.5 leading-relaxed">Refine your summary and bring the most relevant skills forward for this position.</CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 text-xs leading-relaxed text-muted-foreground">
-                    Keep every claim accurate. Your existing profile is the source of truth.
-                  </CardContent>
-                  <CardFooter>
-                    <Button type="button" variant="outline" className="w-full" onClick={() => setMaterialMode("resume")}>
-                      <WandSparkles aria-hidden="true" data-icon="inline-start" />
-                      Tailor resume
-                    </Button>
-                  </CardFooter>
-                </Card>
+              <div className="grid items-start gap-4 md:grid-cols-2">
+                {(["cover-letter", "resume"] as const).map((kind) => (
+                  <ApplicationMaterialCard
+                    key={kind}
+                    kind={kind}
+                    saved={materials[kind]}
+                    isLoading={materialsStatus === "loading"}
+                    onOpen={() => openMaterial(kind, false)}
+                    onGenerate={() => openMaterial(kind, true)}
+                  />
+                ))}
               </div>
 
               <Card className="border-border shadow-none">
@@ -122,7 +100,9 @@ export function ApplicationWorkspaceTabs({
                   <div className="grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
                     <div>
                       <p className="text-xs font-medium text-muted-foreground">Application stage</p>
-                      <Badge variant="outline" className="mt-2 rounded-full font-normal">{application.status}</Badge>
+                      <Badge variant="outline" className={`mt-2 rounded-full font-normal ${applicationStatusClassName(application.status)}`}>
+                        <StatusLabel status={application.status} />
+                      </Badge>
                     </div>
                     <div>
                       <p className="text-xs font-medium text-muted-foreground">Follow-up</p>
@@ -162,6 +142,9 @@ export function ApplicationWorkspaceTabs({
           <TabsContent value="interview" className="mx-auto w-full max-w-[1180px]">
             <ApplicationInterviewPrep application={application} />
           </TabsContent>
+          <TabsContent value="networking" className="mx-auto w-full max-w-[1180px]">
+            <ApplicationNetworking application={application} />
+          </TabsContent>
         </div>
       </Tabs>
 
@@ -169,6 +152,9 @@ export function ApplicationWorkspaceTabs({
         <ApplicationMaterialsDialog
           application={application}
           mode={materialMode}
+          saved={materials}
+          onSave={saveMaterial}
+          generateOnOpen={generateOnOpen}
           onOpenChange={(open) => {
             if (!open) setMaterialMode(null)
           }}

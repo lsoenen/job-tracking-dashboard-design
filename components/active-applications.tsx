@@ -8,15 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useApplications } from "@/components/applications-provider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
-import { getTrackedApplications } from "@/lib/application-helpers"
-
-function statusClassName(status: string) {
-  if (status === "Interviewing") return "border-primary/20 bg-primary/5 text-primary"
-  if (status === "Take-home") return "border-warning/20 bg-warning/5 text-warning"
-  if (status === "Offer") return "border-success/20 bg-success/5 text-success"
-  if (status === "Not moving forward") return "border-destructive/20 bg-destructive/5 text-destructive"
-  return "border-border bg-muted text-muted-foreground"
-}
+import { applicationStatusClassName, getTrackedApplications } from "@/lib/application-helpers"
+import { statusLabel } from "@/lib/applications"
+import { StatusLabel } from "@/components/status-label"
 
 export function ActiveApplications() {
   const [query, setQuery] = useState("")
@@ -31,7 +25,7 @@ export function ActiveApplications() {
     if (!normalizedQuery) return activeApplications
 
     return activeApplications.filter((application) =>
-      [application.company, application.role, application.status, application.nextStep]
+      [application.company, application.role, statusLabel(application.status), application.nextStep]
         .join(" ")
         .toLowerCase()
         .includes(normalizedQuery),
@@ -88,8 +82,8 @@ export function ActiveApplications() {
                   </div>
                 </div>
 
-                <Badge variant="outline" className={`w-fit rounded-full px-2.5 py-1 text-xs font-normal ${statusClassName(application.status)}`}>
-                  {application.status}
+                <Badge variant="outline" className={`w-fit rounded-full px-2.5 py-1 text-xs font-normal ${applicationStatusClassName(application.status)}`}>
+                  <StatusLabel status={application.status} />
                 </Badge>
 
                 <div className="min-w-0">

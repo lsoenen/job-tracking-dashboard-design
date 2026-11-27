@@ -2,12 +2,18 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import { toast } from "sonner"
 import { format, parseISO } from "date-fns"
-import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpRight, CalendarDays, ChevronDown, Search } from "lucide-react"
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpRight, ChevronDown, Ellipsis, FileSpreadsheet, Pencil, Search, Trash2 } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { AppliedDatePicker } from "@/components/applied-date-picker"
 import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
+import { ApplicationStatusControl } from "@/components/application-status-control"
+import { DeleteApplicationDialog } from "@/components/delete-application-dialog"
+import { EditApplicationSheet } from "@/components/edit-application-sheet"
+import { ImportApplicationsDialog } from "@/components/import-applications-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,55 +21,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { applicationStatusClassName } from "@/lib/application-helpers"
-import { applicationStatuses, type Application, type ApplicationStatus } from "@/lib/applications"
-
-function ApplicationStatusControl({
-  application,
-  onStatusChange,
-}: {
-  application: Application
-  onStatusChange: (applicationId: string, status: ApplicationStatus) => void
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <button
-            type="button"
-            aria-label={`Change stage for ${application.role} at ${application.company}. Current stage: ${application.status}`}
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${applicationStatusClassName(application.status)}`}
-          />
-        }
-      >
-        {application.status}
-        <ChevronDown aria-hidden="true" className="size-3" />
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-48 gap-1 p-1">
-        <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Change stage</p>
-        <div role="group" aria-label={`Stages for ${application.role} at ${application.company}`} className="flex flex-col">
-          {applicationStatuses.map((status) => (
-            <Button
-              key={status}
-              type="button"
-              variant="ghost"
-              size="sm"
-              aria-pressed={application.status === status}
-              className={`w-full justify-start ${application.status === status ? "bg-muted" : ""}`}
-              onClick={() => {
-                onStatusChange(application.id, status)
-                setOpen(false)
-              }}
-            >
-              {status}
-            </Button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  )
-}
+import { applicationStatuses, statusLabel, type Application, type ApplicationStatus } from "@/lib/applications"
+import { StatusLabel } from "@/components/status-label"
 
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
@@ -72,18 +31,44 @@ export function ApplicationsTable() {
     role: "",
     appliedDate: "",
     stage: [] as string[],
-    nextStep: "",
-    due: "",
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [appliedDateSort, setAppliedDateSort] = useState<"asc" | "desc" | null>(null)
   const {
     applications: applicationRows,
     addApplication,
     updateApplicationAppliedDate,
     updateApplicationStatus,
+    statusEvents,
   } = useApplications()
+
+  function handleStatusChange(applicationId: string, status: ApplicationStatus) {
+    const application = applicationRows.find((item) => item.id === applicationId)
+    updateApplicationStatus(applicationId, status)
+    if (status !== "Not moving forward" || !application || application.status === status) return
+
+    // Nothing on record says this reached an interview: offer to record how far it got
+    const interviewedOnRecord =
+      Boolean(application.interviewStage) ||
+      statusEvents.some(
+        (event) =>
+          event.applicationId === applicationId &&
+          (event.toStatus === "Interviewing" || event.toStatus === "Take-home" || event.toStatus === "Offer"),
+      )
+    if (interviewedOnRecord) return
+
+    toast("Marked as not moving forward", {
+      description: "Did it get to an interview first? Recording it keeps your interview rate accurate.",
+      duration: 10000,
+      action: { label: "Record how far", onClick: () => setEditingId(applicationId) },
+    })
+  }
   const selectedApplication = applicationRows.find((application) => application.id === selectedId)
+  const editingApplication = applicationRows.find((application) => application.id === editingId) ?? null
+  const deletingApplication = applicationRows.find((application) => application.id === deletingId) ?? null
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     const matchesFilter = (value: string, filter: string) =>
@@ -98,6 +83,7 @@ export function ApplicationsTable() {
           application.description ?? "",
           application.sourceUrl ?? "",
           application.status,
+          statusLabel(application.status),
           application.appliedDate ? format(parseISO(application.appliedDate), "MMM d, yyyy") : "",
           application.nextStep,
           application.due,
@@ -114,9 +100,7 @@ export function ApplicationsTable() {
           application.appliedDate ? format(parseISO(application.appliedDate), "MMM d, yyyy") : "",
           filters.appliedDate,
         ) &&
-        (filters.stage.length === 0 || filters.stage.includes(application.status)) &&
-        matchesFilter(application.nextStep, filters.nextStep) &&
-        matchesFilter(application.due, filters.due)
+        (filters.stage.length === 0 || filters.stage.includes(application.status))
       )
     })
 
@@ -138,9 +122,7 @@ export function ApplicationsTable() {
     filters.stage.length > 0 ||
     filters.company ||
     filters.role ||
-    filters.appliedDate ||
-    filters.nextStep ||
-    filters.due,
+    filters.appliedDate,
   )
 
   return (
@@ -161,52 +143,64 @@ export function ApplicationsTable() {
                 className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </label>
-            <AddApplicationSheet onAdd={addApplication} />
+            <div className="flex gap-2">
+              <AddApplicationSheet onAdd={addApplication} />
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={<Button type="button" size="icon-sm" variant="outline" aria-label="More options" title="More options" />}
+                >
+                  <Ellipsis aria-hidden="true" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setImportOpen(true)}>
+                    <FileSpreadsheet aria-hidden="true" />
+                    Import from Excel or CSV…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <ImportApplicationsDialog open={importOpen} onOpenChange={setImportOpen} />
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className={selectedApplication ? "grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" : ""}>
           <div className="min-w-0">
-            <p className="border-b border-border px-4 py-2 text-xs text-muted-foreground sm:hidden">
-              Scroll horizontally to see all columns.
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
+            <div>
+              <table className="w-full table-fixed text-left text-sm">
                 <caption className="sr-only">
-                  Job applications with their company, role, applied date, stage, next step, and due date.
+                  Job applications with their company, role, applied date, and stage. Open an application to see its next step and due date.
                 </caption>
                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th scope="col" className="w-[15%] px-3 py-2 font-medium">Company</th>
-                    <th scope="col" className="w-[19%] px-3 py-2 font-medium">Role</th>
+                    <th scope="col" className="w-[26%] truncate px-2 py-2 font-medium sm:px-3">Company</th>
+                    <th scope="col" className="w-[36%] truncate px-2 py-2 font-medium sm:px-3">Role</th>
                     <th
                       scope="col"
                       aria-sort={appliedDateSort === "desc" ? "descending" : appliedDateSort === "asc" ? "ascending" : "none"}
-                      className="w-[14%] px-3 py-2 font-medium"
+                      className="w-[17%] px-2 py-2 font-medium sm:px-3"
                     >
                       <button
                         type="button"
                         onClick={() => setAppliedDateSort((current) => current === "desc" ? "asc" : "desc")}
                         aria-label={`Sort by applied date, ${appliedDateSort === "desc" ? "oldest first" : "newest first"}`}
-                        className="flex items-center gap-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="flex max-w-full items-center gap-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
-                        Applied date
+                        <span className="truncate">Applied date</span>
                         {appliedDateSort === "desc" ? (
-                          <ArrowDown aria-hidden="true" className="size-3" />
+                          <ArrowDown aria-hidden="true" className="size-3 shrink-0" />
                         ) : appliedDateSort === "asc" ? (
-                          <ArrowUp aria-hidden="true" className="size-3" />
+                          <ArrowUp aria-hidden="true" className="size-3 shrink-0" />
                         ) : (
-                          <ArrowDownUp aria-hidden="true" className="size-3" />
+                          <ArrowDownUp aria-hidden="true" className="size-3 shrink-0" />
                         )}
                       </button>
                     </th>
-                    <th scope="col" className="w-[15%] px-3 py-2 font-medium">Stage</th>
-                    <th scope="col" className="w-[23%] px-3 py-2 font-medium">Next step</th>
-                    <th scope="col" className="w-[14%] px-3 py-2 font-medium">Due</th>
+                    <th scope="col" className="w-[21%] truncate px-2 py-2 font-medium sm:px-3">Stage</th>
+                    <th scope="col" className="w-10 px-1 py-2"><span className="sr-only">Actions</span></th>
                   </tr>
                   <tr className="border-b border-border">
-                    <th scope="col" className="px-3 py-2 align-middle">
+                    <th scope="col" className="px-2 py-2 align-middle sm:px-3">
                       <label className="sr-only" htmlFor="filter-company">Filter by company</label>
                       <input
                         id="filter-company"
@@ -217,7 +211,7 @@ export function ApplicationsTable() {
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
-                    <th scope="col" className="px-3 py-2 align-middle">
+                    <th scope="col" className="px-2 py-2 align-middle sm:px-3">
                       <label className="sr-only" htmlFor="filter-role">Filter by role</label>
                       <input
                         id="filter-role"
@@ -228,7 +222,7 @@ export function ApplicationsTable() {
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
-                    <th scope="col" className="px-3 py-2 align-middle">
+                    <th scope="col" className="px-2 py-2 align-middle sm:px-3">
                       <label className="sr-only" htmlFor="filter-applied-date">Filter by applied date</label>
                       <input
                         id="filter-applied-date"
@@ -239,15 +233,15 @@ export function ApplicationsTable() {
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
-                    <th scope="col" className="px-3 py-2 align-middle">
+                    <th scope="col" className="px-2 py-2 align-middle sm:px-3">
                       <Popover>
                         <PopoverTrigger
                           render={
                             <Button
                               variant="outline"
                               size="sm"
-                              aria-label={`Filter by stage${filters.stage.length > 0 ? `: ${filters.stage.join(", ")}` : ""}`}
-                              className="w-full justify-between rounded-md px-2 text-xs font-normal"
+                              aria-label={`Filter by stage${filters.stage.length > 0 ? `: ${filters.stage.map((stage) => statusLabel(stage as ApplicationStatus)).join(", ")}` : ""}`}
+                              className="w-full min-w-0 shrink justify-between overflow-hidden rounded-md px-2 text-xs font-normal"
                             />
                           }
                         >
@@ -255,7 +249,7 @@ export function ApplicationsTable() {
                             {filters.stage.length === 0
                               ? "All stages"
                               : filters.stage.length === 1
-                                ? filters.stage[0]
+                                ? statusLabel(filters.stage[0] as ApplicationStatus)
                                 : `${filters.stage.length} stages`}
                           </span>
                           <ChevronDown data-icon="inline-end" aria-hidden="true" />
@@ -291,35 +285,14 @@ export function ApplicationsTable() {
                                     }))
                                   }
                                 />
-                                <span>{status}</span>
+                                <span>{statusLabel(status)}</span>
                               </label>
                             ))}
                           </fieldset>
                         </PopoverContent>
                       </Popover>
                     </th>
-                    <th scope="col" className="px-3 py-2 align-middle">
-                      <label className="sr-only" htmlFor="filter-next-step">Filter by next step</label>
-                      <input
-                        id="filter-next-step"
-                        type="search"
-                        value={filters.nextStep}
-                        onChange={(event) => setFilters((current) => ({ ...current, nextStep: event.target.value }))}
-                        placeholder="Filter next step"
-                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                      />
-                    </th>
-                    <th scope="col" className="px-3 py-2 align-middle">
-                      <label className="sr-only" htmlFor="filter-due">Filter by due date</label>
-                      <input
-                        id="filter-due"
-                        type="search"
-                        value={filters.due}
-                        onChange={(event) => setFilters((current) => ({ ...current, due: event.target.value }))}
-                        placeholder="Filter due"
-                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                      />
-                    </th>
+                    <th scope="col" className="px-1 py-2"><span className="sr-only">No filter</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -332,7 +305,7 @@ export function ApplicationsTable() {
                           key={application.id}
                           className={`transition-colors ${isSelected ? "bg-primary/[0.06]" : "hover:bg-muted/30"}`}
                         >
-                          <td className="px-3 py-2">
+                          <td className="overflow-hidden px-2 py-2 sm:px-3">
                             <button
                               type="button"
                               onClick={(event) => {
@@ -342,7 +315,7 @@ export function ApplicationsTable() {
                               aria-label={`Preview ${application.role} at ${application.company}`}
                               className="flex w-full min-w-0 items-center gap-2 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
-                              <Avatar className={`size-6 shrink-0 rounded-full border-0 after:hidden ${application.company === "Vercel" ? "bg-black" : "bg-transparent"}`}>
+                              <Avatar className={`size-6 shrink-0 rounded-full border-0 after:hidden bg-background`}>
                                 {application.logo && (
                                   <AvatarImage
                                     src={application.logo}
@@ -354,20 +327,20 @@ export function ApplicationsTable() {
                                   {application.initials}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="block min-w-0 truncate text-xs font-medium text-foreground">{application.company}</span>
+                              <span title={application.company} className="block min-w-0 truncate text-xs font-medium text-foreground">{application.company}</span>
                             </button>
                           </td>
-                          <td className="px-3 py-2">
+                          <td className="overflow-hidden px-2 py-2 sm:px-3">
                             <Link
                               href={`/applications/${encodeURIComponent(application.id)}`}
                               aria-label={`Open ${application.role} at ${application.company}`}
                               className="group inline-flex max-w-full items-center gap-1 rounded-sm text-left text-xs font-medium text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
-                              <span className="truncate underline-offset-4 group-hover:underline">{application.role}</span>
+                              <span title={application.role} className="truncate underline-offset-4 group-hover:underline">{application.role}</span>
                               <ArrowUpRight aria-hidden="true" className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
                             </Link>
                           </td>
-                          <td className="px-2 py-2">
+                          <td className="overflow-hidden px-1 py-2 sm:px-2">
                             <AppliedDatePicker
                               value={application.appliedDate}
                               company={application.company}
@@ -375,24 +348,45 @@ export function ApplicationsTable() {
                               onChange={(appliedDate) => updateApplicationAppliedDate(application.id, appliedDate)}
                             />
                           </td>
-                          <td className="px-3 py-2">
-                            <ApplicationStatusControl application={application} onStatusChange={updateApplicationStatus} />
+                          <td className="overflow-hidden px-2 py-2 sm:px-3">
+                            <ApplicationStatusControl application={application} onStatusChange={handleStatusChange} />
                           </td>
-                          <td className="px-3 py-2">
-                            <p className="truncate text-xs font-medium text-foreground">{application.nextStep}</p>
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            <span className="flex items-center gap-1.5 whitespace-nowrap text-xs">
-                              <CalendarDays aria-hidden="true" className="size-3 shrink-0" />
-                              {application.due}
-                            </span>
+                          <td className="px-1 py-1.5 text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger
+                                render={
+                                  <Button
+                                    type="button"
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    aria-label={`Actions for ${application.role} at ${application.company}`}
+                                    className="text-muted-foreground"
+                                  />
+                                }
+                              >
+                                <Ellipsis aria-hidden="true" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="min-w-36">
+                                <DropdownMenuItem onClick={() => setEditingId(application.id)}>
+                                  <Pencil aria-hidden="true" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => setDeletingId(application.id)}
+                                  className="text-destructive data-highlighted:bg-destructive/10 [&_svg]:text-destructive"
+                                >
+                                  <Trash2 aria-hidden="true" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </td>
                         </tr>
                       )
                     })
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-3 py-10 text-center text-xs text-muted-foreground">
+                      <td colSpan={5} className="px-3 py-10 text-center text-xs text-muted-foreground">
                         <p role="status">
                           {hasActiveFilters ? "No applications match these filters." : "No roles in your tracker yet. Mark one as interested on Canvas or add an application to get started."}
                         </p>
@@ -407,8 +401,22 @@ export function ApplicationsTable() {
             </p>
           </div>
           {selectedApplication && (
-            <ApplicationPreviewPanel application={selectedApplication} onClose={() => setSelectedId(null)} />
+            <ApplicationPreviewPanel
+              key={selectedApplication.id}
+              application={selectedApplication}
+              onClose={() => setSelectedId(null)}
+              onEdit={() => setEditingId(selectedApplication.id)}
+              onDelete={() => setDeletingId(selectedApplication.id)}
+            />
           )}
+          <EditApplicationSheet application={editingApplication} onOpenChange={(open) => !open && setEditingId(null)} />
+          <DeleteApplicationDialog
+            application={deletingApplication}
+            onOpenChange={(open) => !open && setDeletingId(null)}
+            onDeleted={(id) => {
+              if (id === selectedId) setSelectedId(null)
+            }}
+          />
         </div>
       </CardContent>
     </Card>

@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Copy, LoaderCircle, Sparkles } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { Copy, LoaderCircle, Save, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { useJobProfile } from "@/components/job-profile-provider"
+import type { CoverLetterContent, ResumeContent, SavedMaterials } from "@/components/use-application-materials"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -23,20 +24,64 @@ type ApplicationMaterialMode = "resume" | "cover-letter"
 type ApplicationMaterialsDialogProps = {
   application: Application
   mode: ApplicationMaterialMode
+  saved: SavedMaterials
+  onSave: (kind: ApplicationMaterialMode, content: CoverLetterContent | ResumeContent) => Promise<boolean>
+  /** Open and generate a first draft straight away */
+  generateOnOpen?: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: ApplicationMaterialsDialogProps) {
+export function ApplicationMaterialsDialog({ application, mode, saved, onSave, generateOnOpen, onOpenChange }: ApplicationMaterialsDialogProps) {
   const { profile } = useJobProfile()
-  const [summary, setSummary] = useState(profile.background)
-  const [skills, setSkills] = useState(profile.skills)
-  const [coverLetter, setCoverLetter] = useState("")
+  const savedResume = saved.resume?.content
+  const savedLetter = saved["cover-letter"]?.content.text ?? ""
+  const [summary, setSummary] = useState(savedResume?.summary ?? profile.background)
+  const [skills, setSkills] = useState(savedResume?.skills ?? profile.skills)
+  const [coverLetter, setCoverLetter] = useState(savedLetter)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [generationError, setGenerationError] = useState("")
+  const [lastSaved, setLastSaved] = useState(() =>
+    mode === "resume" ? (savedResume ? JSON.stringify(savedResume) : null) : savedLetter || null,
+  )
+  const autoStarted = useRef(false)
   const isResume = mode === "resume"
   const title = isResume ? "Tailor resume" : "Create cover letter"
   const description = `${application.role} at ${application.company}`
   const draft = isResume ? `${summary.trim()}\n\nCore skills\n${skills.trim()}`.trim() : coverLetter.trim()
+  const currentContent: CoverLetterContent | ResumeContent = isResume
+    ? { summary: summary.trim(), skills: skills.trim() }
+    : { text: coverLetter.trim() }
+  const currentKey = isResume ? JSON.stringify(currentContent) : coverLetter.trim()
+  const hasContent = isResume ? Boolean(summary.trim() || skills.trim()) : Boolean(coverLetter.trim())
+  const isDirty = hasContent && currentKey !== lastSaved
+
+  async function save(content = currentContent, key = currentKey, quiet = false) {
+    setIsSaving(true)
+    const ok = await onSave(mode, content)
+    setIsSaving(false)
+    if (ok) {
+      setLastSaved(key)
+      if (!quiet) toast.success(isResume ? "Resume draft saved" : "Cover letter saved")
+    } else {
+      toast.error("Your draft couldn't be saved. Copy it somewhere safe and try again.")
+    }
+    return ok
+  }
+
+  async function close() {
+    // Never lose edits: save anything unsaved on the way out
+    if (isDirty && !(await save(currentContent, currentKey, true))) return
+    onOpenChange(false)
+  }
+
+  useEffect(() => {
+    if (!generateOnOpen || autoStarted.current) return
+    autoStarted.current = true
+    void generateDraft()
+    // Run once when the dialog opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function generateDraft() {
     setIsGenerating(true)
@@ -74,11 +119,14 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
         }
         setSummary(result.summary)
         setSkills(result.skills)
-        toast.success("Role-tailored resume content is ready")
+        const content = { summary: result.summary.trim(), skills: result.skills.trim() }
+        await save(content, JSON.stringify(content), true)
+        toast.success("Role-tailored resume content is ready and saved")
       } else {
         if (typeof result.content !== "string") throw new Error("The cover letter draft was incomplete. Please try again.")
         setCoverLetter(result.content)
-        toast.success("Your cover letter draft is ready")
+        await save({ text: result.content.trim() }, result.content.trim(), true)
+        toast.success("Your cover letter draft is ready and saved")
       }
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : "Could not generate a draft. Please try again.")
@@ -99,7 +147,7 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
   }
 
   return (
-    <Dialog open onOpenChange={onOpenChange}>
+    <Dialog open onOpenChange={(open) => { if (!open) void close() }}>
       <DialogContent className="max-w-2xl">
         <div className="min-h-0 overflow-y-auto p-6">
           <DialogHeader>
@@ -164,8 +212,16 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
           )}
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="ghost" onClick={() => void close()} disabled={isSaving}>
             Close
+          </Button>
+          <Button type="button" variant="outline" onClick={() => void save()} disabled={!isDirty || isSaving || isGenerating}>
+            {isSaving ? (
+              <LoaderCircle aria-hidden="true" data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <Save aria-hidden="true" data-icon="inline-start" />
+            )}
+            {isDirty || !lastSaved ? "Save draft" : "Saved"}
           </Button>
           <Button type="button" onClick={copyDraft} disabled={!draft}>
             <Copy aria-hidden="true" data-icon="inline-start" />

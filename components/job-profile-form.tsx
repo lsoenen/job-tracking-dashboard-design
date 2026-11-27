@@ -72,6 +72,18 @@ export function JobProfileForm({ profile, onChange }: JobProfileFormProps) {
                 onChange={(event) => onChange({ yearsExperience: Number(event.currentTarget.value) || 0 })}
               />
             </Field>
+            <Field>
+              <FieldLabel htmlFor="profile-weekly-goal">Weekly application goal</FieldLabel>
+              <Input
+                id="profile-weekly-goal"
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={profile.weeklyApplicationGoal}
+                onChange={(event) => onChange({ weeklyApplicationGoal: Number(event.currentTarget.value) || 0 })}
+              />
+            </Field>
           </div>
           <Field>
             <FieldLabel htmlFor="profile-skills">Skills</FieldLabel>

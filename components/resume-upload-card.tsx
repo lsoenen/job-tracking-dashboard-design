@@ -1,4 +1,6 @@
-import { FileText } from "lucide-react"
+import { ExternalLink, FileText } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 
 import {
   Card,
@@ -13,9 +15,11 @@ import { Input } from "@/components/ui/input"
 import type { ResumeAttachment } from "@/lib/job-profile"
 
 type ResumeUploadCardProps = {
-  resume: ResumeAttachment
+  resume: ResumeAttachment | null
+  isPendingUpload: boolean
   error: string
   onFileSelected: (file: File) => void
+  onOpen?: () => void
 }
 
 function formatFileSize(sizeBytes: number) {
@@ -26,16 +30,17 @@ function formatFileSize(sizeBytes: number) {
   return `${Math.max(1, Math.round(sizeBytes / 1024))} KB`
 }
 
-export function ResumeUploadCard({ resume, error, onFileSelected }: ResumeUploadCardProps) {
+export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelected, onOpen }: ResumeUploadCardProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle role="heading" aria-level={2}>
           Resume
         </CardTitle>
-        <CardDescription>Use the sample resume or choose a PDF to update its preview details.</CardDescription>
+        <CardDescription>Upload your resume as a PDF. Only you can see it.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
+        {resume ? (
         <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/20 p-4">
           <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-md bg-background text-muted-foreground ring-1 ring-border">
             <FileText />
@@ -45,14 +50,23 @@ export function ResumeUploadCard({ resume, error, onFileSelected }: ResumeUpload
             <p className="mt-1 text-xs text-muted-foreground">
               PDF · {formatFileSize(resume.sizeBytes)} · Updated {resume.lastUpdated}
             </p>
-            <Badge className="mt-3" variant="outline">
-              {resume.isPlaceholder ? "Sample placeholder" : "Selected for this session"}
-            </Badge>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Badge variant="outline">{isPendingUpload ? "Uploads when you save" : "Saved"}</Badge>
+              {onOpen && (
+                <Button type="button" variant="link" size="sm" className="h-auto px-0" onClick={onOpen}>
+                  View
+                  <ExternalLink data-icon="inline-end" aria-hidden="true" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
+        ) : (
+          <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">No resume uploaded yet.</p>
+        )}
 
         <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="resume-upload">Replace resume</FieldLabel>
+          <FieldLabel htmlFor="resume-upload">{resume ? "Replace resume" : "Upload resume"}</FieldLabel>
           <Input
             id="resume-upload"
             type="file"
@@ -65,7 +79,7 @@ export function ResumeUploadCard({ resume, error, onFileSelected }: ResumeUpload
             }}
           />
           <FieldDescription id="resume-upload-help">
-            PDF only, up to 10 MB. Demo mode shows the selected file details but does not upload or store the document.
+            PDF only, up to 10 MB.
           </FieldDescription>
           {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
         </Field>
