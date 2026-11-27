@@ -115,20 +115,20 @@ export function CanvasPage() {
                   <li key={job.id} className="min-w-0">
                     <Card className="h-full border-border shadow-none transition-colors hover:border-muted-foreground/40">
                       <CardContent className="flex h-full flex-col gap-5 p-4 sm:p-5">
-                        <div className="flex min-w-0 items-start gap-3">
+                        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:flex">
                           <Avatar className="size-11 shrink-0 rounded-xl border border-border bg-background">
                             <AvatarImage src={job.logo} alt={`${job.company} logo`} className="object-contain p-2" />
                             <AvatarFallback className="rounded-xl bg-muted text-xs font-medium text-muted-foreground">
                               {companyInitials(job.company)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="line-clamp-2 text-sm font-medium leading-snug">{job.title}</h3>
+                          <div className="min-w-0 sm:flex-1">
+                            <h3 className="text-sm font-medium leading-snug sm:line-clamp-2">{job.title}</h3>
                             <p className="mt-1 truncate text-xs font-medium text-muted-foreground">{job.company}</p>
                           </div>
                           <Badge
                             variant="outline"
-                            className={`mt-0.5 shrink-0 ${fitPresentation.className}`}
+                            className={`col-span-2 mt-0.5 w-fit ${fitPresentation.className} sm:shrink-0`}
                             aria-label={`${fitPresentation.label}: ${fitScore}%`}
                           >
                             {fitPresentation.label} · {fitScore}%
