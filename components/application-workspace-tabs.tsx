@@ -48,7 +48,6 @@ export function ApplicationWorkspaceTabs({
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
             <div className="flex min-w-0 flex-col gap-5">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Application toolkit</p>
                 <h2 className="mt-1 text-xl font-semibold tracking-tight">Put your best work forward</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                   Build a focused first draft for {application.role}. Your profile and the role notes help keep every suggestion relevant to you.
