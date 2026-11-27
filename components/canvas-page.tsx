@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { CalendarDays, Check, Plus } from "lucide-react"
+import { toast } from "sonner"
 
 import { useApplications } from "@/components/applications-provider"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
@@ -78,8 +79,11 @@ export function CanvasPage() {
       description: `${job.summary} Posted ${postedDate}. Source: ${job.source}.`,
       status: "Interested",
       canvasJobId: job.id,
-      nextStep: "Review the job posting",
+      nextStep: "—",
       due: "—",
+    })
+    toast("Added to application tracker", {
+      style: { background: "#000", color: "#fff", border: "1px solid #000" },
     })
   }
 
@@ -92,7 +96,7 @@ export function CanvasPage() {
           <section aria-labelledby="page-title" className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Canvas</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Explore product design roles from LinkedIn, Indeed, Wellfound, Wellhub, and more. Save promising roles to your Wishlist while you prepare.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Explore product design roles from LinkedIn, Indeed, Wellfound, Wellhub, and more. Add interesting roles directly to your application tracker.</p>
               <p className="mt-1 text-xs text-muted-foreground">Fit estimates use your profile skills and background; the sample resume is not parsed.</p>
             </div>
             <p className="text-xs text-muted-foreground">Mock data · Newest first</p>
@@ -161,7 +165,7 @@ export function CanvasPage() {
                               size="sm"
                               variant={isAdded ? "secondary" : "outline"}
                               disabled={isAdded}
-                              aria-label={`${isAdded ? "Already tracked" : "Add to Wishlist"}: ${job.title} at ${job.company}`}
+                              aria-label={`${isAdded ? "Already tracked" : "I'm interested"}: ${job.title} at ${job.company}`}
                               onClick={() => addJobToList(job)}
                             >
                               {isAdded ? (
@@ -169,7 +173,7 @@ export function CanvasPage() {
                               ) : (
                                 <Plus data-icon="inline-start" aria-hidden="true" />
                               )}
-                              {isAdded ? "Already tracked" : "Add to Wishlist"}
+                              {isAdded ? "Already tracked" : "I'm interested"}
                             </Button>
                           </div>
                         </div>
@@ -258,7 +262,7 @@ export function CanvasPage() {
               ) : (
                 <Plus data-icon="inline-start" aria-hidden="true" />
               )}
-              {selectedJobIsAdded ? "Already tracked" : "Add to Wishlist"}
+              {selectedJobIsAdded ? "Already tracked" : "I'm interested"}
             </Button>
           </DialogFooter>
         </DialogContent>

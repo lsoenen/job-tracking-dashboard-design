@@ -7,12 +7,10 @@ import { applications as initialApplications, type Application, type Application
 type ApplicationsContextValue = {
   applications: Application[]
   interviewProgress: Record<string, string[]>
-  readinessProgress: Record<string, string[]>
   addApplication: (application: NewApplication) => void
   updateApplicationStatus: (applicationId: string, status: ApplicationStatus) => void
   updateInterviewStage: (applicationId: string, stage: InterviewStage) => void
   toggleInterviewQuestionPractice: (applicationId: string, personaSlug: string, questionId: string) => void
-  setReadinessTaskCompletion: (applicationId: string, taskId: string, isComplete: boolean) => void
 }
 
 const ApplicationsContext = createContext<ApplicationsContextValue | null>(null)
@@ -31,7 +29,6 @@ function companyInitials(company: string) {
 export function ApplicationsProvider({ children }: { children: ReactNode }) {
   const [applications, setApplications] = useState(initialApplications)
   const [interviewProgress, setInterviewProgress] = useState<Record<string, string[]>>({})
-  const [readinessProgress, setReadinessProgress] = useState<Record<string, string[]>>({})
 
   function addApplication(application: NewApplication) {
     setApplications((current) => [
@@ -84,31 +81,15 @@ export function ApplicationsProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  function setReadinessTaskCompletion(applicationId: string, taskId: string, isComplete: boolean) {
-    setReadinessProgress((current) => {
-      const completedTasks = new Set(current[applicationId] ?? [])
-
-      if (isComplete) {
-        completedTasks.add(taskId)
-      } else {
-        completedTasks.delete(taskId)
-      }
-
-      return { ...current, [applicationId]: Array.from(completedTasks) }
-    })
-  }
-
   return (
     <ApplicationsContext.Provider
       value={{
         applications,
         interviewProgress,
-        readinessProgress,
         addApplication,
         updateApplicationStatus,
         updateInterviewStage,
         toggleInterviewQuestionPractice,
-        setReadinessTaskCompletion,
       }}
     >
       {children}

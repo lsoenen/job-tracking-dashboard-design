@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Bookmark, BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { isInterviewStatus } from "@/lib/applications"
 const pursuitLogoSource =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_fqy74wfqy74wfqy7-x8BCS3oCuas7TgUq32jxqsnj5s9Vvz.jpeg"
 
-type DashboardPage = "overview" | "canvas" | "wishlist" | "applications" | "interview" | "account"
+type DashboardPage = "overview" | "canvas" | "applications" | "interview" | "account"
 
 const navigation: {
   id: DashboardPage
@@ -24,7 +24,6 @@ const navigation: {
 }[] = [
   { id: "overview", label: "Overview", href: "/", icon: ChartNoAxesCombined },
   { id: "canvas", label: "Canvas", href: "/canvas", icon: LayoutGrid },
-  { id: "wishlist", label: "Wishlist", href: "/wishlist", icon: Bookmark },
   { id: "applications", label: "Applications", href: "/applications", icon: BriefcaseBusiness },
   { id: "interview", label: "Interview", href: "/interviews", icon: MessageSquareText },
 ]
@@ -68,8 +67,7 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
   const { profile } = useJobProfile()
   const { applications } = useApplications()
   const interviewCount = applications.filter((application) => isInterviewStatus(application.status)).length.toString()
-  const wishlistCount = applications.filter((application) => application.status === "Interested").length.toString()
-  const applicationCount = applications.filter((application) => application.status !== "Interested").length.toString()
+  const applicationCount = applications.length.toString()
 
   return (
     <aside
@@ -107,11 +105,9 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
             const count =
               item.id === "interview"
                 ? interviewCount
-                : item.id === "wishlist"
-                  ? wishlistCount
-                  : item.id === "applications"
-                    ? applicationCount
-                    : item.count
+                : item.id === "applications"
+                  ? applicationCount
+                  : item.count
             const itemLabelClassName = collapsed
               ? "hidden"
               : "hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap transition-[max-width,opacity] duration-200 md:inline-block md:max-w-[9rem] md:opacity-100"

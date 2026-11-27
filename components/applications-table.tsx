@@ -75,17 +75,13 @@ export function ApplicationsTable() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<"active" | "graveyard">("active")
   const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
-  const trackedApplications = useMemo(
-    () => applicationRows.filter((application) => application.status !== "Interested"),
+  const graveyardApplications = useMemo(
+    () => applicationRows.filter((application) => application.status === "Not moving forward"),
     [applicationRows],
   )
-  const graveyardApplications = useMemo(
-    () => trackedApplications.filter((application) => application.status === "Not moving forward"),
-    [trackedApplications],
-  )
   const activeApplications = useMemo(
-    () => trackedApplications.filter((application) => application.status !== "Not moving forward"),
-    [trackedApplications],
+    () => applicationRows.filter((application) => application.status !== "Not moving forward"),
+    [applicationRows],
   )
   const visibleApplications = view === "active" ? activeApplications : graveyardApplications
   const selectedApplication = visibleApplications.find((application) => application.id === selectedId)
@@ -372,7 +368,7 @@ export function ApplicationsTable() {
                     <tr>
                       <td colSpan={5} className="px-3 py-10 text-center text-xs text-muted-foreground">
                         <p role="status">
-                          {hasActiveFilters ? "No applications match these filters." : "No applied roles yet. Move a role from your wishlist or add an application to get started."}
+                          {hasActiveFilters ? "No applications match these filters." : "No roles in your tracker yet. Mark one as interested on Canvas or add an application to get started."}
                         </p>
                       </td>
                     </tr>
