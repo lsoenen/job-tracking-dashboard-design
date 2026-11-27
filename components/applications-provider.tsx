@@ -8,6 +8,7 @@ type ApplicationsContextValue = {
   applications: Application[]
   interviewProgress: Record<string, string[]>
   addApplication: (application: NewApplication) => void
+  updateApplicationAppliedDate: (applicationId: string, appliedDate: string | undefined) => void
   updateApplicationStatus: (applicationId: string, status: ApplicationStatus) => void
   updateInterviewStage: (applicationId: string, stage: InterviewStage) => void
   toggleInterviewQuestionPractice: (applicationId: string, personaSlug: string, questionId: string) => void
@@ -40,6 +41,14 @@ export function ApplicationsProvider({ children }: { children: ReactNode }) {
       },
       ...current,
     ])
+  }
+
+  function updateApplicationAppliedDate(applicationId: string, appliedDate: string | undefined) {
+    setApplications((current) =>
+      current.map((application) =>
+        application.id === applicationId ? { ...application, appliedDate } : application,
+      ),
+    )
   }
 
   function updateApplicationStatus(applicationId: string, status: ApplicationStatus) {
@@ -87,6 +96,7 @@ export function ApplicationsProvider({ children }: { children: ReactNode }) {
         applications,
         interviewProgress,
         addApplication,
+        updateApplicationAppliedDate,
         updateApplicationStatus,
         updateInterviewStage,
         toggleInterviewQuestionPractice,

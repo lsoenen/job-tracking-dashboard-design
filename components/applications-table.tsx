@@ -1,9 +1,11 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { format, parseISO } from "date-fns"
 import { CalendarDays, ChevronDown, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
+import { AppliedDatePicker } from "@/components/applied-date-picker"
 import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
 import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -67,12 +69,18 @@ export function ApplicationsTable() {
   const [filters, setFilters] = useState({
     company: "",
     role: "",
+    appliedDate: "",
     stage: [] as string[],
     nextStep: "",
     due: "",
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
+  const {
+    applications: applicationRows,
+    addApplication,
+    updateApplicationAppliedDate,
+    updateApplicationStatus,
+  } = useApplications()
   const selectedApplication = applicationRows.find((application) => application.id === selectedId)
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -88,6 +96,7 @@ export function ApplicationsTable() {
           application.description ?? "",
           application.sourceUrl ?? "",
           application.status,
+          application.appliedDate ? format(parseISO(application.appliedDate), "MMM d, yyyy") : "",
           application.nextStep,
           application.due,
         ]
@@ -99,6 +108,10 @@ export function ApplicationsTable() {
         matchesQuery &&
         matchesFilter(application.company, filters.company) &&
         matchesFilter(application.role, filters.role) &&
+        matchesFilter(
+          application.appliedDate ? format(parseISO(application.appliedDate), "MMM d, yyyy") : "",
+          filters.appliedDate,
+        ) &&
         (filters.stage.length === 0 || filters.stage.includes(application.status)) &&
         matchesFilter(application.nextStep, filters.nextStep) &&
         matchesFilter(application.due, filters.due)
@@ -106,7 +119,13 @@ export function ApplicationsTable() {
     })
   }, [applicationRows, query, filters])
   const hasActiveFilters = Boolean(
-    query.trim() || filters.stage.length > 0 || filters.company || filters.role || filters.nextStep || filters.due,
+    query.trim() ||
+    filters.stage.length > 0 ||
+    filters.company ||
+    filters.role ||
+    filters.appliedDate ||
+    filters.nextStep ||
+    filters.due,
   )
 
   return (
@@ -140,15 +159,16 @@ export function ApplicationsTable() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left text-sm">
                 <caption className="sr-only">
-                  Job applications with their company, role, stage, next step, and due date.
+                  Job applications with their company, role, applied date, stage, next step, and due date.
                 </caption>
                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th scope="col" className="w-[18%] px-3 py-2 font-medium">Company</th>
-                    <th scope="col" className="w-[22%] px-3 py-2 font-medium">Role</th>
-                    <th scope="col" className="w-[17%] px-3 py-2 font-medium">Stage</th>
-                    <th scope="col" className="w-[27%] px-3 py-2 font-medium">Next step</th>
-                    <th scope="col" className="w-[16%] px-3 py-2 font-medium">Due</th>
+                    <th scope="col" className="w-[15%] px-3 py-2 font-medium">Company</th>
+                    <th scope="col" className="w-[19%] px-3 py-2 font-medium">Role</th>
+                    <th scope="col" className="w-[14%] px-3 py-2 font-medium">Applied date</th>
+                    <th scope="col" className="w-[15%] px-3 py-2 font-medium">Stage</th>
+                    <th scope="col" className="w-[23%] px-3 py-2 font-medium">Next step</th>
+                    <th scope="col" className="w-[14%] px-3 py-2 font-medium">Due</th>
                   </tr>
                   <tr className="border-b border-border">
                     <th scope="col" className="px-3 py-2 align-middle">
@@ -170,6 +190,17 @@ export function ApplicationsTable() {
                         value={filters.role}
                         onChange={(event) => setFilters((current) => ({ ...current, role: event.target.value }))}
                         placeholder="Filter role"
+                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </th>
+                    <th scope="col" className="px-3 py-2 align-middle">
+                      <label className="sr-only" htmlFor="filter-applied-date">Filter by applied date</label>
+                      <input
+                        id="filter-applied-date"
+                        type="search"
+                        value={filters.appliedDate}
+                        onChange={(event) => setFilters((current) => ({ ...current, appliedDate: event.target.value }))}
+                        placeholder="Filter date"
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
@@ -294,6 +325,14 @@ export function ApplicationsTable() {
                           <td className="px-3 py-2">
                             <p className="truncate text-xs text-foreground">{application.role}</p>
                           </td>
+                          <td className="px-2 py-2">
+                            <AppliedDatePicker
+                              value={application.appliedDate}
+                              company={application.company}
+                              role={application.role}
+                              onChange={(appliedDate) => updateApplicationAppliedDate(application.id, appliedDate)}
+                            />
+                          </td>
                           <td className="px-3 py-2">
                             <ApplicationStatusControl application={application} onStatusChange={updateApplicationStatus} />
                           </td>
@@ -311,7 +350,7 @@ export function ApplicationsTable() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-3 py-10 text-center text-xs text-muted-foreground">
+                      <td colSpan={6} className="px-3 py-10 text-center text-xs text-muted-foreground">
                         <p role="status">
                           {hasActiveFilters ? "No applications match these filters." : "No roles in your tracker yet. Mark one as interested on Canvas or add an application to get started."}
                         </p>
