@@ -163,7 +163,7 @@ export function AddApplicationSheet({ onAdd }: { onAdd: (application: NewApplica
     >
       <SheetTrigger render={<Button size="sm" className="w-full sm:w-auto" />}>
         <Plus data-icon="inline-start" aria-hidden="true" />
-        Add application
+        Add
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

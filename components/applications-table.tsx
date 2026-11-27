@@ -1,15 +1,14 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Archive, CalendarDays, ChevronDown, Search } from "lucide-react"
+import { CalendarDays, ChevronDown, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
 import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { applicationStatusClassName } from "@/lib/application-helpers"
@@ -73,24 +72,14 @@ export function ApplicationsTable() {
     due: "",
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [view, setView] = useState<"active" | "graveyard">("active")
   const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
-  const graveyardApplications = useMemo(
-    () => applicationRows.filter((application) => application.status === "Not moving forward"),
-    [applicationRows],
-  )
-  const activeApplications = useMemo(
-    () => applicationRows.filter((application) => application.status !== "Not moving forward"),
-    [applicationRows],
-  )
-  const visibleApplications = view === "active" ? activeApplications : graveyardApplications
-  const selectedApplication = visibleApplications.find((application) => application.id === selectedId)
+  const selectedApplication = applicationRows.find((application) => application.id === selectedId)
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     const matchesFilter = (value: string, filter: string) =>
       value.toLowerCase().includes(filter.trim().toLowerCase())
 
-    return visibleApplications.filter((application) => {
+    return applicationRows.filter((application) => {
       const matchesQuery =
         !normalizedQuery ||
         [
@@ -115,7 +104,7 @@ export function ApplicationsTable() {
         matchesFilter(application.due, filters.due)
       )
     })
-  }, [visibleApplications, query, filters])
+  }, [applicationRows, query, filters])
   const hasActiveFilters = Boolean(
     query.trim() || filters.stage.length > 0 || filters.company || filters.role || filters.nextStep || filters.due,
   )
@@ -124,43 +113,10 @@ export function ApplicationsTable() {
     <Card className="border-border shadow-none">
       <CardHeader className="border-b border-border">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <div>
-              <CardTitle className="text-base">{view === "active" ? "Active applications" : "Application graveyard"}</CardTitle>
-              <CardDescription className="mt-1">
-                {view === "active"
-                  ? "Your current pipeline, prioritized for what’s next."
-                  : "Rejected applications stay here for reference and remain in total application counts."}
-              </CardDescription>
-            </div>
-            <div role="group" aria-label="Application collection" className="inline-flex items-center rounded-md bg-muted p-1">
-              <button
-                type="button"
-                aria-pressed={view === "active"}
-                onClick={() => {
-                  setView("active")
-                  setSelectedId(null)
-                }}
-                className={`rounded px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${view === "active" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                Active <span className="ml-1 tabular-nums">{activeApplications.length}</span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={view === "graveyard"}
-                onClick={() => {
-                  setView("graveyard")
-                  setSelectedId(null)
-                }}
-                className={`rounded px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${view === "graveyard" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                Graveyard <span className="ml-1 tabular-nums">{graveyardApplications.length}</span>
-              </button>
-            </div>
-          </div>
+          <CardTitle className="text-base">Applications ({applicationRows.length})</CardTitle>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <label className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20 sm:w-[260px]">
+            <label className="flex h-7 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20 sm:w-[260px]">
               <Search aria-hidden="true" className="size-4 shrink-0" />
               <span className="sr-only">Search applications</span>
               <input
@@ -177,17 +133,6 @@ export function ApplicationsTable() {
       </CardHeader>
       <CardContent className="p-0">
         <div className={selectedApplication ? "grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" : ""}>
-          {view === "graveyard" && graveyardApplications.length === 0 && !hasActiveFilters ? (
-            <Empty role="status" className="min-h-[280px] border-0">
-              <EmptyHeader>
-                <EmptyMedia variant="icon"><Archive aria-hidden="true" /></EmptyMedia>
-                <EmptyTitle>Your graveyard is empty</EmptyTitle>
-                <EmptyDescription>
-                  When an application is marked “Not moving forward,” it will stay here for reference.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
           <div className="min-w-0">
             <p className="border-b border-border px-4 py-2 text-xs text-muted-foreground sm:hidden">
               Scroll horizontally to see all columns.
@@ -195,7 +140,7 @@ export function ApplicationsTable() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left text-sm">
                 <caption className="sr-only">
-                  {view === "graveyard" ? "Archived job applications" : "Active job applications"} with their company, role, stage, next step, and due date.
+                  Job applications with their company, role, stage, next step, and due date.
                 </caption>
                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                   <tr className="border-b border-border">
@@ -377,10 +322,9 @@ export function ApplicationsTable() {
               </table>
             </div>
             <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
-              Showing {filteredApplications.length} of {visibleApplications.length} {view === "graveyard" ? "archived" : "active"} applications
+              Showing {filteredApplications.length} of {applicationRows.length} applications
             </p>
           </div>
-          )}
           {selectedApplication && (
             <ApplicationPreviewPanel application={selectedApplication} onClose={() => setSelectedId(null)} />
           )}
