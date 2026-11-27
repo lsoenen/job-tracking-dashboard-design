@@ -63,6 +63,7 @@ Staging is a Vercel **preview** deployment of the `staging` branch, with a fixed
    | `SUPABASE_SECRET_KEY` | Supabase secret key (mark it **Sensitive**) |
    | `CRON_SECRET` | Same value as in `.env.local` |
    | `NEXT_PUBLIC_SITE_URL` | `https://pursuit-staging.vercel.app` |
+   | `ANTHROPIC_API_KEY` | Claude API key, used for resume tailoring (mark it **Sensitive**) |
 
 4. **Supabase auth:** under **Authentication → URL Configuration → Redirect URLs**, add `https://pursuit-staging.vercel.app/**`.
 5. **AI features:** under the Vercel team's **AI Gateway** tab, enable it. Deployments authenticate automatically, with no key needed.
