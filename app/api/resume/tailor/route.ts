@@ -6,13 +6,29 @@ import { describeAiError, parseJsonObject } from "@/lib/ai-errors"
 import { createClient } from "@/lib/supabase/server"
 import type { TailoredResume } from "@/lib/tailored-resume"
 
-export const maxDuration = 120
+export const maxDuration = 300
+
+/** Time allowed for one model reply; a second try only happens if this much time is left */
+const ATTEMPT_MS = 120_000
+const MAX_EDITS = 12
 
 const DOWNLOAD_LINK_SECONDS = 300
 
 async function downloadLink(supabase: Awaited<ReturnType<typeof createClient>>, path: string, fileName: string) {
   const { data } = await supabase.storage.from("resumes").createSignedUrl(path, DOWNLOAD_LINK_SECONDS, { download: fileName })
   return data?.signedUrl ?? null
+}
+
+/**
+ * The part of a posting that matters for tailoring: from the first responsibilities or
+ * qualifications heading on, skipping the company boilerplate that usually comes first.
+ */
+function postingCriteria(posting: string) {
+  const heading =
+    /^\s*(?:what you.?ll do|what you will do|responsibilities|the role|in this role|your role|what you.?ll bring|qualifications|requirements|about you|who you are|you have|you might be|skills)\b/im
+  const match = heading.exec(posting)
+  const text = match ? posting.slice(match.index) : posting
+  return text.slice(0, 5000)
 }
 
 function safeFilePart(value: string) {
@@ -95,7 +111,10 @@ export async function POST(request: NextRequest) {
   let reorders: TailorReorder[] = []
   let summary = ""
 
-  const resumeLines = parsed.lines
+  // Only what the model needs: editable lines plus headings for context (no contact details)
+  const resumeLines = parsed.lines.filter((line) => line.editable || line.kind === "heading" || line.group)
+  const criteria = postingCriteria(posting)
+  const startedAt = Date.now()
   const roleLabel = `${application.role} at ${application.company}`
 
   async function askModel() {
@@ -108,16 +127,17 @@ export async function POST(request: NextRequest) {
         "Keep every rewritten line the same length or shorter (never more than a few characters longer), so no line wraps onto a new line and the page count stays the same.",
       ].join(" "),
       prompt: `Return only JSON: {"summary":"one sentence on what you emphasized","edits":[{"id":"","text":""}],"reorders":[{"group":"","order":["id", "..."]}]}
-- Only edit lines marked editable. Leave a line out of "edits" if it's already a good fit.
+- Only edit lines marked editable, at most ${MAX_EDITS} of them: the ones where the posting's language fits best. Leave the rest out.
 - For lines that have "segments" (mixed formatting, e.g. a bold lead-in), return "segments" with the same number of parts instead of "text", keeping each part's role.
 - "order" must list every id in that group exactly once.
 
-Job posting (${roleLabel}), focus on its responsibilities and qualifications:
-${posting.slice(0, 9000)}
+Job posting (${roleLabel}), responsibilities and qualifications:
+${criteria}
 
 Resume lines:
 ${JSON.stringify(resumeLines.map(({ id, kind, text, editable: canEdit, group, segments }) => ({ id, kind, text, ...(canEdit ? { editable: true } : {}), ...(group ? { group } : {}), ...(segments ? { segments } : {}) })))}`,
-      abortSignal: AbortSignal.timeout(55000),
+      maxOutputTokens: 4000,
+      abortSignal: AbortSignal.timeout(ATTEMPT_MS),
     })
     return parseJsonObject<{ summary?: unknown; edits?: unknown; reorders?: unknown }>(text)
   }
@@ -128,7 +148,8 @@ ${JSON.stringify(resumeLines.map(({ id, kind, text, editable: canEdit, group, se
       result = await askModel()
     } catch (error) {
       // Free models occasionally reply with broken JSON: try once more
-      if (!(error instanceof SyntaxError)) throw error
+      // ...but only when there is time left for another full attempt
+      if (!(error instanceof SyntaxError) || Date.now() - startedAt > maxDuration * 1000 - ATTEMPT_MS - 10_000) throw error
       console.warn("Resume tailoring: unusable AI reply, retrying once")
       result = await askModel()
     }

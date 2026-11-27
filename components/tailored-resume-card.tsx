@@ -111,7 +111,7 @@ export function TailoredResumeCard({
           <div role="status" className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-6 text-center">
             <LoaderCircle aria-hidden="true" className="size-6 animate-spin text-primary" />
             <p className="text-sm font-medium">Tailoring your resume…</p>
-            <p className="text-xs text-muted-foreground">Reading the posting and your resume. This can take up to a minute.</p>
+            <p className="text-xs text-muted-foreground">Reading the posting and your resume. This can take up to two minutes.</p>
           </div>
         </CardContent>
       ) : current ? (
