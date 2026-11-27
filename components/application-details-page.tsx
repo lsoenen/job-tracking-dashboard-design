@@ -27,33 +27,34 @@ export function ApplicationDetailsPage({ applicationId }: { applicationId: strin
 
         {application ? (
           <div className="mx-auto max-w-[1180px]">
-            <header className="flex flex-col justify-between gap-5 border-b border-border pb-6 sm:flex-row sm:items-center">
-              <div className="flex min-w-0 items-center gap-4">
-                <Avatar className={`size-14 shrink-0 border border-border ${application.company === "Vercel" ? "bg-black" : "bg-background"}`}>
-                  {application.logo && <AvatarImage src={application.logo} alt={`${application.company} logo`} className="object-contain p-1" />}
-                  <AvatarFallback className="bg-muted text-sm font-medium text-muted-foreground">{application.initials}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-muted-foreground">{application.company}</p>
-                  <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{application.role}</h1>
-                  <p className="mt-1 text-sm text-muted-foreground">Your dedicated workspace for this application</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {jobPostingUrl && (
-                  <a href={jobPostingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline">
-                    View job posting <ExternalLink aria-hidden="true" className="size-3.5" />
-                  </a>
-                )}
-                <Badge variant="outline" className={`w-fit rounded-full px-3 py-1.5 text-sm font-normal ${applicationStatusClassName(application.status)}`}>
-                  {application.status}
-                </Badge>
-              </div>
-            </header>
-
-            <div className="mt-6">
-              <ApplicationWorkspaceTabs application={application} />
-            </div>
+            <ApplicationWorkspaceTabs
+              application={application}
+              header={(
+                <header className="flex flex-col justify-between gap-5 pb-6 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <Avatar className={`size-14 shrink-0 border border-border ${application.company === "Vercel" ? "bg-black" : "bg-background"}`}>
+                      {application.logo && <AvatarImage src={application.logo} alt={`${application.company} logo`} className="object-contain p-1" />}
+                      <AvatarFallback className="bg-muted text-sm font-medium text-muted-foreground">{application.initials}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-muted-foreground">{application.company}</p>
+                      <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{application.role}</h1>
+                      <p className="mt-1 text-sm text-muted-foreground">Your dedicated workspace for this application</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {jobPostingUrl && (
+                      <a href={jobPostingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline">
+                        View job posting <ExternalLink aria-hidden="true" className="size-3.5" />
+                      </a>
+                    )}
+                    <Badge variant="outline" className={`w-fit rounded-full px-3 py-1.5 text-sm font-normal ${applicationStatusClassName(application.status)}`}>
+                      {application.status}
+                    </Badge>
+                  </div>
+                </header>
+              )}
+            />
           </div>
         ) : (
           <Card className="mx-auto max-w-xl border-border shadow-none">

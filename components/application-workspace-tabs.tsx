@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { ArrowUpRight, BriefcaseBusiness, CalendarDays, FileText, MessageSquareText, Sparkles, WandSparkles } from "lucide-react"
 
 import { ApplicationInterviewPrep } from "@/components/application-interview-prep"
@@ -12,14 +12,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { safeExternalUrl } from "@/lib/application-helpers"
 import type { Application } from "@/lib/applications"
 
-export function ApplicationWorkspaceTabs({ application }: { application: Application }) {
+export function ApplicationWorkspaceTabs({
+  application,
+  header,
+}: {
+  application: Application
+  header: ReactNode
+}) {
   const [materialMode, setMaterialMode] = useState<ApplicationMaterialMode | null>(null)
   const jobPostingUrl = safeExternalUrl(application.sourceUrl)
 
   return (
     <>
       <Tabs defaultValue="resources" className="flex flex-col gap-5">
-        <TabsList variant="line" className="w-full justify-start gap-2 border-b border-border p-0 sm:w-fit">
+        <div className="overflow-hidden rounded-xl border border-border bg-card px-5 pt-5 sm:px-7 sm:pt-6">
+          {header}
+          <TabsList variant="line" className="w-full justify-start gap-2 border-b border-border p-0">
           <TabsTrigger value="resources" className="h-11 flex-none gap-2 rounded-none px-3">
             <FileText aria-hidden="true" />
             Resources
@@ -28,7 +36,8 @@ export function ApplicationWorkspaceTabs({ application }: { application: Applica
             <MessageSquareText aria-hidden="true" />
             Interview prep
           </TabsTrigger>
-        </TabsList>
+          </TabsList>
+        </div>
 
         <TabsContent value="resources" className="flex flex-col gap-5">
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
