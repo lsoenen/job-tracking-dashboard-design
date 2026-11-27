@@ -221,7 +221,7 @@ export function JobSearchDashboard() {
             <Card id="insights" className="border-border shadow-none">
               <CardHeader>
                 <h2 className="text-base font-medium tracking-tight">Application pipeline</h2>
-                <CardDescription>Where your {totalApplications} tracked applications stand right now.</CardDescription>
+                <CardDescription>Where your {activeCount} active applications stand right now.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ApplicationOutcomes />

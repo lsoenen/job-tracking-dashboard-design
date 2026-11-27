@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/chart"
 
 const chartConfig = {
-  applied: { label: "Awaiting response", color: "var(--chart-5)" },
-  rejected: { label: "Not moving forward", color: "var(--destructive)" },
+  applications: { label: "Applications", color: "var(--chart-5)" },
   interviewing: { label: "Interviewing", color: "var(--chart-1)" },
   takeHome: { label: "Take-home", color: "var(--warning)" },
   offer: { label: "Offer received", color: "var(--success)" },
@@ -23,14 +22,12 @@ export function ApplicationOutcomes() {
   const { applications } = useApplications()
   const statusCounts = getApplicationStatusCounts(applications)
   const outcomes = [
-    { key: "applied", label: "Awaiting response", value: statusCounts.Applied },
-    { key: "rejected", label: "Not moving forward", value: statusCounts["Not moving forward"] },
+    { key: "applications", label: "Applications", value: statusCounts.Applied },
     { key: "interviewing", label: "Interviewing", value: statusCounts.Interviewing },
     { key: "takeHome", label: "Take-home", value: statusCounts["Take-home"] },
     { key: "offer", label: "Offer received", value: statusCounts.Offer },
   ]
   const totalApplications = outcomes.reduce((total, outcome) => total + outcome.value, 0)
-  const activeApplications = totalApplications - statusCounts["Not moving forward"]
 
   return (
     <div className="grid items-center gap-4 sm:grid-cols-[minmax(180px,0.9fr)_1fr]">
@@ -59,7 +56,7 @@ export function ApplicationOutcomes() {
         </div>
       </div>
 
-      <ul aria-label="Application outcome breakdown" className="flex flex-col gap-3.5">
+      <ul aria-label="Active application status breakdown" className="flex flex-col gap-3.5">
         {outcomes.map((outcome) => {
           const percentage = totalApplications === 0 ? 0 : Math.round((outcome.value / totalApplications) * 100)
 
@@ -79,10 +76,6 @@ export function ApplicationOutcomes() {
             </li>
           )
         })}
-        <li className="mt-1 flex items-center justify-between border-t border-border pt-3 text-sm">
-          <span className="text-muted-foreground">Still active</span>
-          <span className="font-medium tabular-nums">{activeApplications}</span>
-        </li>
       </ul>
     </div>
   )
