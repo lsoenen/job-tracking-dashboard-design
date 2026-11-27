@@ -71,5 +71,10 @@ export function useApplicationMaterials(applicationId: string) {
     [applicationId],
   )
 
-  return { materials, status, saveMaterial }
+  /** Keep a draft the server already saved (e.g. a tailored resume), so it survives tab switches */
+  const rememberMaterial = useCallback((kind: MaterialKind, content: unknown, updatedAt: string) => {
+    setMaterials((current) => ({ ...current, [kind]: { content, updatedAt } }))
+  }, [])
+
+  return { materials, status, saveMaterial, rememberMaterial }
 }

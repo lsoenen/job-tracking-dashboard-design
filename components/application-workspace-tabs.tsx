@@ -26,7 +26,7 @@ export function ApplicationWorkspaceTabs({
 }) {
   const [materialMode, setMaterialMode] = useState<ApplicationMaterialMode | null>(null)
   const [generateOnOpen, setGenerateOnOpen] = useState(false)
-  const { materials, status: materialsStatus, saveMaterial } = useApplicationMaterials(application.id)
+  const { materials, status: materialsStatus, saveMaterial, rememberMaterial } = useApplicationMaterials(application.id)
 
   function openMaterial(mode: ApplicationMaterialMode, generate: boolean) {
     setGenerateOnOpen(generate)
@@ -82,6 +82,7 @@ export function ApplicationWorkspaceTabs({
                   application={application}
                   saved={materials.resume?.content}
                   isLoading={materialsStatus === "loading"}
+                  onTailored={(resume) => rememberMaterial("resume", resume, resume.generatedAt)}
                 />
               </div>
 

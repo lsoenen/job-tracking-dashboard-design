@@ -142,7 +142,10 @@ export function detailsFromPosting(facts: PostingFacts): JobDetails {
   const text = facts.description ?? ""
   const details: JobDetails = { ...salaryFromText(text) }
 
-  const location = facts.location?.split("•").map((part) => part.trim()).filter(Boolean).join(", ")
+  // A structured location wins; otherwise look for a "Location: …" line in the text
+  const location =
+    facts.location?.split("•").map((part) => part.trim()).filter(Boolean).join(", ") ||
+    text.match(/^\s*(?:locations?|based in|office location|where)\s*[:\-–]\s*(.{3,100})$/im)?.[1]?.trim()
   if (location) details.location = location
 
   if (facts.isRemote || /\bremote\b/i.test(facts.location ?? "")) details.workArrangement = "Remote"

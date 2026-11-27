@@ -59,10 +59,16 @@ export function JobDescriptionCard({
             )}
           </div>
           {text && !editing && (
-            <Button type="button" size="sm" variant="ghost" onClick={startEditing}>
-              <Pencil data-icon="inline-start" aria-hidden="true" />
-              Edit
-            </Button>
+            <div className="flex gap-1">
+              <Button type="button" size="sm" variant="ghost" onClick={onImport}>
+                <Download data-icon="inline-start" aria-hidden="true" />
+                Import posting
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={startEditing}>
+                <Pencil data-icon="inline-start" aria-hidden="true" />
+                Edit
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>

@@ -27,11 +27,14 @@ export function TailoredResumeCard({
   application,
   saved,
   isLoading,
+  onTailored,
 }: {
   application: Application
   /** The saved "resume" material, which may be an older text draft */
   saved?: unknown
   isLoading: boolean
+  /** Called with each newly tailored resume, so the page keeps it */
+  onTailored?: (resume: TailoredResume) => void
 }) {
   const { profile } = useJobProfile()
   const [resume, setResume] = useState<TailoredResume | null>(isTailored(saved) ? saved : null)
@@ -39,7 +42,10 @@ export function TailoredResumeCard({
   const [isDownloading, setIsDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showChanges, setShowChanges] = useState(false)
-  const current = resume ?? (isTailored(saved) ? saved : null)
+  // Newest wins: whatever the page has saved, or a result produced in this card
+  const savedResume = isTailored(saved) ? saved : null
+  const current =
+    resume && (!savedResume || resume.generatedAt >= savedResume.generatedAt) ? resume : (savedResume ?? resume)
   const hasWordResume = Boolean(profile.resume?.path && /\.docx$/i.test(profile.resume.path))
 
   async function tailor() {
@@ -54,6 +60,7 @@ export function TailoredResumeCard({
       const payload = (await response.json()) as { resume?: TailoredResume; url?: string; error?: string }
       if (!response.ok || !payload.resume) throw new Error(payload.error || "Your resume couldn't be tailored.")
       setResume(payload.resume)
+      onTailored?.(payload.resume)
       setShowChanges(true)
       toast.success("Tailored resume ready", {
         action: payload.url ? { label: "Download", onClick: () => startDownload(payload.url!) } : undefined,

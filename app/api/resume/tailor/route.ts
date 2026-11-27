@@ -225,7 +225,10 @@ ${JSON.stringify(resumeLines.map(({ id, kind, text, editable: canEdit, group, se
   const { error: saveError } = await supabase
     .from("application_materials")
     .upsert({ application_id: applicationId, kind: "resume", content }, { onConflict: "application_id,kind" })
-  if (saveError) console.error("Saving tailored resume record failed:", saveError.message)
+  if (saveError) {
+    console.error("Saving tailored resume record failed:", saveError.message)
+    return NextResponse.json({ error: "The tailored resume couldn't be saved. Please try again." }, { status: 500 })
+  }
 
   return NextResponse.json({ resume: content, url: await downloadLink(supabase, path, fileName) })
 }
