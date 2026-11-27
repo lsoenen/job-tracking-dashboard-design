@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { applyTailoring, DOCX_MIME, parseResume, type TailorChange, type TailorEdit, type TailorReorder } from "@/lib/resume-docx"
 import { claudeIsConfigured, claudeNotConfigured, describeClaudeError } from "@/lib/ai-errors"
+import { postingCriteria } from "@/lib/posting-criteria"
 import { createClient } from "@/lib/supabase/server"
 import { z } from "zod"
 import type { TailoredResume } from "@/lib/tailored-resume"
@@ -41,18 +42,6 @@ const DOWNLOAD_LINK_SECONDS = 300
 async function downloadLink(supabase: Awaited<ReturnType<typeof createClient>>, path: string, fileName: string) {
   const { data } = await supabase.storage.from("resumes").createSignedUrl(path, DOWNLOAD_LINK_SECONDS, { download: fileName })
   return data?.signedUrl ?? null
-}
-
-/**
- * The part of a posting that matters for tailoring: from the first responsibilities or
- * qualifications heading on, skipping the company boilerplate that usually comes first.
- */
-function postingCriteria(posting: string) {
-  const heading =
-    /^\s*(?:what you.?ll do|what you will do|responsibilities|the role|in this role|your role|what you.?ll bring|qualifications|requirements|about you|who you are|you have|you might be|skills)\b/im
-  const match = heading.exec(posting)
-  const text = match ? posting.slice(match.index) : posting
-  return text.slice(0, 5000)
 }
 
 function safeFilePart(value: string) {

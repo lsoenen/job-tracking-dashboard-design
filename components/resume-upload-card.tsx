@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input"
 import type { ResumeAttachment } from "@/lib/job-profile"
 
 type ResumeUploadCardProps = {
+  /** Which document this card is for; defaults to the resume */
+  kind?: "resume" | "cover-letter"
   resume: ResumeAttachment | null
   isPendingUpload: boolean
   error: string
@@ -30,14 +32,33 @@ function formatFileSize(sizeBytes: number) {
   return `${Math.max(1, Math.round(sizeBytes / 1024))} KB`
 }
 
-export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelected, onOpen }: ResumeUploadCardProps) {
+const cardText = {
+  resume: {
+    title: "Resume",
+    description: "Upload your resume as a Word file (.docx). Only you can see it.",
+    empty: "No resume uploaded yet.",
+    noun: "resume",
+    help: "Word (.docx) only, up to 10 MB. Google Docs: File → Download → Microsoft Word. Tailoring keeps your exact design.",
+  },
+  "cover-letter": {
+    title: "Sample cover letter",
+    description: "A cover letter you've written before. New letters follow its voice, style, and layout.",
+    empty: "No sample cover letter yet.",
+    noun: "sample letter",
+    help: "Word (.docx) only, up to 10 MB. Use one you're proud of: generated letters copy its tone and design.",
+  },
+} as const
+
+export function ResumeUploadCard({ kind = "resume", resume, isPendingUpload, error, onFileSelected, onOpen }: ResumeUploadCardProps) {
+  const text = cardText[kind]
+  const inputId = `${kind}-upload`
   return (
     <Card>
       <CardHeader>
         <CardTitle role="heading" aria-level={2}>
-          Resume
+          {text.title}
         </CardTitle>
-        <CardDescription>Upload your resume as a Word file (.docx). Only you can see it.</CardDescription>
+        <CardDescription>{text.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {resume ? (
@@ -51,7 +72,7 @@ export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelecte
               {/\.pdf$/i.test(resume.name) ? "PDF" : "Word"} · {formatFileSize(resume.sizeBytes)} · Updated {resume.lastUpdated}
             </p>
             {/\.pdf$/i.test(resume.name) && (
-              <p className="mt-2 text-xs text-warning">Upload the Word (.docx) version to tailor it for each role.</p>
+              <p className="mt-2 text-xs text-warning">Upload the Word (.docx) version to use it for each role.</p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge variant="outline">{isPendingUpload ? "Uploads when you save" : "Saved"}</Badge>
@@ -65,25 +86,23 @@ export function ResumeUploadCard({ resume, isPendingUpload, error, onFileSelecte
           </div>
         </div>
         ) : (
-          <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">No resume uploaded yet.</p>
+          <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">{text.empty}</p>
         )}
 
         <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="resume-upload">{resume ? "Replace resume" : "Upload resume"}</FieldLabel>
+          <FieldLabel htmlFor={inputId}>{resume ? `Replace ${text.noun}` : `Upload ${text.noun}`}</FieldLabel>
           <Input
-            id="resume-upload"
+            id={inputId}
             type="file"
             accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            aria-describedby="resume-upload-help"
+            aria-describedby={`${inputId}-help`}
             aria-invalid={Boolean(error)}
             onChange={(event) => {
               const file = event.currentTarget.files?.[0]
               if (file) onFileSelected(file)
             }}
           />
-          <FieldDescription id="resume-upload-help">
-            Word (.docx) only, up to 10 MB. Google Docs: File → Download → Microsoft Word. Tailoring keeps your exact design.
-          </FieldDescription>
+          <FieldDescription id={`${inputId}-help`}>{text.help}</FieldDescription>
           {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
         </Field>
       </CardContent>

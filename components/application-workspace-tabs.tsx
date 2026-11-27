@@ -1,14 +1,13 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { type ReactNode } from "react"
 import { ArrowUpRight, BriefcaseBusiness, CalendarDays, FileText, MessageSquareText, Sparkles, SquareChartGantt, Users } from "lucide-react"
 
 import { ApplicationInterviewPrep } from "@/components/application-interview-prep"
 import { ApplicationNetworking } from "@/components/application-networking"
 import { ApplicationOverview } from "@/components/application-overview"
-import { ApplicationMaterialCard } from "@/components/application-material-card"
+import { CoverLetterCard } from "@/components/cover-letter-card"
 import { TailoredResumeCard } from "@/components/tailored-resume-card"
-import { ApplicationMaterialsDialog, type ApplicationMaterialMode } from "@/components/application-materials-dialog"
 import { useApplicationMaterials } from "@/components/use-application-materials"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,14 +23,7 @@ export function ApplicationWorkspaceTabs({
   application: Application
   header: ReactNode
 }) {
-  const [materialMode, setMaterialMode] = useState<ApplicationMaterialMode | null>(null)
-  const [generateOnOpen, setGenerateOnOpen] = useState(false)
-  const { materials, status: materialsStatus, saveMaterial, rememberMaterial } = useApplicationMaterials(application.id)
-
-  function openMaterial(mode: ApplicationMaterialMode, generate: boolean) {
-    setGenerateOnOpen(generate)
-    setMaterialMode(mode)
-  }
+  const { materials, status: materialsStatus, rememberMaterial } = useApplicationMaterials(application.id)
   const jobPostingUrl = safeExternalUrl(application.sourceUrl)
 
   return (
@@ -71,12 +63,11 @@ export function ApplicationWorkspaceTabs({
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
             <div className="flex min-w-0 flex-col gap-5">
               <div className="grid items-start gap-4 md:grid-cols-2">
-                <ApplicationMaterialCard
-                  kind="cover-letter"
-                  saved={materials["cover-letter"]}
+                <CoverLetterCard
+                  application={application}
+                  saved={materials["cover-letter"]?.content}
                   isLoading={materialsStatus === "loading"}
-                  onOpen={() => openMaterial("cover-letter", false)}
-                  onGenerate={() => openMaterial("cover-letter", true)}
+                  onGenerated={(letter) => rememberMaterial("cover-letter", letter, letter.generatedAt)}
                 />
                 <TailoredResumeCard
                   application={application}
@@ -152,18 +143,6 @@ export function ApplicationWorkspaceTabs({
         </div>
       </Tabs>
 
-      {materialMode && (
-        <ApplicationMaterialsDialog
-          application={application}
-          mode={materialMode}
-          saved={materials}
-          onSave={saveMaterial}
-          generateOnOpen={generateOnOpen}
-          onOpenChange={(open) => {
-            if (!open) setMaterialMode(null)
-          }}
-        />
-      )}
     </>
   )
 }

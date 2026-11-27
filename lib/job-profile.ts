@@ -28,4 +28,6 @@ export type JobProfile = {
   background: string
   weeklyApplicationGoal: number
   resume: ResumeAttachment | null
+  /** A sample cover letter (.docx) whose voice and design generated letters follow */
+  coverLetter: ResumeAttachment | null
 }

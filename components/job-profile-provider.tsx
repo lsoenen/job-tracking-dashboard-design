@@ -13,7 +13,7 @@ type JobProfileContextValue = {
   /** Temporary link to the profile photo, or null when there isn't one */
   avatarUrl: string | null
   /** Saves profile fields and, if given, uploads a new resume (.docx). Returns an error message or null. */
-  saveProfile: (profile: JobProfile, resumeFile?: File | null) => Promise<string | null>
+  saveProfile: (profile: JobProfile, resumeFile?: File | null, coverLetterFile?: File | null) => Promise<string | null>
   getResumeUrl: () => Promise<string | null>
   /** Crops, shrinks and saves a new profile photo right away. Returns an error message or null. */
   uploadAvatar: (file: File) => Promise<string | null>
@@ -83,7 +83,7 @@ export function JobProfileProvider({
     return null
   }
 
-  async function saveProfile(nextProfile: JobProfile, resumeFile?: File | null) {
+  async function saveProfile(nextProfile: JobProfile, resumeFile?: File | null, coverLetterFile?: File | null) {
     const update: Record<string, unknown> = profileToRow(nextProfile)
 
     if (resumeFile) {
@@ -104,6 +104,26 @@ export function JobProfileProvider({
       update.resume_name = resumeFile.name
       update.resume_size_bytes = resumeFile.size
       update.resume_updated_at = new Date().toISOString()
+    }
+
+    if (coverLetterFile) {
+      const path = `${userId}/cover-letter.docx`
+      const { error: uploadError } = await supabase.storage
+        .from("resumes")
+        .upload(path, coverLetterFile, {
+          upsert: true,
+          contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+
+      if (uploadError) {
+        console.error("Cover letter upload failed:", uploadError.message)
+        return "Your sample cover letter couldn't be uploaded. Please try again."
+      }
+
+      update.cover_letter_path = path
+      update.cover_letter_name = coverLetterFile.name
+      update.cover_letter_size_bytes = coverLetterFile.size
+      update.cover_letter_updated_at = new Date().toISOString()
     }
 
     const { data, error } = await supabase

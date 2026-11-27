@@ -43,7 +43,7 @@ type Paragraph = {
 const DOCUMENT = "word/document.xml"
 const bulletChars = /^[\s]*[•▪●◦‣∙·\-–—*]\s+/
 
-function decodeXml(value: string) {
+export function decodeXml(value: string) {
   return value
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
@@ -54,12 +54,12 @@ function decodeXml(value: string) {
     .replace(/&amp;/g, "&")
 }
 
-function encodeXml(value: string) {
+export function encodeXml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
 /** Innermost <w:p> elements, found with depth tracking so text boxes and nested content are handled */
-function findParagraphs(xml: string) {
+export function findParagraphs(xml: string) {
   const found: { start: number; end: number }[] = []
   const stack: { start: number; hasChild: boolean }[] = []
   const tag = /<w:p(?=[\s>/])[^>]*?(\/?)>|<\/w:p>/g
@@ -80,7 +80,7 @@ function findParagraphs(xml: string) {
   return found.sort((left, right) => left.start - right.start)
 }
 
-function parseRuns(paragraphXml: string): Run[] {
+export function parseRuns(paragraphXml: string): Run[] {
   const runs: Run[] = []
   const runPattern = /<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g
 
@@ -112,7 +112,7 @@ function parseRuns(paragraphXml: string): Run[] {
 const unsafeContent = /<w:hyperlink|<w:fldSimple|<w:instrText|<w:fldChar|<w:drawing|<w:pict|<mc:AlternateContent|<w:sym|<w:br\/>|<w:ptab|<w:object|<w:ins |<w:del /
 
 /** Text with tabs shown as "\t", in document order */
-function textWithTabs(paragraphXml: string) {
+export function textWithTabs(paragraphXml: string) {
   let text = ""
   const token = /<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>|<w:tab\/>/g
   for (let match = token.exec(paragraphXml); match; match = token.exec(paragraphXml)) {

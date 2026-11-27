@@ -34,6 +34,10 @@ export type ProfileRow = {
   resume_name: string | null
   resume_size_bytes: number | null
   resume_updated_at: string | null
+  cover_letter_path: string | null
+  cover_letter_name: string | null
+  cover_letter_size_bytes: number | null
+  cover_letter_updated_at: string | null
 }
 
 type StatusEventRow = {
@@ -50,7 +54,7 @@ export const applicationColumns =
   "id, company, role, logo, description, source_url, company_url, canvas_job_id, status, interview_stage, applied_date, next_step, due_date"
 
 export const profileColumns =
-  "full_name, headline, location, years_experience, skills, background, weekly_application_goal, resume_path, resume_name, resume_size_bytes, resume_updated_at"
+  "full_name, headline, location, years_experience, skills, background, weekly_application_goal, resume_path, resume_name, resume_size_bytes, resume_updated_at, cover_letter_path, cover_letter_name, cover_letter_size_bytes, cover_letter_updated_at"
 
 /** Profile photos live in the private "avatars" bucket; links to them expire after this many seconds */
 export const avatarLinkLifetime = 60 * 60 * 24
@@ -129,20 +133,21 @@ export function profileFromRow(row: ProfileRow | null): JobProfile {
     skills: row?.skills ?? "",
     background: row?.background ?? "",
     weeklyApplicationGoal: row?.weekly_application_goal ?? 5,
-    resume:
-      row?.resume_path && row.resume_name
-        ? {
-            path: row.resume_path,
-            name: row.resume_name,
-            sizeBytes: row.resume_size_bytes ?? 0,
-            lastUpdated: row.resume_updated_at
-              ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
-                  new Date(row.resume_updated_at),
-                )
-              : "",
-            isPlaceholder: false,
-          }
-        : null,
+    resume: attachmentFrom(row?.resume_path, row?.resume_name, row?.resume_size_bytes, row?.resume_updated_at),
+    coverLetter: attachmentFrom(row?.cover_letter_path, row?.cover_letter_name, row?.cover_letter_size_bytes, row?.cover_letter_updated_at),
+  }
+}
+
+function attachmentFrom(path?: string | null, name?: string | null, sizeBytes?: number | null, updatedAt?: string | null) {
+  if (!path || !name) return null
+  return {
+    path,
+    name,
+    sizeBytes: sizeBytes ?? 0,
+    lastUpdated: updatedAt
+      ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(updatedAt))
+      : "",
+    isPlaceholder: false,
   }
 }
 

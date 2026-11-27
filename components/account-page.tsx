@@ -21,11 +21,44 @@ export function AccountPage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [resumeError, setResumeError] = useState("")
+  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null)
+  const [coverLetterError, setCoverLetterError] = useState("")
   const [saveMessage, setSaveMessage] = useState("")
 
   function updateDraft(patch: Partial<JobProfile>) {
     setDraft((current) => ({ ...current, ...patch }))
     setSaveMessage("")
+  }
+
+/** Why a file can't be used as a Word document, or "" when it's fine */
+  function wordFileProblem(file: File) {
+    const isWord =
+      file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      file.name.toLowerCase().endsWith(".docx")
+    if (!isWord) {
+      return file.name.toLowerCase().endsWith(".doc")
+        ? "Older .doc files aren't supported. In Word, use File → Save As → Word Document (.docx)."
+        : "Choose a Word file (.docx). From Google Docs: File → Download → Microsoft Word."
+    }
+    if (file.size > maximumResumeSize) return "Choose a Word file smaller than 10 MB."
+    return ""
+  }
+
+  function handleCoverLetterSelect(file: File) {
+    const problem = wordFileProblem(file)
+    setCoverLetterError(problem)
+    setSaveMessage("")
+    if (problem) return
+
+    setCoverLetterFile(file)
+    updateDraft({
+      coverLetter: {
+        name: file.name,
+        sizeBytes: file.size,
+        lastUpdated: new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date()),
+        isPlaceholder: false,
+      },
+    })
   }
 
   function handleResumeSelect(file: File) {
@@ -72,7 +105,7 @@ export function AccountPage() {
     event.preventDefault()
     setIsSaving(true)
     setSaveMessage("")
-    const error = await saveProfile(draft, resumeFile)
+    const error = await saveProfile(draft, resumeFile, coverLetterFile)
     setIsSaving(false)
 
     if (error) {
@@ -81,6 +114,7 @@ export function AccountPage() {
     }
 
     setResumeFile(null)
+    setCoverLetterFile(null)
     setSaveMessage("Profile saved. Recommended role scores will use these details.")
   }
 
@@ -113,6 +147,13 @@ export function AccountPage() {
                 error={resumeError}
                 onFileSelected={handleResumeSelect}
                 onOpen={profile.resume?.path && !resumeFile ? openResume : undefined}
+              />
+              <ResumeUploadCard
+                kind="cover-letter"
+                resume={draft.coverLetter}
+                isPendingUpload={Boolean(coverLetterFile)}
+                error={coverLetterError}
+                onFileSelected={handleCoverLetterSelect}
               />
             </div>
           </div>
