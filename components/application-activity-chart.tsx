@@ -17,8 +17,8 @@ const activity = [
 ]
 
 const chartConfig = {
-  applications: { label: "Applications sent", color: "var(--chart-1)" },
-  responses: { label: "Responses received", color: "var(--success)" },
+  applications: { label: "Applications sent", color: "var(--chart-5)" },
+  responses: { label: "Responses received", color: "var(--chart-1)" },
 } satisfies ChartConfig
 
 export function ApplicationActivityChart() {
@@ -48,11 +48,11 @@ export function ApplicationActivityChart() {
       </ChartContainer>
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground" aria-label="Chart legend">
         <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="size-2.5 rounded-sm bg-chart-1" />
+          <span aria-hidden="true" className="size-2.5 rounded-sm bg-chart-5" />
           Applications sent
         </span>
         <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="size-2.5 rounded-sm bg-success" />
+          <span aria-hidden="true" className="size-2.5 rounded-sm bg-chart-1" />
           Responses received
         </span>
       </div>
