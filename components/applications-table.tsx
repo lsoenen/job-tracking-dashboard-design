@@ -110,7 +110,7 @@ export function ApplicationsTable() {
   )
 
   return (
-    <Card className="border-border shadow-none">
+    <Card className="gap-0 border-border shadow-none">
       <CardHeader className="border-b border-border">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">Applications ({applicationRows.length})</CardTitle>
