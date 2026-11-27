@@ -9,6 +9,7 @@ import {
 
 import { ApplicationActivityChart } from "@/components/application-activity-chart"
 import { useApplications } from "@/components/applications-provider"
+import { useJobProfile } from "@/components/job-profile-provider"
 import { getApplicationStatusCounts, getTrackedApplications } from "@/lib/application-helpers"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { ActiveApplications } from "@/components/active-applications"
@@ -153,6 +154,8 @@ function NextSteps() {
 
 export function JobSearchDashboard() {
   const { applications } = useApplications()
+  const { profile } = useJobProfile()
+  const firstName = profile.fullName.trim().split(/\s+/)[0]
   const trackedApplications = getTrackedApplications(applications)
   const statusCounts = getApplicationStatusCounts(applications)
   const totalApplications = trackedApplications.length
@@ -196,7 +199,9 @@ export function JobSearchDashboard() {
         <main id="top" className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
           <section aria-labelledby="page-title" className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Your search, in focus.</h1>
+              <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">
+                Welcome{firstName ? `, ${firstName}` : ""}.
+              </h1>
               <p className="mt-2 text-sm text-muted-foreground">See what&apos;s moving. Know what&apos;s next.</p>
             </div>
             <div className="flex items-center gap-2">
