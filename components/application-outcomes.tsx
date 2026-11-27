@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/chart"
 
 const chartConfig = {
-  applications: { label: "Awaiting response", color: "var(--warning)" },
-  interviewing: { label: "Interviewing", color: "var(--chart-1)" },
-  takeHome: { label: "Take-home", color: "var(--info)" },
-  offer: { label: "Offer received", color: "var(--success)" },
+  applications: { label: "Awaiting response", color: "var(--status-applied)" },
+  interviewing: { label: "Interviewing", color: "var(--status-interviewing)" },
+  takeHome: { label: "Take-home", color: "var(--status-take-home)" },
+  offer: { label: "Offer received", color: "var(--status-offer)" },
 } satisfies ChartConfig
 
 export function ApplicationOutcomes() {
