@@ -86,6 +86,12 @@ export function JobProfileProvider({
   async function saveProfile(nextProfile: JobProfile, resumeFile?: File | null, coverLetterFile?: File | null) {
     const update: Record<string, unknown> = profileToRow(nextProfile)
 
+    // Uploads are checked against your sign-in; make sure it's still valid first
+    if (resumeFile || coverLetterFile) {
+      const { data: auth } = await supabase.auth.getUser()
+      if (auth.user?.id !== userId) return "Your sign-in has expired. Log out and back in, then save again."
+    }
+
     if (resumeFile) {
       const path = `${userId}/resume.docx`
       const { error: uploadError } = await supabase.storage
@@ -97,7 +103,9 @@ export function JobProfileProvider({
 
       if (uploadError) {
         console.error("Resume upload failed:", uploadError.message)
-        return "Your resume couldn't be uploaded. Please try again."
+        return /row-level security|jwt|unauthori[sz]ed/i.test(uploadError.message)
+          ? "Your sign-in has expired. Log out and back in, then save again."
+          : "Your resume couldn't be uploaded. Please try again."
       }
 
       update.resume_path = path
@@ -117,7 +125,9 @@ export function JobProfileProvider({
 
       if (uploadError) {
         console.error("Cover letter upload failed:", uploadError.message)
-        return "Your sample cover letter couldn't be uploaded. Please try again."
+        return /row-level security|jwt|unauthori[sz]ed/i.test(uploadError.message)
+          ? "Your sign-in has expired. Log out and back in, then save again."
+          : "Your sample cover letter couldn't be uploaded. Please try again."
       }
 
       update.cover_letter_path = path

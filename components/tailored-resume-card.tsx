@@ -57,7 +57,7 @@ export function TailoredResumeCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ applicationId: application.id }),
       })
-      const payload = (await response.json()) as { resume?: TailoredResume; url?: string; error?: string }
+      const payload = (await response.json().catch(() => ({ error: `The server had a problem (${response.status}). Please try again.` }))) as { resume?: TailoredResume; url?: string; error?: string }
       if (!response.ok || !payload.resume) throw new Error(payload.error || "Your resume couldn't be tailored.")
       setResume(payload.resume)
       onTailored?.(payload.resume)
@@ -76,7 +76,7 @@ export function TailoredResumeCard({
     setIsDownloading(true)
     try {
       const response = await fetch(`/api/resume/tailor?applicationId=${encodeURIComponent(application.id)}`)
-      const payload = (await response.json()) as { url?: string; error?: string }
+      const payload = (await response.json().catch(() => ({ error: `The server had a problem (${response.status}). Please try again.` }))) as { url?: string; error?: string }
       if (!response.ok || !payload.url) throw new Error(payload.error)
       startDownload(payload.url)
     } catch {

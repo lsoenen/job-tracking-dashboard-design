@@ -57,7 +57,7 @@ export function CoverLetterCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ applicationId: application.id }),
       })
-      const payload = (await response.json()) as { letter?: GeneratedCoverLetter; url?: string; error?: string }
+      const payload = (await response.json().catch(() => ({ error: `The server had a problem (${response.status}). Please try again.` }))) as { letter?: GeneratedCoverLetter; url?: string; error?: string }
       if (!response.ok || !payload.letter) throw new Error(payload.error || "The cover letter couldn't be written.")
       setLatest(payload.letter)
       onGenerated?.(payload.letter)
@@ -76,7 +76,7 @@ export function CoverLetterCard({
     setIsDownloading(true)
     try {
       const response = await fetch(`/api/cover-letter?applicationId=${encodeURIComponent(application.id)}`)
-      const payload = (await response.json()) as { url?: string; error?: string }
+      const payload = (await response.json().catch(() => ({ error: `The server had a problem (${response.status}). Please try again.` }))) as { url?: string; error?: string }
       if (!response.ok || !payload.url) throw new Error(payload.error)
       startDownload(payload.url)
     } catch {
