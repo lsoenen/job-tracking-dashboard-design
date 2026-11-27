@@ -54,27 +54,22 @@ const nextSteps = [
 
 function WeeklyFocusWidget() {
   return (
-    <Card className="mb-5 border-primary/15 bg-primary/[0.04] shadow-none">
-      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-6">
-        <div className="flex shrink-0 items-center justify-between gap-3 sm:min-w-56">
-          <div>
-            <p className="text-sm font-medium">A little closer, every day.</p>
-            <p className="mt-1 text-xs text-muted-foreground">Weekly focus actions</p>
-          </div>
-          <span className="text-sm font-medium tabular-nums text-primary">3/5</span>
-        </div>
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+    <Card className="mb-5 border-border bg-muted/20 shadow-none">
+      <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2.5">
+        <p className="text-xs font-medium text-muted-foreground">A little closer, every day.</p>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
+          <p className="text-sm">Applications submitted this week</p>
+          <span className="text-sm font-medium tabular-nums text-primary">2/5</span>
           <div
             role="progressbar"
-            aria-label="Weekly focus progress"
+            aria-label="Applications submitted this week"
             aria-valuemin={0}
             aria-valuemax={5}
-            aria-valuenow={3}
-            className="h-1.5 min-w-12 flex-1 overflow-hidden rounded-full bg-primary/15"
+            aria-valuenow={2}
+            className="h-1.5 min-w-12 flex-1 overflow-hidden rounded-full bg-primary/10 sm:max-w-36"
           >
-            <div className="h-full w-3/5 rounded-full bg-primary" />
+            <div className="h-full w-2/5 rounded-full bg-primary" />
           </div>
-          <p className="shrink-0 text-xs text-muted-foreground"><span className="font-medium text-primary">2 more</span> to reach your goal</p>
         </div>
       </CardContent>
     </Card>
