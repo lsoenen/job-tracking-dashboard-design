@@ -55,17 +55,26 @@ export function parseJsonObject<T>(text: string): T {
 // Claude (Anthropic SDK)
 // ---------------------------------------------------------------------------
 
+/** No key is visible to this deployment at all */
 const claudeNotConfigured: AiFailure = {
-  code: "ai-not-configured",
+  code: "ai-key-missing",
   message:
-    "Claude isn't set up for this site yet. Add an ANTHROPIC_API_KEY environment variable in Vercel (and .env.local for local use), then redeploy.",
+    "This deployment can't see an ANTHROPIC_API_KEY. In Vercel → Settings → Environment Variables, check the name is exactly ANTHROPIC_API_KEY and that it's enabled for Preview (staging), then redeploy.",
+  status: 503,
+}
+
+/** A key is present, but Anthropic rejected it */
+const claudeKeyRejected: AiFailure = {
+  code: "ai-key-rejected",
+  message:
+    "Anthropic rejected the API key. Check it was copied completely (it starts with sk-ant-) and hasn't been deleted in the Claude Console, update it in Vercel, then redeploy.",
   status: 503,
 }
 
 /** Typed Anthropic SDK errors, most specific first, mapped to something a person can act on */
 export function describeClaudeError(error: unknown): AiFailure {
   if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) {
-    return claudeNotConfigured
+    return claudeKeyRejected
   }
   if (error instanceof Anthropic.RateLimitError) {
     return { code: "ai-rate-limited", message: "Claude is handling a lot of requests right now. Wait a minute and try again.", status: 429 }
@@ -93,7 +102,7 @@ export function describeClaudeError(error: unknown): AiFailure {
 }
 
 export function claudeIsConfigured() {
-  return Boolean(process.env.ANTHROPIC_API_KEY)
+  return Boolean(process.env.ANTHROPIC_API_KEY?.trim())
 }
 
 export { claudeNotConfigured }
