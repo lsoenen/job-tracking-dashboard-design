@@ -42,11 +42,10 @@ type ApplicationReadinessChecklistProps = {
   completedTaskIds: string[]
   onTaskChange: (taskId: string, isComplete: boolean) => void
   onPrepare: (mode: ApplicationMaterialMode) => void
-  hasContacts: boolean
   onContacts: () => void
 }
 
-function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskChange, onPrepare, hasContacts, onContacts }: ApplicationReadinessChecklistProps) {
+function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskChange, onPrepare, onContacts }: ApplicationReadinessChecklistProps) {
   const completedCount = readinessTasks.filter((task) => completedTaskIds.includes(task.id)).length
   const progressPercent = Math.round((completedCount / readinessTasks.length) * 100)
   const isReady = completedCount === readinessTasks.length
@@ -110,7 +109,7 @@ function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskCh
               >
                 {task.label}
               </label>
-              {task.id === "contact-hiring-manager" && hasContacts && (
+              {task.id === "contact-hiring-manager" && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -161,8 +160,6 @@ type WishlistCardProps = {
 
 function WishlistCard({ application, completedTaskIds, onPrepare, onContacts, onReadinessTaskChange, onStatusChange }: WishlistCardProps) {
   const companyUrl = safeExternalUrl(application.companyUrl)
-  const hasContacts = canvasJobs.some((job) => job.id === application.canvasJobId)
-
   return (
     <Card className="flex h-full flex-col border-border shadow-none">
       <CardHeader className="flex flex-row items-start justify-between gap-3">
@@ -202,7 +199,6 @@ function WishlistCard({ application, completedTaskIds, onPrepare, onContacts, on
           completedTaskIds={completedTaskIds}
           onTaskChange={(taskId, isComplete) => onReadinessTaskChange(application.id, taskId, isComplete)}
           onPrepare={(mode) => onPrepare(application, mode)}
-          hasContacts={hasContacts}
           onContacts={() => onContacts(application)}
         />
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-4">
@@ -256,9 +252,9 @@ export function WishlistPage() {
     setContactsRequest(application)
   }
 
-  const contactsJob = contactsRequest
-    ? canvasJobs.find((job) => job.id === contactsRequest.canvasJobId)
-    : undefined
+  const contacts = contactsRequest
+    ? canvasJobs.find((job) => job.id === contactsRequest.canvasJobId)?.contacts ?? []
+    : []
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -311,10 +307,10 @@ export function WishlistPage() {
           </Card>
         )}
       </main>
-      {contactsRequest && contactsJob && (
+      {contactsRequest && (
         <ApplicationContactsDialog
           application={contactsRequest}
-          contacts={contactsJob.contacts}
+          contacts={contacts}
           onOpenChange={(open) => {
             if (!open) setContactsRequest(null)
           }}
