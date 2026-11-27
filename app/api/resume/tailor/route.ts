@@ -2,6 +2,7 @@ import { generateText } from "ai"
 import { NextResponse, type NextRequest } from "next/server"
 
 import { applyTailoring, DOCX_MIME, parseResume, type TailorChange, type TailorEdit, type TailorReorder } from "@/lib/resume-docx"
+import { describeAiError, parseJsonObject } from "@/lib/ai-errors"
 import { createClient } from "@/lib/supabase/server"
 import type { TailoredResume } from "@/lib/tailored-resume"
 
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
   }
   const original = new Uint8Array(await file.arrayBuffer())
 
-  let parsed
+  let parsed: Awaited<ReturnType<typeof parseResume>>
   try {
     parsed = await parseResume(original)
   } catch (error) {
@@ -93,7 +94,11 @@ export async function POST(request: NextRequest) {
   let edits: TailorEdit[] = []
   let reorders: TailorReorder[] = []
   let summary = ""
-  try {
+
+  const resumeLines = parsed.lines
+  const roleLabel = `${application.role} at ${application.company}`
+
+  async function askModel() {
     const { text } = await generateText({
       model: "nvidia/nemotron-3.5-lightning-free",
       system: [
@@ -107,25 +112,34 @@ export async function POST(request: NextRequest) {
 - For lines that have "segments" (mixed formatting, e.g. a bold lead-in), return "segments" with the same number of parts instead of "text", keeping each part's role.
 - "order" must list every id in that group exactly once.
 
-Job posting (${application.role} at ${application.company}), focus on its responsibilities and qualifications:
+Job posting (${roleLabel}), focus on its responsibilities and qualifications:
 ${posting.slice(0, 9000)}
 
 Resume lines:
-${JSON.stringify(parsed.lines.map(({ id, kind, text, editable: canEdit, group, segments }) => ({ id, kind, text, ...(canEdit ? { editable: true } : {}), ...(group ? { group } : {}), ...(segments ? { segments } : {}) })))}`,
-      abortSignal: AbortSignal.timeout(90000),
+${JSON.stringify(resumeLines.map(({ id, kind, text, editable: canEdit, group, segments }) => ({ id, kind, text, ...(canEdit ? { editable: true } : {}), ...(group ? { group } : {}), ...(segments ? { segments } : {}) })))}`,
+      abortSignal: AbortSignal.timeout(55000),
     })
-    const start = text.indexOf("{")
-    const end = text.lastIndexOf("}")
-    const result = JSON.parse(text.slice(start, end + 1)) as { summary?: unknown; edits?: unknown; reorders?: unknown }
+    return parseJsonObject<{ summary?: unknown; edits?: unknown; reorders?: unknown }>(text)
+  }
+
+  try {
+    let result
+    try {
+      result = await askModel()
+    } catch (error) {
+      // Free models occasionally reply with broken JSON: try once more
+      if (!(error instanceof SyntaxError)) throw error
+      console.warn("Resume tailoring: unusable AI reply, retrying once")
+      result = await askModel()
+    }
     edits = (Array.isArray(result.edits) ? result.edits : []) as TailorEdit[]
     reorders = (Array.isArray(result.reorders) ? result.reorders : []) as TailorReorder[]
     summary = typeof result.summary === "string" ? result.summary.slice(0, 400) : ""
   } catch (error) {
-    console.error("Resume tailoring AI failed:", error instanceof Error ? error.message : error)
-    return NextResponse.json(
-      { error: "The AI assistant isn't available right now. (It runs on the deployed site, not on a local copy without a key.)" },
-      { status: 503 },
-    )
+    const failure = describeAiError(error)
+    // Full details go to the Vercel logs; the person sees what they can do about it
+    console.error(`Resume tailoring AI failed [${failure.code}]:`, error instanceof Error ? `${error.name}: ${error.message}` : error)
+    return NextResponse.json({ error: failure.message, code: failure.code }, { status: failure.status })
   }
 
   const tailored = await applyTailoring(original, edits, reorders)
