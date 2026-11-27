@@ -67,6 +67,8 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
   const { profile } = useJobProfile()
   const { applications } = useApplications()
   const interviewCount = applications.filter((application) => isInterviewStatus(application.status)).length.toString()
+  const wishlistCount = applications.filter((application) => application.status === "Interested").length.toString()
+  const applicationCount = applications.filter((application) => application.status !== "Interested").length.toString()
 
   return (
     <aside
@@ -101,7 +103,14 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
           {navigation.map((item) => {
             const Icon = item.icon
             const active = item.id === activePage
-            const count = item.id === "interview" ? interviewCount : item.count
+            const count =
+              item.id === "interview"
+                ? interviewCount
+                : item.id === "wishlist"
+                  ? wishlistCount
+                  : item.id === "applications"
+                    ? applicationCount
+                    : item.count
             const itemLabelClassName = collapsed
               ? "hidden"
               : "hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap transition-[max-width,opacity] duration-200 md:inline-block md:max-w-[9rem] md:opacity-100"

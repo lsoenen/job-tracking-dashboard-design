@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { CalendarDays, Search } from "lucide-react"
+import { Archive, CalendarDays, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
@@ -9,6 +9,7 @@ import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { applicationStatusClassName } from "@/lib/application-helpers"
 import { applicationStatuses, type ApplicationStatus } from "@/lib/applications"
 import {
@@ -23,14 +24,28 @@ import {
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [view, setView] = useState<"active" | "graveyard">("active")
   const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
-  const selectedApplication = applicationRows.find((application) => application.id === selectedId)
+  const trackedApplications = useMemo(
+    () => applicationRows.filter((application) => application.status !== "Interested"),
+    [applicationRows],
+  )
+  const graveyardApplications = useMemo(
+    () => trackedApplications.filter((application) => application.status === "Not moving forward"),
+    [trackedApplications],
+  )
+  const activeApplications = useMemo(
+    () => trackedApplications.filter((application) => application.status !== "Not moving forward"),
+    [trackedApplications],
+  )
+  const visibleApplications = view === "active" ? activeApplications : graveyardApplications
+  const selectedApplication = visibleApplications.find((application) => application.id === selectedId)
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
-    if (!normalizedQuery) return applicationRows
+    if (!normalizedQuery) return visibleApplications
 
-    return applicationRows.filter((application) =>
+    return visibleApplications.filter((application) =>
       [
         application.company,
         application.role,
@@ -44,7 +59,7 @@ export function ApplicationsTable() {
         .toLowerCase()
         .includes(normalizedQuery),
     )
-  }, [applicationRows, query])
+  }, [visibleApplications, query])
 
   return (
     <Card className="border-border shadow-none">
@@ -52,11 +67,39 @@ export function ApplicationsTable() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <div>
-              <CardTitle className="text-base">All active applications</CardTitle>
-              <CardDescription className="mt-1">Every application, stage, and upcoming next step.</CardDescription>
+              <CardTitle className="text-base">{view === "active" ? "Active applications" : "Application graveyard"}</CardTitle>
+              <CardDescription className="mt-1">
+                {view === "active"
+                  ? "Your current pipeline, prioritized for what’s next."
+                  : "Rejected applications stay here for reference and remain in total application counts."}
+              </CardDescription>
             </div>
-            <Badge variant="outline" className="rounded-full font-normal">{applicationRows.length} tracked</Badge>
+            <div role="group" aria-label="Application collection" className="inline-flex items-center rounded-md bg-muted p-1">
+              <button
+                type="button"
+                aria-pressed={view === "active"}
+                onClick={() => {
+                  setView("active")
+                  setSelectedId(null)
+                }}
+                className={`rounded px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${view === "active" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Active <span className="ml-1 tabular-nums">{activeApplications.length}</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={view === "graveyard"}
+                onClick={() => {
+                  setView("graveyard")
+                  setSelectedId(null)
+                }}
+                className={`rounded px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${view === "graveyard" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Graveyard <span className="ml-1 tabular-nums">{graveyardApplications.length}</span>
+              </button>
+            </div>
           </div>
+
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <label className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20 sm:w-[260px]">
               <Search aria-hidden="true" className="size-4 shrink-0" />
@@ -75,13 +118,26 @@ export function ApplicationsTable() {
       </CardHeader>
       <CardContent className="p-0">
         <div className={selectedApplication ? "grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" : ""}>
+          {view === "graveyard" && graveyardApplications.length === 0 && !query ? (
+            <Empty role="status" className="min-h-[280px] border-0">
+              <EmptyHeader>
+                <EmptyMedia variant="icon"><Archive aria-hidden="true" /></EmptyMedia>
+                <EmptyTitle>Your graveyard is empty</EmptyTitle>
+                <EmptyDescription>
+                  When an application is marked “Not moving forward,” it will stay here for reference.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
           <div className="min-w-0">
             <p className="border-b border-border px-4 py-2 text-xs text-muted-foreground sm:hidden">
               Scroll horizontally to see all columns.
             </p>
             <div className="overflow-x-auto">
               <table className={`w-full text-left text-sm ${selectedApplication ? "min-w-[360px]" : "min-w-[720px]"}`}>
-                <caption className="sr-only">Active job applications with their stage, next step, and due date.</caption>
+                <caption className="sr-only">
+                  {view === "graveyard" ? "Archived job applications" : "Active job applications"} with their stage, next step, and due date.
+                </caption>
                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                   <tr className="border-b border-border">
                     <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "w-[68%]" : "w-[32%]"}`}>Company and role</th>
@@ -167,7 +223,7 @@ export function ApplicationsTable() {
                     <tr>
                       <td colSpan={4} className="px-5 py-12 text-center text-sm text-muted-foreground">
                         <p role="status">
-                          {query ? `No applications match “${query}”.` : "No applications yet. Add one to get started."}
+                          {query ? `No applications match “${query}”.` : "No applied roles yet. Move a role from your wishlist or add an application to get started."}
                         </p>
                       </td>
                     </tr>
@@ -176,9 +232,10 @@ export function ApplicationsTable() {
               </table>
             </div>
             <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
-              Showing {filteredApplications.length} of {applicationRows.length} applications
+              Showing {filteredApplications.length} of {visibleApplications.length} {view === "graveyard" ? "archived" : "active"} applications
             </p>
           </div>
+          )}
           {selectedApplication && (
             <ApplicationPreviewPanel application={selectedApplication} onClose={() => setSelectedId(null)} />
           )}

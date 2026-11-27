@@ -1,3 +1,5 @@
+"use client"
+
 import {
   ArrowRight,
   CalendarDays,
@@ -6,6 +8,8 @@ import {
 } from "lucide-react"
 
 import { ApplicationActivityChart } from "@/components/application-activity-chart"
+import { useApplications } from "@/components/applications-provider"
+import { getApplicationStatusCounts, getTrackedApplications } from "@/lib/application-helpers"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { ActiveApplications } from "@/components/active-applications"
 import { ApplicationOutcomes } from "@/components/application-outcomes"
@@ -18,33 +22,14 @@ import {
   CardHeader,
 } from "@/components/ui/card"
 
-const responseRate = 39.6
-const metrics = [
-  {
-    label: "Total applications",
-    value: "48",
-    note: "+12 this month",
-  },
-  {
-    label: "Response rate",
-    value: `${responseRate.toFixed(1)}%`,
-    note: "19 companies replied",
-    benchmark: "Good is typically 3–5% for cold applications",
-    status: responseRate > 5 ? "Excellent" : responseRate >= 3 ? "Good" : responseRate >= 2 ? "Typical" : "Low",
-    tone: responseRate >= 3 ? "success" : responseRate >= 2 ? "neutral" : "destructive",
-  },
-  {
-    label: "In interviews",
-    value: "6",
-    note: "2 scheduled next week",
-  },
-  {
-    label: "Offers received",
-    value: "4",
-    note: "1 awaiting decision",
-    tone: "success",
-  },
-]
+type DashboardMetric = {
+  label: string
+  value: string
+  note: string
+  benchmark?: string
+  status?: string
+  tone?: "success" | "neutral" | "destructive"
+}
 
 const nextSteps = [
   {
@@ -96,7 +81,7 @@ function WeeklyFocusWidget() {
   )
 }
 
-function MetricCard({ metric }: { metric: (typeof metrics)[number] }) {
+function MetricCard({ metric }: { metric: DashboardMetric }) {
   const statusTone = metric.tone === "success"
     ? "border-success/20 bg-success/5 text-success"
     : metric.tone === "destructive"
@@ -172,6 +157,43 @@ function NextSteps() {
 }
 
 export function JobSearchDashboard() {
+  const { applications } = useApplications()
+  const trackedApplications = getTrackedApplications(applications)
+  const statusCounts = getApplicationStatusCounts(applications)
+  const totalApplications = trackedApplications.length
+  const rejectedCount = statusCounts["Not moving forward"]
+  const activeCount = totalApplications - rejectedCount
+  const interviewCount = statusCounts.Interviewing
+  const offerCount = statusCounts.Offer
+  const repliedCount = totalApplications - statusCounts.Applied
+  const responseRate = totalApplications === 0 ? 0 : (repliedCount / totalApplications) * 100
+  const metrics: DashboardMetric[] = [
+    {
+      label: "Total applications",
+      value: String(totalApplications),
+      note: `${activeCount} active · ${rejectedCount} in graveyard`,
+    },
+    {
+      label: "Response rate",
+      value: `${responseRate.toFixed(1)}%`,
+      note: repliedCount === 1 ? "1 company replied" : `${repliedCount} companies replied`,
+      benchmark: "Good is typically 3–5% for cold applications",
+      status: responseRate > 5 ? "Excellent" : responseRate >= 3 ? "Good" : responseRate >= 2 ? "Typical" : "Low",
+      tone: responseRate >= 3 ? "success" : responseRate >= 2 ? "neutral" : "destructive",
+    },
+    {
+      label: "In interviews",
+      value: String(interviewCount),
+      note: "Current Interviewing status",
+    },
+    {
+      label: "Offers received",
+      value: String(offerCount),
+      note: "Current pipeline",
+      tone: "success",
+    },
+  ]
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <DashboardSidebar activePage="overview" />
@@ -204,7 +226,7 @@ export function JobSearchDashboard() {
             <Card id="insights" className="border-border shadow-none">
               <CardHeader>
                 <h2 className="text-base font-medium tracking-tight">Application pipeline</h2>
-                <CardDescription>Where your 48 applications stand right now.</CardDescription>
+                <CardDescription>Where your {totalApplications} tracked applications stand right now.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ApplicationOutcomes />

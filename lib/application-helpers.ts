@@ -1,4 +1,20 @@
-import type { ApplicationStatus } from "@/lib/applications"
+import { applicationStatuses, type Application, type ApplicationStatus } from "@/lib/applications"
+
+export function getTrackedApplications(applications: readonly Application[]) {
+  return applications.filter((application) => application.status !== "Interested")
+}
+
+export function getApplicationStatusCounts(applications: readonly Application[]) {
+  const counts = Object.fromEntries(
+    applicationStatuses.map((status) => [status, 0]),
+  ) as Record<ApplicationStatus, number>
+
+  for (const application of applications) {
+    counts[application.status] += 1
+  }
+
+  return counts
+}
 
 export function applicationStatusClassName(status: ApplicationStatus) {
   if (status === "Interviewing") return "border-primary/20 bg-primary/5 text-primary"

@@ -5,9 +5,10 @@ import Link from "next/link"
 import { ArrowRight, Search } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { applications } from "@/lib/applications"
+import { useApplications } from "@/components/applications-provider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
+import { getTrackedApplications } from "@/lib/application-helpers"
 
 function statusClassName(status: string) {
   if (status === "Interviewing") return "border-primary/20 bg-primary/5 text-primary"
@@ -19,18 +20,23 @@ function statusClassName(status: string) {
 
 export function ActiveApplications() {
   const [query, setQuery] = useState("")
+  const { applications } = useApplications()
+  const activeApplications = useMemo(
+    () => getTrackedApplications(applications).filter((application) => application.status !== "Not moving forward"),
+    [applications],
+  )
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
-    if (!normalizedQuery) return applications
+    if (!normalizedQuery) return activeApplications
 
-    return applications.filter((application) =>
+    return activeApplications.filter((application) =>
       [application.company, application.role, application.status, application.nextStep]
         .join(" ")
         .toLowerCase()
         .includes(normalizedQuery),
     )
-  }, [query])
+  }, [activeApplications, query])
 
   return (
     <Card className="h-full border-border shadow-none">
@@ -40,7 +46,7 @@ export function ActiveApplications() {
           <CardDescription className="mt-1">Your next moves, ordered by date.</CardDescription>
         </div>
         <Link href="/applications" className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-foreground hover:underline">
-          View all {applications.length} <ArrowRight aria-hidden="true" className="size-3.5" />
+          View all {activeApplications.length} <ArrowRight aria-hidden="true" className="size-3.5" />
         </Link>
       </CardHeader>
       <CardContent>
@@ -99,7 +105,7 @@ export function ActiveApplications() {
           </p>
         )}
         <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
-          Showing {filteredApplications.length} of {applications.length} in-progress applications
+          Showing {filteredApplications.length} of {activeApplications.length} in-progress applications
         </p>
       </CardContent>
     </Card>

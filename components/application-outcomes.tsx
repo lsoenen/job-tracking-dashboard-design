@@ -2,6 +2,8 @@
 
 import { Cell, Pie, PieChart } from "recharts"
 
+import { useApplications } from "@/components/applications-provider"
+import { getApplicationStatusCounts } from "@/lib/application-helpers"
 import {
   ChartContainer,
   ChartTooltip,
@@ -9,26 +11,27 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 
-const outcomes = [
-  { key: "noResponse", label: "Awaiting response", value: 29 },
-  { key: "rejected", label: "Not moving forward", value: 9 },
-  { key: "interviewing", label: "Interviewing", value: 6 },
-  { key: "offer", label: "Offer received", value: 4 },
-]
-
 const chartConfig = {
-  noResponse: { label: "Awaiting response", color: "var(--chart-5)" },
+  applied: { label: "Awaiting response", color: "var(--chart-5)" },
   rejected: { label: "Not moving forward", color: "var(--destructive)" },
   interviewing: { label: "Interviewing", color: "var(--chart-1)" },
+  takeHome: { label: "Take-home", color: "var(--warning)" },
   offer: { label: "Offer received", color: "var(--success)" },
 } satisfies ChartConfig
 
-const totalApplications = outcomes.reduce((total, outcome) => total + outcome.value, 0)
-const activeConversations = outcomes
-  .filter((outcome) => outcome.key === "interviewing" || outcome.key === "offer")
-  .reduce((total, outcome) => total + outcome.value, 0)
-
 export function ApplicationOutcomes() {
+  const { applications } = useApplications()
+  const statusCounts = getApplicationStatusCounts(applications)
+  const outcomes = [
+    { key: "applied", label: "Awaiting response", value: statusCounts.Applied },
+    { key: "rejected", label: "Not moving forward", value: statusCounts["Not moving forward"] },
+    { key: "interviewing", label: "Interviewing", value: statusCounts.Interviewing },
+    { key: "takeHome", label: "Take-home", value: statusCounts["Take-home"] },
+    { key: "offer", label: "Offer received", value: statusCounts.Offer },
+  ]
+  const totalApplications = outcomes.reduce((total, outcome) => total + outcome.value, 0)
+  const activeApplications = totalApplications - statusCounts["Not moving forward"]
+
   return (
     <div className="grid items-center gap-4 sm:grid-cols-[minmax(180px,0.9fr)_1fr]">
       <div className="relative mx-auto w-full max-w-[250px]">
@@ -58,7 +61,7 @@ export function ApplicationOutcomes() {
 
       <ul aria-label="Application outcome breakdown" className="flex flex-col gap-3.5">
         {outcomes.map((outcome) => {
-          const percentage = Math.round((outcome.value / totalApplications) * 100)
+          const percentage = totalApplications === 0 ? 0 : Math.round((outcome.value / totalApplications) * 100)
 
           return (
             <li key={outcome.key} className="flex items-center justify-between gap-3">
@@ -77,8 +80,8 @@ export function ApplicationOutcomes() {
           )
         })}
         <li className="mt-1 flex items-center justify-between border-t border-border pt-3 text-sm">
-          <span className="text-muted-foreground">In progress</span>
-          <span className="font-medium tabular-nums">{activeConversations}</span>
+          <span className="text-muted-foreground">Still active</span>
+          <span className="font-medium tabular-nums">{activeApplications}</span>
         </li>
       </ul>
     </div>
