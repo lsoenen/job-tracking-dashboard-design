@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Bookmark, FileText, PenLine } from "lucide-react"
+import { Bookmark, ExternalLink, FileText, PenLine } from "lucide-react"
 
 import { ApplicationMaterialsDialog, type ApplicationMaterialMode } from "@/components/application-materials-dialog"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useApplications } from "@/components/applications-provider"
+import { safeExternalUrl } from "@/lib/application-helpers"
 import type { Application, ApplicationStatus } from "@/lib/applications"
 
 function companyInitials(company: string) {
@@ -33,6 +34,8 @@ type WishlistCardProps = {
 }
 
 function WishlistCard({ application, onPrepare, onStatusChange }: WishlistCardProps) {
+  const companyUrl = safeExternalUrl(application.companyUrl)
+
   return (
     <Card className="flex h-full flex-col border-border shadow-none">
       <CardHeader className="flex flex-row items-start justify-between gap-3">
@@ -56,6 +59,17 @@ function WishlistCard({ application, onPrepare, onStatusChange }: WishlistCardPr
         <p className="line-clamp-4 text-sm leading-relaxed text-muted-foreground">
           {application.description || `Explore the ${application.role} opportunity at ${application.company}.`}
         </p>
+        {companyUrl && (
+          <a
+            href={companyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            View company on LinkedIn
+            <ExternalLink aria-hidden="true" className="size-3.5" />
+          </a>
+        )}
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-4">
           <span className="text-xs font-medium text-muted-foreground">Status</span>
           <Select

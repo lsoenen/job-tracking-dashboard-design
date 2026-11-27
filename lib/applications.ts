@@ -30,6 +30,7 @@ export type Application = {
   logo?: string
   description?: string
   sourceUrl?: string
+  companyUrl?: string
   status: ApplicationStatus
   interviewStage?: InterviewStage
   nextStep: string
@@ -80,5 +81,15 @@ export const applications: Application[] = [
     interviewStage: "recruiter",
     nextStep: "Share availability",
     due: "Nov 27",
+  },
+  {
+    id: "seed-manifest-os",
+    company: "Manifest OS",
+    role: "Product Designer",
+    initials: "MO",
+    companyUrl: "https://www.linkedin.com/company/manifest-o-s/posts/?feedView=all",
+    status: "Interested",
+    nextStep: "Review company",
+    due: "No deadline",
   },
 ]
