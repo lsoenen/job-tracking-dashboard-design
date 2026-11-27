@@ -4,11 +4,12 @@ import { useState } from "react"
 import Link from "next/link"
 import { BriefcaseBusiness, ChartNoAxesCombined, LayoutGrid, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useApplications } from "@/components/applications-provider"
 import { useJobProfile } from "@/components/job-profile-provider"
 import { isInterviewStatus } from "@/lib/applications"
+import { profileInitials } from "@/lib/job-profile"
 
 type DashboardPage = "overview" | "canvas" | "applications" | "interview" | "account"
 
@@ -39,20 +40,9 @@ function PursuitLogo({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-function profileInitials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-}
-
 export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) {
   const [collapsed, setCollapsed] = useState(false)
-  const { profile, email } = useJobProfile()
+  const { profile, email, avatarUrl } = useJobProfile()
   const { applications } = useApplications()
   const displayName = profile.fullName.trim() || email
   const interviewCount = applications.filter((application) => isInterviewStatus(application.status)).length.toString()
@@ -142,6 +132,7 @@ export function DashboardSidebar({ activePage }: { activePage: DashboardPage }) 
           className={`flex items-center gap-3 rounded-md border-t border-border pt-4 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring ${collapsed ? "justify-center" : "justify-center md:justify-start"}`}
         >
           <Avatar className="size-8 shrink-0 border border-border">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
             <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">
               {profileInitials(displayName) || "?"}
             </AvatarFallback>

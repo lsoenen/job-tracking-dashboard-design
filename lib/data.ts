@@ -49,8 +49,11 @@ export const NO_LOGO = "none"
 export const applicationColumns =
   "id, company, role, logo, description, source_url, company_url, canvas_job_id, status, interview_stage, applied_date, next_step, due_date"
 
-const profileColumns =
+export const profileColumns =
   "full_name, headline, location, years_experience, skills, background, weekly_application_goal, resume_path, resume_name, resume_size_bytes, resume_updated_at"
+
+/** Profile photos live in the private "avatars" bucket; links to them expire after this many seconds */
+export const avatarLinkLifetime = 60 * 60 * 24
 
 // ---------------------------------------------------------------------------
 // Mapping helpers
@@ -171,6 +174,8 @@ export type UserData = {
   userId: string
   email: string
   profile: JobProfile
+  /** The profile photo, with a temporary link for showing it */
+  avatar: { path: string; url: string | null } | null
   applications: Application[]
   statusEvents: StatusEvent[]
   interviewProgress: Record<string, string[]>
@@ -181,7 +186,7 @@ export async function loadUserData(supabase: SupabaseClient): Promise<UserData |
   const claims = claimsData?.claims
   if (!claims?.sub) return null
 
-  const [profileResult, applicationsResult, eventsResult, practiceResult] = await Promise.all([
+  const [profileResult, applicationsResult, eventsResult, practiceResult, avatarResult] = await Promise.all([
     supabase.from("profiles").select(profileColumns).eq("id", claims.sub).maybeSingle(),
     supabase.from("applications").select(applicationColumns).order("created_at", { ascending: false }),
     supabase
@@ -190,10 +195,19 @@ export async function loadUserData(supabase: SupabaseClient): Promise<UserData |
       .order("changed_at", { ascending: true })
       .limit(10000),
     supabase.from("interview_practice").select("application_id, persona_slug, question_id"),
+    // Kept apart from the profile query so the app still works before the profile photo migration has run
+    supabase.from("profiles").select("avatar_path").eq("id", claims.sub).maybeSingle(),
   ])
 
   for (const result of [profileResult, applicationsResult, eventsResult, practiceResult]) {
     if (result.error) console.error("Failed to load user data:", result.error.message)
+  }
+
+  const avatarPath = (avatarResult.data as { avatar_path: string | null } | null)?.avatar_path ?? null
+  let avatar: UserData["avatar"] = null
+  if (avatarPath) {
+    const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(avatarPath, avatarLinkLifetime)
+    avatar = { path: avatarPath, url: signed?.signedUrl ?? null }
   }
 
   const interviewProgress: Record<string, string[]> = {}
@@ -206,6 +220,7 @@ export async function loadUserData(supabase: SupabaseClient): Promise<UserData |
     userId: claims.sub,
     email: typeof claims.email === "string" ? claims.email : "",
     profile: profileFromRow(profileResult.data as ProfileRow | null),
+    avatar,
     applications: ((applicationsResult.data ?? []) as ApplicationRow[]).map(applicationFromRow),
     statusEvents: ((eventsResult.data ?? []) as StatusEventRow[]).map(statusEventFromRow),
     interviewProgress,

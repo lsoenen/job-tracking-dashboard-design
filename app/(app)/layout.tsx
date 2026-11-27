@@ -21,7 +21,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       initialStatusEvents={data.statusEvents}
       initialInterviewProgress={data.interviewProgress}
     >
-      <JobProfileProvider userId={data.userId} email={data.email} initialProfile={data.profile}>
+      <JobProfileProvider
+        userId={data.userId}
+        email={data.email}
+        initialProfile={data.profile}
+        initialAvatar={data.avatar}
+      >
         {children}
       </JobProfileProvider>
     </ApplicationsProvider>

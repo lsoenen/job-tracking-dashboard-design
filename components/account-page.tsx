@@ -7,6 +7,7 @@ import { signOut } from "@/app/auth/actions"
 
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { JobProfileForm } from "@/components/job-profile-form"
+import { ProfilePhotoCard } from "@/components/profile-photo-card"
 import { ResumeUploadCard } from "@/components/resume-upload-card"
 import { Button } from "@/components/ui/button"
 import { useJobProfile } from "@/components/job-profile-provider"
@@ -97,13 +98,16 @@ export function AccountPage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.8fr)]">
             <JobProfileForm profile={draft} onChange={updateDraft} />
-            <ResumeUploadCard
-              resume={draft.resume}
-              isPendingUpload={Boolean(resumeFile)}
-              error={resumeError}
-              onFileSelected={handleResumeSelect}
-              onOpen={profile.resume?.path && !resumeFile ? openResume : undefined}
-            />
+            <div className="flex flex-col gap-4">
+              <ProfilePhotoCard />
+              <ResumeUploadCard
+                resume={draft.resume}
+                isPendingUpload={Boolean(resumeFile)}
+                error={resumeError}
+                onFileSelected={handleResumeSelect}
+                onOpen={profile.resume?.path && !resumeFile ? openResume : undefined}
+              />
+            </div>
           </div>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
