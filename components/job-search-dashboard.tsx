@@ -53,30 +53,6 @@ const nextSteps = [
   },
 ]
 
-function WeeklyFocusWidget() {
-  return (
-    <Card className="mb-5 border-border bg-muted/20 shadow-none">
-      <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2.5">
-        <p className="text-xs font-medium text-muted-foreground">A little closer, every day.</p>
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-          <p className="text-sm">Applications submitted this week</p>
-          <span className="text-sm font-medium tabular-nums text-primary">2/5</span>
-          <div
-            role="progressbar"
-            aria-label="Applications submitted this week"
-            aria-valuemin={0}
-            aria-valuemax={5}
-            aria-valuenow={2}
-            className="h-1.5 min-w-12 flex-1 overflow-hidden rounded-full bg-primary/10 sm:max-w-36"
-          >
-            <div className="h-full w-2/5 rounded-full bg-primary" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 function MetricCard({ metric }: { metric: DashboardMetric }) {
   const statusTone = metric.tone === "success"
     ? "border-success/20 bg-success/5 text-success"
@@ -203,6 +179,9 @@ export function JobSearchDashboard() {
                 Welcome{firstName ? `, ${firstName}` : ""}.
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">See what&apos;s moving. Know what&apos;s next.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Applications submitted this week: <span className="font-medium tabular-nums text-foreground">2/5</span>
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="h-9 gap-2 rounded-md px-3 text-sm font-normal text-foreground">
@@ -215,8 +194,6 @@ export function JobSearchDashboard() {
               </a>
             </div>
           </section>
-
-          <WeeklyFocusWidget />
 
           <section aria-label="Job search key performance indicators" className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {metrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
