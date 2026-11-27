@@ -38,6 +38,18 @@ function companyInitials(company: string) {
     .toUpperCase()
 }
 
+function getFitPresentation(score: number) {
+  if (score >= 75) {
+    return { label: "Strong fit", className: "border-success/20 bg-success/5 text-success" }
+  }
+
+  if (score >= 50) {
+    return { label: "Possible fit", className: "border-border bg-muted text-muted-foreground" }
+  }
+
+  return { label: "Low fit", className: "border-warning/20 bg-warning/5 text-warning" }
+}
+
 function isJobAdded(job: CanvasJob, applications: { company: string; role: string }[]) {
   return applications.some(
     (application) =>
@@ -53,6 +65,7 @@ export function CanvasPage() {
   const recommendedJobs = [...canvasJobs].sort((first, second) => second.postedAt.localeCompare(first.postedAt))
   const selectedJobIsAdded = selectedJob ? isJobAdded(selectedJob, applications) : false
   const selectedFitScore = selectedJob ? calculateJobFitScore(selectedJob, profile) : 0
+  const selectedFitPresentation = getFitPresentation(selectedFitScore)
 
   function addJobToList(job: CanvasJob) {
     if (isJobAdded(job, applications)) return
@@ -96,6 +109,7 @@ export function CanvasPage() {
                 const isAdded = isJobAdded(job, applications)
                 const postedDate = formatPostedDate(job.postedAt)
                 const fitScore = calculateJobFitScore(job, profile)
+                const fitPresentation = getFitPresentation(fitScore)
 
                 return (
                   <li key={job.id} className="min-w-0">
@@ -109,15 +123,15 @@ export function CanvasPage() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium text-muted-foreground">{job.company}</p>
-                            <h3 className="mt-1 line-clamp-2 text-sm font-medium leading-snug">{job.title}</h3>
+                            <h3 className="line-clamp-2 text-sm font-medium leading-snug">{job.title}</h3>
+                            <p className="mt-1 truncate text-xs font-medium text-muted-foreground">{job.company}</p>
                           </div>
                           <Badge
-                            variant={fitScore >= 75 ? "secondary" : "outline"}
-                            className="mt-0.5 shrink-0"
-                            aria-label={`Fit Score: ${fitScore}%`}
+                            variant="outline"
+                            className={`mt-0.5 shrink-0 ${fitPresentation.className}`}
+                            aria-label={`${fitPresentation.label}: ${fitScore}%`}
                           >
-                            {fitScore}% fit
+                            {fitPresentation.label} · {fitScore}%
                           </Badge>
                         </div>
 
@@ -181,11 +195,15 @@ export function CanvasPage() {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-muted-foreground">{selectedJob.company}</p>
-                <DialogTitle className="mt-1 pr-2 text-base leading-snug">{selectedJob.title}</DialogTitle>
+                <DialogTitle className="pr-2 text-base leading-snug">{selectedJob.title}</DialogTitle>
+                <p className="mt-1 text-xs font-medium text-muted-foreground">{selectedJob.company}</p>
               </div>
-              <Badge variant={selectedFitScore >= 75 ? "secondary" : "outline"} className="mt-0.5 shrink-0">
-                {selectedFitScore}% fit
+              <Badge
+                variant="outline"
+                className={`mt-0.5 shrink-0 ${selectedFitPresentation.className}`}
+                aria-label={`${selectedFitPresentation.label}: ${selectedFitScore}%`}
+              >
+                {selectedFitPresentation.label} · {selectedFitScore}%
               </Badge>
             </div>
             <DialogDescription className="leading-relaxed">{selectedJob.summary}</DialogDescription>

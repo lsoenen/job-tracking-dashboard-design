@@ -171,8 +171,8 @@ function WishlistCard({ application, completedTaskIds, onPrepare, onContacts, on
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <CardTitle className="truncate text-base">{application.company}</CardTitle>
-            <CardDescription className="mt-1 line-clamp-2">{application.role}</CardDescription>
+            <CardTitle className="line-clamp-2 text-base leading-snug">{application.role}</CardTitle>
+            <CardDescription className="mt-1">{application.company}</CardDescription>
           </div>
         </div>
         <Badge variant="outline" className="shrink-0 rounded-full border-primary/20 bg-primary/5 text-primary">
