@@ -7,14 +7,61 @@ import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
 import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { applicationStatusClassName } from "@/lib/application-helpers"
-import { applicationStatuses } from "@/lib/applications"
+import { applicationStatuses, type Application, type ApplicationStatus } from "@/lib/applications"
+
+function ApplicationStatusControl({
+  application,
+  onStatusChange,
+}: {
+  application: Application
+  onStatusChange: (applicationId: string, status: ApplicationStatus) => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={`Change stage for ${application.role} at ${application.company}. Current stage: ${application.status}`}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${applicationStatusClassName(application.status)}`}
+          />
+        }
+      >
+        {application.status}
+        <ChevronDown aria-hidden="true" className="size-3" />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-48 gap-1 p-1">
+        <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Change stage</p>
+        <div role="group" aria-label={`Stages for ${application.role} at ${application.company}`} className="flex flex-col">
+          {applicationStatuses.map((status) => (
+            <Button
+              key={status}
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-pressed={application.status === status}
+              className={`w-full justify-start ${application.status === status ? "bg-muted" : ""}`}
+              onClick={() => {
+                onStatusChange(application.id, status)
+                setOpen(false)
+              }}
+            >
+              {status}
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
@@ -27,7 +74,7 @@ export function ApplicationsTable() {
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<"active" | "graveyard">("active")
-  const { applications: applicationRows, addApplication } = useApplications()
+  const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
   const trackedApplications = useMemo(
     () => applicationRows.filter((application) => application.status !== "Interested"),
     [applicationRows],
@@ -307,9 +354,7 @@ export function ApplicationsTable() {
                             <p className="truncate text-xs text-foreground">{application.role}</p>
                           </td>
                           <td className="px-3 py-2">
-                            <Badge className={`whitespace-nowrap px-2 py-0.5 text-[11px] ${applicationStatusClassName(application.status)}`}>
-                              {application.status}
-                            </Badge>
+                            <ApplicationStatusControl application={application} onStatusChange={updateApplicationStatus} />
                           </td>
                           <td className="px-3 py-2">
                             <p className="truncate text-xs font-medium text-foreground">{application.nextStep}</p>
