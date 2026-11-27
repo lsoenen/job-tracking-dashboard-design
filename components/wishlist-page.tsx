@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Bookmark, ExternalLink, FileText, PenLine } from "lucide-react"
+import { Bookmark, Check, ExternalLink, FileText, PenLine } from "lucide-react"
 
 import { ApplicationMaterialsDialog, type ApplicationMaterialMode } from "@/components/application-materials-dialog"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { useApplications } from "@/components/applications-provider"
 import { safeExternalUrl } from "@/lib/application-helpers"
 import type { Application, ApplicationStatus } from "@/lib/applications"
+import { cn } from "@/lib/utils"
 
 function companyInitials(company: string) {
   return company
@@ -27,13 +28,119 @@ function companyInitials(company: string) {
     .toUpperCase()
 }
 
+const readinessTasks: Array<{ id: string; label: string; mode?: ApplicationMaterialMode }> = [
+  { id: "tailor-resume", label: "Tailor resume", mode: "resume" },
+  { id: "write-cover-letter", label: "Write a cover letter", mode: "cover-letter" },
+  { id: "contact-hiring-manager", label: "Reach out to hiring manager" },
+  { id: "contact-recruiter", label: "Reach out to recruiter" },
+]
+
+type ApplicationReadinessChecklistProps = {
+  application: Application
+  completedTaskIds: string[]
+  onTaskChange: (taskId: string, isComplete: boolean) => void
+  onPrepare: (mode: ApplicationMaterialMode) => void
+}
+
+function ApplicationReadinessChecklist({ application, completedTaskIds, onTaskChange, onPrepare }: ApplicationReadinessChecklistProps) {
+  const completedCount = readinessTasks.filter((task) => completedTaskIds.includes(task.id)).length
+  const progressPercent = Math.round((completedCount / readinessTasks.length) * 100)
+  const isReady = completedCount === readinessTasks.length
+  const applicationLabel = `${application.role} at ${application.company}`
+
+  return (
+    <section aria-label={`Application readiness checklist for ${applicationLabel}`} className="rounded-lg border border-border bg-muted/20 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">Readiness checklist</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {isReady ? "Every prep step is complete." : `${completedCount} of ${readinessTasks.length} steps complete`}
+          </p>
+        </div>
+        <Badge
+          variant="outline"
+          className={cn(
+            "shrink-0 rounded-full",
+            isReady ? "border-success/25 bg-success/10 text-success" : "border-border bg-background text-muted-foreground",
+          )}
+        >
+          {isReady ? <><Check aria-hidden="true" className="mr-1 size-3.5" />Ready to apply</> : "Preparing"}
+        </Badge>
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <div
+          role="progressbar"
+          aria-label={`${applicationLabel} application readiness`}
+          aria-valuemin={0}
+          aria-valuemax={readinessTasks.length}
+          aria-valuenow={completedCount}
+          className={cn("h-1.5 flex-1 overflow-hidden rounded-full", isReady ? "bg-success/10" : "bg-primary/10")}
+        >
+          <div
+            className={cn("h-full rounded-full transition-[width] duration-300 motion-reduce:transition-none", isReady ? "bg-success" : "bg-primary")}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <span className="w-8 text-right text-[11px] tabular-nums text-muted-foreground">
+          {completedCount}/{readinessTasks.length}
+        </span>
+      </div>
+      <ul className="mt-2 list-none divide-y divide-border/70">
+        {readinessTasks.map((task) => {
+          const isComplete = completedTaskIds.includes(task.id)
+          const checkboxId = `${application.id}-readiness-${task.id}`
+
+          return (
+            <li key={task.id} className="flex min-h-9 items-center gap-2 py-1.5">
+              <input
+                id={checkboxId}
+                type="checkbox"
+                checked={isComplete}
+                onChange={(event) => onTaskChange(task.id, event.currentTarget.checked)}
+                aria-label={`${task.label} for ${applicationLabel}`}
+                className="size-4 shrink-0 cursor-pointer accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              />
+              <label
+                htmlFor={checkboxId}
+                className={cn("min-w-0 flex-1 cursor-pointer truncate text-xs leading-5", isComplete && "text-muted-foreground line-through")}
+              >
+                {task.label}
+              </label>
+              {task.mode && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 shrink-0 px-2"
+                  aria-label={`${isComplete ? "Open" : "Prepare"} ${task.mode === "resume" ? "resume draft" : "cover letter draft"} for ${applicationLabel}`}
+                  onClick={() => task.mode && onPrepare(task.mode)}
+                >
+                  {task.mode === "resume" ? <FileText aria-hidden="true" data-icon="inline-start" /> : <PenLine aria-hidden="true" data-icon="inline-start" />}
+                  {isComplete ? "Open" : "Prepare"}
+                </Button>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {isReady && (
+        <p className="mt-2 border-t border-border/70 pt-2 text-xs leading-relaxed text-success">
+          Your prep is complete. Paste your tailored materials into the employer&apos;s application site.
+        </p>
+      )}
+    </section>
+  )
+}
+
 type WishlistCardProps = {
   application: Application
+  completedTaskIds: string[]
   onPrepare: (application: Application, mode: ApplicationMaterialMode) => void
+  onReadinessTaskChange: (applicationId: string, taskId: string, isComplete: boolean) => void
   onStatusChange: (applicationId: string, status: ApplicationStatus) => void
 }
 
-function WishlistCard({ application, onPrepare, onStatusChange }: WishlistCardProps) {
+function WishlistCard({ application, completedTaskIds, onPrepare, onReadinessTaskChange, onStatusChange }: WishlistCardProps) {
   const companyUrl = safeExternalUrl(application.companyUrl)
 
   return (
@@ -70,6 +177,12 @@ function WishlistCard({ application, onPrepare, onStatusChange }: WishlistCardPr
             <ExternalLink aria-hidden="true" className="size-3.5" />
           </a>
         )}
+        <ApplicationReadinessChecklist
+          application={application}
+          completedTaskIds={completedTaskIds}
+          onTaskChange={(taskId, isComplete) => onReadinessTaskChange(application.id, taskId, isComplete)}
+          onPrepare={(mode) => onPrepare(application, mode)}
+        />
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-4">
           <span className="text-xs font-medium text-muted-foreground">Status</span>
           <Select
@@ -90,15 +203,10 @@ function WishlistCard({ application, onPrepare, onStatusChange }: WishlistCardPr
           </Select>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col items-stretch gap-2 border-t border-border sm:flex-row">
-        <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => onPrepare(application, "resume")}>
-          <FileText aria-hidden="true" data-icon="inline-start" />
-          Tailor resume
-        </Button>
-        <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => onPrepare(application, "cover-letter")}>
-          <PenLine aria-hidden="true" data-icon="inline-start" />
-          Cover letter
-        </Button>
+      <CardFooter className="border-t border-border py-3">
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Copy finished drafts, then paste them into any employer&apos;s application form.
+        </p>
       </CardFooter>
     </Card>
   )
@@ -110,7 +218,7 @@ type MaterialRequest = {
 } | null
 
 export function WishlistPage() {
-  const { applications, updateApplicationStatus } = useApplications()
+  const { applications, readinessProgress, setReadinessTaskCompletion, updateApplicationStatus } = useApplications()
   const [materialRequest, setMaterialRequest] = useState<MaterialRequest>(null)
   const interestedApplications = useMemo(
     () => applications.filter((application) => application.status === "Interested"),
@@ -129,7 +237,7 @@ export function WishlistPage() {
           <div>
             <h1 id="page-title" className="text-[28px] font-medium tracking-tight sm:text-[32px]">Wishlist</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Keep promising roles here while you prepare. Tailor your resume or draft a cover letter, then move a role to Applied when you&apos;re ready.
+              Use each role&apos;s checklist to strengthen your application. Draft and copy materials here, mark outreach complete, then apply when you&apos;re ready.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm">
@@ -145,7 +253,9 @@ export function WishlistPage() {
               <WishlistCard
                 key={application.id}
                 application={application}
+                completedTaskIds={readinessProgress[application.id] ?? []}
                 onPrepare={openMaterial}
+                onReadinessTaskChange={setReadinessTaskCompletion}
                 onStatusChange={updateApplicationStatus}
               />
             ))}
@@ -174,6 +284,13 @@ export function WishlistPage() {
           key={`${materialRequest.application.id}:${materialRequest.mode}`}
           application={materialRequest.application}
           mode={materialRequest.mode}
+          onCopied={() =>
+            setReadinessTaskCompletion(
+              materialRequest.application.id,
+              materialRequest.mode === "resume" ? "tailor-resume" : "write-cover-letter",
+              true,
+            )
+          }
           onOpenChange={(open) => {
             if (!open) setMaterialRequest(null)
           }}

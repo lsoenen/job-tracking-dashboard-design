@@ -23,6 +23,7 @@ type ApplicationMaterialMode = "resume" | "cover-letter"
 type ApplicationMaterialsDialogProps = {
   application: Application
   mode: ApplicationMaterialMode
+  onCopied: () => void
   onOpenChange: (open: boolean) => void
 }
 
@@ -37,7 +38,7 @@ function createCoverLetterDraft(application: Application, profileName: string, h
   return `Dear ${application.company} hiring team,\n\nI’m excited to apply for the ${application.role} position at ${application.company}. As a ${headline.toLowerCase()}, I bring experience that connects thoughtful product work with clear user needs.\n\n${background}\n\nI’m especially interested in bringing my experience in ${relevantSkills || "product design and collaboration"} to this role. I would welcome the opportunity to share more about how I can contribute to the team.\n\nThank you for your consideration.\n\nBest,\n${profileName}`
 }
 
-export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: ApplicationMaterialsDialogProps) {
+export function ApplicationMaterialsDialog({ application, mode, onCopied, onOpenChange }: ApplicationMaterialsDialogProps) {
   const { profile } = useJobProfile()
   const [summary, setSummary] = useState(profile.background)
   const [skills, setSkills] = useState(profile.skills)
@@ -52,6 +53,7 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
   async function copyDraft() {
     try {
       await navigator.clipboard.writeText(draft)
+      onCopied()
       toast.success(isResume ? "Resume content copied" : "Cover letter copied")
     } catch {
       toast.error("Copy isn’t available here. Select the draft and copy it manually.")
@@ -77,7 +79,7 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
                   rows={5}
                   className="min-h-28"
                 />
-                <FieldDescription>Refine your summary for this role. This won’t modify the resume file in your profile.</FieldDescription>
+                <FieldDescription>Refine your summary for this role, then copy it into your resume or paste it into any application site.</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="resume-skills">Skills to emphasize</FieldLabel>
@@ -88,7 +90,7 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
                   rows={3}
                   className="min-h-20"
                 />
-                <FieldDescription>Reorder or edit your skills, then copy this content into your resume document.</FieldDescription>
+                <FieldDescription>Reorder or edit your skills, then copy them into your resume or application form.</FieldDescription>
               </Field>
             </FieldGroup>
           ) : (
@@ -101,7 +103,7 @@ export function ApplicationMaterialsDialog({ application, mode, onOpenChange }: 
                 rows={14}
                 className="min-h-64"
               />
-              <FieldDescription>Review and personalize this editable draft before sending it.</FieldDescription>
+              <FieldDescription>Review and personalize this draft, then copy it into the employer&apos;s application form.</FieldDescription>
             </Field>
           )}
         </div>
