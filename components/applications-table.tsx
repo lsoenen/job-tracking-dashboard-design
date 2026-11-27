@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { applicationStatusClassName } from "@/lib/application-helpers"
-import { applicationStatuses, type ApplicationStatus } from "@/lib/applications"
+import { applicationStatuses } from "@/lib/applications"
 import {
   Select,
   SelectContent,
@@ -23,9 +23,16 @@ import {
 
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
+  const [filters, setFilters] = useState({
+    company: "",
+    role: "",
+    stage: "all",
+    nextStep: "",
+    due: "",
+  })
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<"active" | "graveyard">("active")
-  const { applications: applicationRows, addApplication, updateApplicationStatus } = useApplications()
+  const { applications: applicationRows, addApplication } = useApplications()
   const trackedApplications = useMemo(
     () => applicationRows.filter((application) => application.status !== "Interested"),
     [applicationRows],
@@ -42,24 +49,38 @@ export function ApplicationsTable() {
   const selectedApplication = visibleApplications.find((application) => application.id === selectedId)
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
+    const matchesFilter = (value: string, filter: string) =>
+      value.toLowerCase().includes(filter.trim().toLowerCase())
 
-    if (!normalizedQuery) return visibleApplications
+    return visibleApplications.filter((application) => {
+      const matchesQuery =
+        !normalizedQuery ||
+        [
+          application.company,
+          application.role,
+          application.description ?? "",
+          application.sourceUrl ?? "",
+          application.status,
+          application.nextStep,
+          application.due,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery)
 
-    return visibleApplications.filter((application) =>
-      [
-        application.company,
-        application.role,
-        application.description ?? "",
-        application.sourceUrl ?? "",
-        application.status,
-        application.nextStep,
-        application.due,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery),
-    )
-  }, [visibleApplications, query])
+      return (
+        matchesQuery &&
+        matchesFilter(application.company, filters.company) &&
+        matchesFilter(application.role, filters.role) &&
+        (filters.stage === "all" || application.status === filters.stage) &&
+        matchesFilter(application.nextStep, filters.nextStep) &&
+        matchesFilter(application.due, filters.due)
+      )
+    })
+  }, [visibleApplications, query, filters])
+  const hasActiveFilters = Boolean(
+    query.trim() || Object.values(filters).some((filter) => filter !== "" && filter !== "all"),
+  )
 
   return (
     <Card className="border-border shadow-none">
@@ -118,7 +139,7 @@ export function ApplicationsTable() {
       </CardHeader>
       <CardContent className="p-0">
         <div className={selectedApplication ? "grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" : ""}>
-          {view === "graveyard" && graveyardApplications.length === 0 && !query ? (
+          {view === "graveyard" && graveyardApplications.length === 0 && !hasActiveFilters ? (
             <Empty role="status" className="min-h-[280px] border-0">
               <EmptyHeader>
                 <EmptyMedia variant="icon"><Archive aria-hidden="true" /></EmptyMedia>
@@ -134,16 +155,79 @@ export function ApplicationsTable() {
               Scroll horizontally to see all columns.
             </p>
             <div className="overflow-x-auto">
-              <table className={`w-full text-left text-sm ${selectedApplication ? "min-w-[360px]" : "min-w-[720px]"}`}>
+              <table className="w-full min-w-[900px] text-left text-sm">
                 <caption className="sr-only">
-                  {view === "graveyard" ? "Archived job applications" : "Active job applications"} with their stage, next step, and due date.
+                  {view === "graveyard" ? "Archived job applications" : "Active job applications"} with their company, role, stage, next step, and due date.
                 </caption>
                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "w-[68%]" : "w-[32%]"}`}>Company and role</th>
-                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "w-[32%]" : "w-[18%]"}`}>Stage</th>
-                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "hidden" : "w-[34%]"}`}>Next step</th>
-                    <th scope="col" className={`px-5 py-3 font-medium ${selectedApplication ? "hidden" : "w-[16%]"}`}>Due</th>
+                    <th scope="col" className="w-[18%] px-3 py-2 font-medium">Company</th>
+                    <th scope="col" className="w-[22%] px-3 py-2 font-medium">Role</th>
+                    <th scope="col" className="w-[17%] px-3 py-2 font-medium">Stage</th>
+                    <th scope="col" className="w-[27%] px-3 py-2 font-medium">Next step</th>
+                    <th scope="col" className="w-[16%] px-3 py-2 font-medium">Due</th>
+                  </tr>
+                  <tr className="border-b border-border">
+                    <th scope="col" className="px-3 pb-2">
+                      <label className="sr-only" htmlFor="filter-company">Filter by company</label>
+                      <input
+                        id="filter-company"
+                        type="search"
+                        value={filters.company}
+                        onChange={(event) => setFilters((current) => ({ ...current, company: event.target.value }))}
+                        placeholder="Filter company"
+                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </th>
+                    <th scope="col" className="px-3 pb-2">
+                      <label className="sr-only" htmlFor="filter-role">Filter by role</label>
+                      <input
+                        id="filter-role"
+                        type="search"
+                        value={filters.role}
+                        onChange={(event) => setFilters((current) => ({ ...current, role: event.target.value }))}
+                        placeholder="Filter role"
+                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </th>
+                    <th scope="col" className="px-3 pb-2">
+                      <label className="sr-only" htmlFor="filter-stage">Filter by stage</label>
+                      <Select value={filters.stage} onValueChange={(value) => setFilters((current) => ({ ...current, stage: value ?? "all" }))}>
+                        <SelectTrigger id="filter-stage" size="sm" aria-label="Filter by stage" className="h-7 w-full rounded-md px-2 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent align="start">
+                          <SelectGroup>
+                            <SelectItem value="all">All stages</SelectItem>
+                            {applicationStatuses.map((status) => (
+                              <SelectItem key={status} value={status}>{status}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </th>
+                    <th scope="col" className="px-3 pb-2">
+                      <label className="sr-only" htmlFor="filter-next-step">Filter by next step</label>
+                      <input
+                        id="filter-next-step"
+                        type="search"
+                        value={filters.nextStep}
+                        onChange={(event) => setFilters((current) => ({ ...current, nextStep: event.target.value }))}
+                        placeholder="Filter next step"
+                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </th>
+                    <th scope="col" className="px-3 pb-2">
+                      <label className="sr-only" htmlFor="filter-due">Filter by due date</label>
+                      <input
+                        id="filter-due"
+                        type="search"
+                        value={filters.due}
+                        onChange={(event) => setFilters((current) => ({ ...current, due: event.target.value }))}
+                        placeholder="Filter due"
+                        className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -156,7 +240,7 @@ export function ApplicationsTable() {
                           key={application.id}
                           className={`transition-colors ${isSelected ? "bg-primary/[0.06]" : "hover:bg-muted/30"}`}
                         >
-                          <td className="px-5 py-4">
+                          <td className="px-3 py-2">
                             <button
                               type="button"
                               onClick={(event) => {
@@ -164,9 +248,9 @@ export function ApplicationsTable() {
                                 setSelectedId(application.id)
                               }}
                               aria-label={`Preview ${application.role} at ${application.company}`}
-                              className="flex w-full min-w-0 items-center gap-3 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                              className="flex w-full min-w-0 items-center gap-2 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
-                              <Avatar className={`size-9 shrink-0 rounded-full border-0 after:hidden ${application.company === "Vercel" ? "bg-black" : "bg-transparent"}`}>
+                              <Avatar className={`size-6 shrink-0 rounded-full border-0 after:hidden ${application.company === "Vercel" ? "bg-black" : "bg-transparent"}`}>
                                 {application.logo && (
                                   <AvatarImage
                                     src={application.logo}
@@ -174,45 +258,27 @@ export function ApplicationsTable() {
                                     className="rounded-full object-contain"
                                   />
                                 )}
-                                <AvatarFallback className="rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                                <AvatarFallback className="rounded-full bg-muted text-[10px] font-medium text-muted-foreground">
                                   {application.initials}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate font-medium text-foreground">{application.company}</span>
-                                <span className="mt-0.5 block truncate text-xs text-muted-foreground">{application.role}</span>
-                              </span>
+                              <span className="block min-w-0 truncate text-xs font-medium text-foreground">{application.company}</span>
                             </button>
                           </td>
-                          <td className="px-5 py-4">
-                            <Select
-                              value={application.status}
-                              onValueChange={(value) => {
-                                if (value) updateApplicationStatus(application.id, value as ApplicationStatus)
-                              }}
-                            >
-                              <SelectTrigger
-                                size="sm"
-                                aria-label={`Update ${application.company} application status`}
-                                className={`rounded-full border-transparent px-2.5 text-xs ${applicationStatusClassName(application.status)}`}
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent align="start">
-                                <SelectGroup>
-                                  {applicationStatuses.map((status) => (
-                                    <SelectItem key={status} value={status}>{status}</SelectItem>
-                                  ))}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                          <td className="px-3 py-2">
+                            <p className="truncate text-xs text-foreground">{application.role}</p>
                           </td>
-                          <td className={selectedApplication ? "hidden" : "px-5 py-4"}>
-                            <p className="font-medium text-foreground">{application.nextStep}</p>
+                          <td className="px-3 py-2">
+                            <Badge className={`whitespace-nowrap px-2 py-0.5 text-[11px] ${applicationStatusClassName(application.status)}`}>
+                              {application.status}
+                            </Badge>
                           </td>
-                          <td className={selectedApplication ? "hidden" : "px-5 py-4 text-muted-foreground"}>
-                            <span className="flex items-center gap-2 whitespace-nowrap">
-                              <CalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
+                          <td className="px-3 py-2">
+                            <p className="truncate text-xs font-medium text-foreground">{application.nextStep}</p>
+                          </td>
+                          <td className="px-3 py-2 text-muted-foreground">
+                            <span className="flex items-center gap-1.5 whitespace-nowrap text-xs">
+                              <CalendarDays aria-hidden="true" className="size-3 shrink-0" />
                               {application.due}
                             </span>
                           </td>
@@ -221,9 +287,9 @@ export function ApplicationsTable() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                      <td colSpan={5} className="px-3 py-10 text-center text-xs text-muted-foreground">
                         <p role="status">
-                          {query ? `No applications match “${query}”.` : "No applied roles yet. Move a role from your wishlist or add an application to get started."}
+                          {hasActiveFilters ? "No applications match these filters." : "No applied roles yet. Move a role from your wishlist or add an application to get started."}
                         </p>
                       </td>
                     </tr>
@@ -231,7 +297,7 @@ export function ApplicationsTable() {
                 </tbody>
               </table>
             </div>
-            <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
+            <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
               Showing {filteredApplications.length} of {visibleApplications.length} {view === "graveyard" ? "archived" : "active"} applications
             </p>
           </div>
