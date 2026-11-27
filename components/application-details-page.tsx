@@ -19,17 +19,16 @@ export function ApplicationDetailsPage({ applicationId }: { applicationId: strin
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <DashboardSidebar activePage="applications" />
-      <main className="mx-auto min-w-0 w-full max-w-[1480px] flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
-        <Link href="/applications" className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          Back to applications
-        </Link>
-
+      <main className="min-w-0 flex-1">
         {application ? (
-          <div className="mx-auto max-w-[1180px]">
-            <ApplicationWorkspaceTabs
-              application={application}
-              header={(
+          <ApplicationWorkspaceTabs
+            application={application}
+            header={(
+              <>
+                <Link href="/applications" className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <ArrowLeft aria-hidden="true" className="size-4" />
+                  Back to applications
+                </Link>
                 <header className="flex flex-col justify-between gap-5 pb-6 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 items-center gap-4">
                     <Avatar className={`size-14 shrink-0 border border-border ${application.company === "Vercel" ? "bg-black" : "bg-background"}`}>
@@ -53,11 +52,16 @@ export function ApplicationDetailsPage({ applicationId }: { applicationId: strin
                     </Badge>
                   </div>
                 </header>
-              )}
-            />
-          </div>
+              </>
+            )}
+          />
         ) : (
-          <Card className="mx-auto max-w-xl border-border shadow-none">
+          <div className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
+            <Link href="/applications" className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+              <ArrowLeft aria-hidden="true" className="size-4" />
+              Back to applications
+            </Link>
+            <Card className="mx-auto max-w-xl border-border shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <BriefcaseBusiness aria-hidden="true" className="size-4" />
@@ -70,7 +74,8 @@ export function ApplicationDetailsPage({ applicationId }: { applicationId: strin
                 Return to applications
               </Link>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         )}
       </main>
     </div>

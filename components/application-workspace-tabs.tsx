@@ -25,21 +25,26 @@ export function ApplicationWorkspaceTabs({
   return (
     <>
       <Tabs defaultValue="resources" className="flex flex-col gap-5">
-        <div className="overflow-hidden rounded-xl border border-border bg-card px-5 pt-5 sm:px-7 sm:pt-6">
-          {header}
-          <TabsList variant="line" className="w-full justify-start gap-2 border-b border-border p-0">
-          <TabsTrigger value="resources" className="h-11 flex-none gap-2 rounded-none px-3">
-            <FileText aria-hidden="true" />
-            Resources
-          </TabsTrigger>
-          <TabsTrigger value="interview" className="h-11 flex-none gap-2 rounded-none px-3">
-            <MessageSquareText aria-hidden="true" />
-            Interview prep
-          </TabsTrigger>
-          </TabsList>
+        <div className="w-full bg-card">
+          <div className="mx-auto w-full max-w-[1480px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8 lg:pt-9">
+            <div className="mx-auto max-w-[1180px]">
+              {header}
+              <TabsList variant="line" className="w-full justify-start gap-2 border-b border-border p-0">
+                <TabsTrigger value="resources" className="h-11 flex-none gap-2 rounded-none px-3">
+                  <FileText aria-hidden="true" />
+                  Resources
+                </TabsTrigger>
+                <TabsTrigger value="interview" className="h-11 flex-none gap-2 rounded-none px-3">
+                  <MessageSquareText aria-hidden="true" />
+                  Interview prep
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
         </div>
 
-        <TabsContent value="resources" className="flex flex-col gap-5">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <TabsContent value="resources" className="mx-auto flex w-full max-w-[1180px] flex-col gap-5">
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
             <div className="flex min-w-0 flex-col gap-5">
               <div>
@@ -155,9 +160,10 @@ export function ApplicationWorkspaceTabs({
           </div>
         </TabsContent>
 
-        <TabsContent value="interview">
-          <ApplicationInterviewPrep application={application} />
-        </TabsContent>
+          <TabsContent value="interview" className="mx-auto w-full max-w-[1180px]">
+            <ApplicationInterviewPrep application={application} />
+          </TabsContent>
+        </div>
       </Tabs>
 
       {materialMode && (
