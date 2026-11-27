@@ -1,8 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Link from "next/link"
 import { format, parseISO } from "date-fns"
-import { ArrowDown, ArrowDownUp, ArrowUp, CalendarDays, ChevronDown, Search } from "lucide-react"
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpRight, CalendarDays, ChevronDown, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { AppliedDatePicker } from "@/components/applied-date-picker"
@@ -357,7 +358,14 @@ export function ApplicationsTable() {
                             </button>
                           </td>
                           <td className="px-3 py-2">
-                            <p className="truncate text-xs text-foreground">{application.role}</p>
+                            <Link
+                              href={`/applications/${encodeURIComponent(application.id)}`}
+                              aria-label={`Open ${application.role} at ${application.company}`}
+                              className="group inline-flex max-w-full items-center gap-1 rounded-sm text-left text-xs font-medium text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                              <span className="truncate underline-offset-4 group-hover:underline">{application.role}</span>
+                              <ArrowUpRight aria-hidden="true" className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                            </Link>
                           </td>
                           <td className="px-2 py-2">
                             <AppliedDatePicker

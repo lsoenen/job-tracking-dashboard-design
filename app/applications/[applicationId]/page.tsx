@@ -3,8 +3,8 @@ import type { Metadata } from "next"
 import { ApplicationDetailsPage } from "@/components/application-details-page"
 
 export const metadata: Metadata = {
-  title: "Application details | Pursuit",
-  description: "Review the full details and next steps for a job application.",
+  title: "Position workspace | Pursuit",
+  description: "Prepare tailored application materials and interview questions for this role.",
 }
 
 export default async function ApplicationDetailsRoute({
