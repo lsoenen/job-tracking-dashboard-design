@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Archive, CalendarDays, Search } from "lucide-react"
+import { Archive, CalendarDays, ChevronDown, Search } from "lucide-react"
 
 import { AddApplicationSheet } from "@/components/add-application-sheet"
 import { ApplicationPreviewPanel } from "@/components/application-preview-panel"
@@ -9,24 +9,19 @@ import { useApplications } from "@/components/applications-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
 import { applicationStatusClassName } from "@/lib/application-helpers"
 import { applicationStatuses } from "@/lib/applications"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 export function ApplicationsTable() {
   const [query, setQuery] = useState("")
   const [filters, setFilters] = useState({
     company: "",
     role: "",
-    stage: "all",
+    stage: [] as string[],
     nextStep: "",
     due: "",
   })
@@ -72,14 +67,14 @@ export function ApplicationsTable() {
         matchesQuery &&
         matchesFilter(application.company, filters.company) &&
         matchesFilter(application.role, filters.role) &&
-        (filters.stage === "all" || application.status === filters.stage) &&
+        (filters.stage.length === 0 || filters.stage.includes(application.status)) &&
         matchesFilter(application.nextStep, filters.nextStep) &&
         matchesFilter(application.due, filters.due)
       )
     })
   }, [visibleApplications, query, filters])
   const hasActiveFilters = Boolean(
-    query.trim() || Object.values(filters).some((filter) => filter !== "" && filter !== "all"),
+    query.trim() || filters.stage.length > 0 || filters.company || filters.role || filters.nextStep || filters.due,
   )
 
   return (
@@ -168,7 +163,7 @@ export function ApplicationsTable() {
                     <th scope="col" className="w-[16%] px-3 py-2 font-medium">Due</th>
                   </tr>
                   <tr className="border-b border-border">
-                    <th scope="col" className="px-3 pb-2">
+                    <th scope="col" className="px-3 py-2 align-middle">
                       <label className="sr-only" htmlFor="filter-company">Filter by company</label>
                       <input
                         id="filter-company"
@@ -179,7 +174,7 @@ export function ApplicationsTable() {
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
-                    <th scope="col" className="px-3 pb-2">
+                    <th scope="col" className="px-3 py-2 align-middle">
                       <label className="sr-only" htmlFor="filter-role">Filter by role</label>
                       <input
                         id="filter-role"
@@ -190,23 +185,66 @@ export function ApplicationsTable() {
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
-                    <th scope="col" className="px-3 pb-2">
-                      <label className="sr-only" htmlFor="filter-stage">Filter by stage</label>
-                      <Select value={filters.stage} onValueChange={(value) => setFilters((current) => ({ ...current, stage: value ?? "all" }))}>
-                        <SelectTrigger id="filter-stage" size="sm" aria-label="Filter by stage" className="h-7 w-full rounded-md px-2 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent align="start">
-                          <SelectGroup>
-                            <SelectItem value="all">All stages</SelectItem>
+                    <th scope="col" className="px-3 py-2 align-middle">
+                      <Popover>
+                        <PopoverTrigger
+                          render={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              aria-label={`Filter by stage${filters.stage.length > 0 ? `: ${filters.stage.join(", ")}` : ""}`}
+                              className="w-full justify-between rounded-md px-2 text-xs font-normal"
+                            />
+                          }
+                        >
+                          <span className="truncate">
+                            {filters.stage.length === 0
+                              ? "All stages"
+                              : filters.stage.length === 1
+                                ? filters.stage[0]
+                                : `${filters.stage.length} stages`}
+                          </span>
+                          <ChevronDown data-icon="inline-end" aria-hidden="true" />
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-56 gap-1 p-2">
+                          <div className="flex items-center justify-between px-2 pb-1">
+                            <span className="text-xs font-medium text-muted-foreground">Filter stages</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              disabled={filters.stage.length === 0}
+                              onClick={() => setFilters((current) => ({ ...current, stage: [] }))}
+                            >
+                              Clear
+                            </Button>
+                          </div>
+                          <fieldset className="flex flex-col gap-0.5">
+                            <legend className="sr-only">Filter applications by stage</legend>
                             {applicationStatuses.map((status) => (
-                              <SelectItem key={status} value={status}>{status}</SelectItem>
+                              <label
+                                key={status}
+                                className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-foreground hover:bg-muted/60"
+                              >
+                                <Checkbox
+                                  checked={filters.stage.includes(status)}
+                                  onCheckedChange={(checked) =>
+                                    setFilters((current) => ({
+                                      ...current,
+                                      stage: checked === true
+                                        ? [...current.stage, status]
+                                        : current.stage.filter((stage) => stage !== status),
+                                    }))
+                                  }
+                                />
+                                <span>{status}</span>
+                              </label>
                             ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                          </fieldset>
+                        </PopoverContent>
+                      </Popover>
                     </th>
-                    <th scope="col" className="px-3 pb-2">
+                    <th scope="col" className="px-3 py-2 align-middle">
                       <label className="sr-only" htmlFor="filter-next-step">Filter by next step</label>
                       <input
                         id="filter-next-step"
@@ -217,7 +255,7 @@ export function ApplicationsTable() {
                         className="h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       />
                     </th>
-                    <th scope="col" className="px-3 pb-2">
+                    <th scope="col" className="px-3 py-2 align-middle">
                       <label className="sr-only" htmlFor="filter-due">Filter by due date</label>
                       <input
                         id="filter-due"
